@@ -6,19 +6,22 @@ internal sealed class DocumentIdentifierRangeTests
     private const string Staged = "before-identifier";
     private const string Healthy = "after-identifier";
     private const string Json = "{\"value\":\"identifier\"}";
+    private const int WorldCodePoint = 0x1F30D;
 
     [Test]
-    [Arguments("a\u0000b", true)]
-    [Arguments("a\u001fb", true)]
-    [Arguments("a\u007fb", true)]
-    [Arguments("a\u0080b", true)]
-    [Arguments("a\u009fb", true)]
-    [Arguments("a b", false)]
-    [Arguments("a~b", false)]
-    [Arguments("a\u00a0b", false)]
-    [Arguments("Київ🌍", false)]
-    public async Task AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(string id, bool denied)
+    [Arguments(0x0000, true)]
+    [Arguments(0x001f, true)]
+    [Arguments(0x007f, true)]
+    [Arguments(0x0080, true)]
+    [Arguments(0x009f, true)]
+    [Arguments(0x0020, false)]
+    [Arguments(0x007e, false)]
+    [Arguments(0x00a0, false)]
+    [Arguments(WorldCodePoint, false)]
+    public async Task AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(int codePoint, bool denied)
     {
+        var id = codePoint == WorldCodePoint ? "Київ" + char.ConvertFromUtf32(codePoint)
+            : string.Concat("a", char.ConvertFromUtf32(codePoint), "b");
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         var result = DocumentCrudFixture.Submit(database,

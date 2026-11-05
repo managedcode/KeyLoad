@@ -11389,6 +11389,24 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentBatchResourceReadTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentBatchResourceReadTests",
+      "methodName": "AcDstore005BatchMetadataReadsStayConstantAsDocumentCountGrows",
+      "instanceName": "AcDstore005BatchMetadataReadsStayConstantAsDocumentCountGrows",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentBatchResourceReadTests.cs",
+      "sourceSha256": "58199e33deb82c888a271b65180d4db4a9485b63430d1d5e912c1a874e319b00",
+      "lineNumber": 12,
+      "endLineNumber": 18,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-005"
+      ],
+      "acceptance": [
+        "AC-DSTORE-005"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentCommandOutcomeReplayTests",
       "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentCommandOutcomeReplayTests",
       "methodName": "AcDstore007FailedRevisionOutcomeReplaysAfterPreconditionBecomesSatisfiable",
@@ -11685,6 +11703,168 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(0, True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(126, False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(127, True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(127757, False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(128, True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(159, True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(160, False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(31, True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
+      "methodName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode",
+      "instanceName": "AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(32, False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/Writes/DocumentIdentifierRangeTests.cs",
+      "sourceSha256": "7e09be080d039cd6e07d7aeb1e8b8acdb13e077df90a231f51ea5fe32ecd482b",
+      "lineNumber": 11,
+      "endLineNumber": 48,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.DocumentStorage.DocumentLifetimeTargetBindingTests",
       "reportClassName": "KeyLoad.FunctionalTests.DocumentStorage.DocumentLifetimeTargetBindingTests",
       "methodName": "OtherResourceCreationCannotReplaceStoredBindingThenExactRepairReplaysAcrossCold",
@@ -11748,9 +11928,9 @@
       "methodName": "AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead",
       "instanceName": "AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead",
       "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/DocumentMutation/DocumentMutationImageReadTests.cs",
-      "sourceSha256": "f0841c05574339b1be0b5cf5a6a2356d4c6f75f4b09eb71a76fb045a7302208c",
-      "lineNumber": 21,
-      "endLineNumber": 30,
+      "sourceSha256": "e7a39fc8a7c50d6dda98fddc27af321d5cb743af6fc3e3fc85a1521385f2bf31",
+      "lineNumber": 20,
+      "endLineNumber": 29,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -11766,9 +11946,9 @@
       "methodName": "AcDstore005ReplacementPatchAndDeleteReadOnePriorImage",
       "instanceName": "AcDstore005ReplacementPatchAndDeleteReadOnePriorImage",
       "sourcePath": "tests/KeyLoad.FunctionalTests/DocumentStorage/Cases/Document/DocumentMutation/DocumentMutationImageReadTests.cs",
-      "sourceSha256": "f0841c05574339b1be0b5cf5a6a2356d4c6f75f4b09eb71a76fb045a7302208c",
-      "lineNumber": 32,
-      "endLineNumber": 48,
+      "sourceSha256": "e7a39fc8a7c50d6dda98fddc27af321d5cb743af6fc3e3fc85a1521385f2bf31",
+      "lineNumber": 31,
+      "endLineNumber": 44,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -63146,7 +63326,7 @@
     },
     {
       "groupId": "unit-functional-03",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(CapturedReadSc*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentMutationImageR*)|(DocumentSc*)|(DocumentU*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Indexe*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadEx*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemoteP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StorageRa*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextM*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(U*)|(VectorM*)|(VectorT*)|(Vi*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(CapturedReadSc*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentB*)|(DocumentId*)|(DocumentMutationImageR*)|(DocumentSc*)|(DocumentU*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Indexe*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadEx*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemoteP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StorageRa*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextM*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(U*)|(VectorM*)|(VectorT*)|(Vi*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsMapColdTests",
         "KeyLoad.FunctionalTests.Authorization.AuthorizationCredentialHttpExportTests",
@@ -63181,6 +63361,8 @@
         "KeyLoad.FunctionalTests.DatabaseComposition.DatabaseCompositionSafetyTests",
         "KeyLoad.FunctionalTests.DatabaseComposition.TypedQueueGraphReplayTests",
         "KeyLoad.FunctionalTests.DocumentStorage.CompositeSparseUniqueTests",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentBatchResourceReadTests",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentMutationImageReadTests",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentScalarIndexMutationTests",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentUnchangedIndexTests",
@@ -63442,6 +63624,16 @@
         "KeyLoad.FunctionalTests.DocumentStorage.CompositeSparseUniqueTests|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas(False, True)",
         "KeyLoad.FunctionalTests.DocumentStorage.CompositeSparseUniqueTests|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas(True, False)",
         "KeyLoad.FunctionalTests.DocumentStorage.CompositeSparseUniqueTests|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas|CompositeNullAndMissingUniquePoliciesPreserveLiteralDeltas(True, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentBatchResourceReadTests|AcDstore005BatchMetadataReadsStayConstantAsDocumentCountGrows|AcDstore005BatchMetadataReadsStayConstantAsDocumentCountGrows",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(0, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(126, False)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(127, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(127757, False)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(128, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(159, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(160, False)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(31, True)",
+        "KeyLoad.FunctionalTests.DocumentStorage.DocumentIdentifierRangeTests|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode|AcDstore001IdentifierControlRangesPreserveAtomicityAndExactUnicode(32, False)",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentMutationImageReadTests|AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead|AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentMutationImageReadTests|AcDstore005ReplacementPatchAndDeleteReadOnePriorImage|AcDstore005ReplacementPatchAndDeleteReadOnePriorImage",
         "KeyLoad.FunctionalTests.DocumentStorage.DocumentScalarIndexMutationTests|AcDstore002ReplacePatchDeleteAndConflictPreserveScalarIndexImages|AcDstore002ReplacePatchDeleteAndConflictPreserveScalarIndexImages",
@@ -63886,7 +64078,7 @@
     },
     {
       "groupId": "unit-functional-04",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnalyticsBoundC*)|(AnalyticsSh*)|(AnalyticsStoreP*)|(AnnProjectionPinB*)|(AnnProv*)|(AnnSeedM*)|(AnnWaitPi*)|(AnnWaitR*)|(AtomicPartitionRosterP*)|(AtomicT*)|(BackupP*)|(Bm25I*)|(Bm25Pu*)|(BoundL*)|(Cac*)|(Cal*)|(CanonicalO*)|(CatalogI*)|(ChunkG*)|(ChunkMultiblockP*)|(ChunkSelectedB*)|(CliBackupO*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionC*)|(ConnectionR*)|(ConnectionSe*)|(CoreAc*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(Disk*)|(DocumentF*)|(DocumentI*)|(DocumentLif*)|(DocumentPa*)|(DropF*)|(Ep*)|(EventAppendW*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionMu*)|(GraphCrossPartitionRep*)|(GraphM*)|(GraphRef*)|(GraphSearchA*)|(GraphSearchC*)|(GraphShortestPathA*)|(GraphTe*)|(HybridQualityR*)|(JournalPrincipalI*)|(JsonP*)|(JsonTextP*)|(KeyCodecTe*)|(LiveR*)|(Ma*)|(McpAuthenticationM*)|(McpAuthenticationP*)|(McpGatewayC*)|(McpI*)|(No*)|(OperationC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionRecordP*)|(PartitionStoragePro*)|(Prepara*)|(ProjectionCa*)|(ProjectionCons*)|(PublicC*)|(QueryAdapterT*)|(QueryCu*)|(QueryE*)|(QueryL*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueDeadlineC*)|(QueueDel*)|(QueueDispatchC*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadCutCl*)|(Reader*)|(RecurringO*)|(RelationalS*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsT*)|(RequestW*)|(Requi*)|(Reve*)|(RuntimeJournalR*)|(RuntimeJournalS*)|(Saf*)|(SagaTimeoutF*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkMix*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRa*)|(SampleRollupR*)|(Sp*)|(SqlBetweenRa*)|(SqlBetweenS*)|(SqlComp*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlNullO*)|(StreamC*)|(SubscriptionF*)|(SubscriptionG*)|(SubscriptionLeaseA*)|(SubscriptionPa*)|(TargetInboxP*)|(Tes*)|(TextIncrementalE*)|(TextOnlineF*)|(TextProjectionF*)|(TextProt*)|(TimeSeriesC*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeB*)/(*)&(!AcChunk004InvalidUtf8AndNoncanonicalUtf16RejectWithValidChecksum*)&(!AcMp006StoredErrorPrecedesWrongValueAndAbsentResultRemainsCorruption*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!CommandRetainsExactInputAndOpaqueUserJson*)&(!FunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnalyticsBoundC*)|(AnalyticsSh*)|(AnalyticsStoreP*)|(AnnProjectionPinB*)|(AnnProv*)|(AnnSeedM*)|(AnnWaitPi*)|(AnnWaitR*)|(AtomicPartitionRosterP*)|(AtomicT*)|(BackupP*)|(Bm25I*)|(Bm25Pu*)|(BoundL*)|(Cac*)|(Cal*)|(CanonicalO*)|(CatalogI*)|(ChunkG*)|(ChunkMultiblockP*)|(ChunkSelectedB*)|(CliBackupO*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionC*)|(ConnectionR*)|(ConnectionSe*)|(CoreAc*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(Disk*)|(DocumentF*)|(DocumentIn*)|(DocumentLif*)|(DocumentPa*)|(DropF*)|(Ep*)|(EventAppendW*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionMu*)|(GraphCrossPartitionRep*)|(GraphM*)|(GraphRef*)|(GraphSearchA*)|(GraphSearchC*)|(GraphShortestPathA*)|(GraphTe*)|(HybridQualityR*)|(JournalPrincipalI*)|(JsonP*)|(JsonTextP*)|(KeyCodecTe*)|(LiveR*)|(Ma*)|(McpAuthenticationM*)|(McpAuthenticationP*)|(McpGatewayC*)|(McpI*)|(No*)|(OperationC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionRecordP*)|(PartitionStoragePro*)|(Prepara*)|(ProjectionCa*)|(ProjectionCons*)|(PublicC*)|(QueryAdapterT*)|(QueryCu*)|(QueryE*)|(QueryL*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueDeadlineC*)|(QueueDel*)|(QueueDispatchC*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadCutCl*)|(Reader*)|(RecurringO*)|(RelationalS*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsT*)|(RequestW*)|(Requi*)|(Reve*)|(RuntimeJournalR*)|(RuntimeJournalS*)|(Saf*)|(SagaTimeoutF*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkMix*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRa*)|(SampleRollupR*)|(Sp*)|(SqlBetweenRa*)|(SqlBetweenS*)|(SqlComp*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlNullO*)|(StreamC*)|(SubscriptionF*)|(SubscriptionG*)|(SubscriptionLeaseA*)|(SubscriptionPa*)|(TargetInboxP*)|(Tes*)|(TextIncrementalE*)|(TextOnlineF*)|(TextProjectionF*)|(TextProt*)|(TimeSeriesC*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeB*)/(*)&(!AcChunk004InvalidUtf8AndNoncanonicalUtf16RejectWithValidChecksum*)&(!AcMp006StoredErrorPrecedesWrongValueAndAbsentResultRemainsCorruption*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!CommandRetainsExactInputAndOpaqueUserJson*)&(!FunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminCatalogTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreReadTests",
