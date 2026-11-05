@@ -50,7 +50,9 @@ internal static class DocumentPathDiagnosticScenario
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
+            var before = await DocumentCommitObservation.ReadAsync(sdk, partition, token);
             await MeasureAsync(output, phases, "bulk-create", records, () => LoadAsync(sdk, partition, records, nodes, batchRecords, token));
+            await DocumentCommitObservation.SaveAsync(sdk, partition, before, records, batchRecords, output, token);
             await MeasureAsync(output, phases, "random-point-read", records, () => ReadAsync(sdk, partition, records, token));
             await MeasureAsync(output, phases, "point-predicate-query", QueryOperations,
                 () => QueryAsync(sdk, partition, records, token));

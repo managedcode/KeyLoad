@@ -34,6 +34,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             var owners = await OwnersAsync(cancellationToken);
             var maximum = await gaps.CompleteAsync(owners, cancellationToken);
             Advance(owners, maximum);
+            StorageCopyPrimarySelection.PreferLocal(owners, storage.LocalSiloAddress);
             started = true;
             var prepared = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
                 .PrepareBatchAsync(operations, cancellationToken);

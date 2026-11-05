@@ -29,4 +29,8 @@ internal sealed class DocumentPathDiagnosticTests
     [Test]
     public Task TwentyThousandDocumentsAcrossThreeNodes() => DocumentPathDiagnosticScenario.RunAsync(20_000, 3,
         TestContext.Current!.Execution.CancellationToken);
+
+    [Test]
+    public Task OneHundredThousandDocumentsAcrossThreeNodes() => DocumentPathDiagnosticScenario.RunAsync(100_000, 3,
+        TestContext.Current!.Execution.CancellationToken);
 }

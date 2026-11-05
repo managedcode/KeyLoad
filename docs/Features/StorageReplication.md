@@ -17,8 +17,9 @@ Each silo-local Grain Service owns that silo's ZoneTree files (with ZoneTree's
 write-ahead log), locks and ordered apply gate. Grains call those services through typed Orleans calls;
 moving an activation never moves a file or open storage handle.
 
-The public API enters one ordinary request grain per admitted operation. Database grains
-order canonical commands into batches and request operations from the required
+The public API enters one ordinary request grain per admitted operation. One commit grain
+per persisted storage incarnation orders canonical commands across logical tenant,
+database and partition identities into batches and requests operations from the required
 silo-local owners. Every queued command joins the next batch. Each owner applies a
 batch as one process-persistent native ZoneTree transaction; disk sync is
 periodic work owned by ZoneTree. Each command keeps its own canonical sequence and the outcome it would
@@ -78,6 +79,13 @@ batch advances that same set and fences older discoveries; a different cached
 set is invalidated. A concurrent read cannot leave the next command using a
 cached canonical sequence from before the acknowledged batch.
 
+After completing any retained copy gap, batch preparation prefers the commit
+grain's local silo when that silo is already a selected copy at the same canonical
+cut. This avoids sending the full command batch to another silo and back solely
+for preparation. The selected copy set is unchanged, and every selected owner
+still applies the same prepared commands before acknowledgement. An absent or
+lagging local copy cannot replace a required advanced copy.
+
 ## Requirements and acceptance
 
 | Requirement | Observable acceptance | Current evidence boundary |
@@ -91,6 +99,7 @@ cached canonical sequence from before the acknowledged batch.
 | REQ-REP-007: startup validates independent positive silo/copy counts without an artificial maximum. | AC-REP-007: 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are valid counts; zero counts and copies exceeding silos refuse before resources start. | Configuration acceptance does not qualify a topology's runtime or durability. |
 | REQ-REP-008: concurrent canonical commands share one process-persistent native commit per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
 | REQ-REP-009: retained interrupted copy work is completed without requiring a new write. | AC-REP-009: interrupt one actual copy RPC, observe the background repair RPC, keep a read barrier available while repair is held, then verify the original document and sequence on both copies, exact retry and healthy continuation with joined cleanup. | `CopySynchronizationTests.InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair`; local and delivered-source qualification remain separate. |
+| REQ-REP-010: preparation prefers a selected local copy only at the same canonical cut. | AC-REP-010: the actual prepare call targets the coordinator's silo when it is a selected current copy; both copies retain exact data, revision and replayed outcome, and a healthy command follows. A different incarnation, lagging cut or unselected local silo cannot replace an advanced required owner. | `StoragePreparationLocalityTests` separates owner-selection checks from a real two-host command, replay and follow-up. Aspire throughput and delivered-source qualification remain separate. |
 
 ## Source and verification
 

@@ -50005,6 +50005,24 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "methodName": "PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes",
+      "instanceName": "PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/StoragePreparationLocalityTests.cs",
+      "sourceSha256": "d17eed9a53b4e09577c29e7b699b9e9d09a67f6c31be985641f006e92a7ef79f",
+      "lineNumber": 13,
+      "endLineNumber": 21,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-010"
+      ],
+      "acceptance": [
+        "AC-REP-010"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.TimeSeries.ChunkCorrectionIdentityTests",
       "reportClassName": "KeyLoad.FunctionalTests.TimeSeries.ChunkCorrectionIdentityTests",
       "methodName": "AcChunk008010011012SelectedCorrectionCannotDuplicateSealedBaseEventIdentity",
@@ -61364,6 +61382,66 @@
       "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
     },
     {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "methodName": "LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches",
+      "instanceName": "LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches(False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/StoragePreparationLocalityTests.cs",
+      "sourceSha256": "d17eed9a53b4e09577c29e7b699b9e9d09a67f6c31be985641f006e92a7ef79f",
+      "lineNumber": 58,
+      "endLineNumber": 75,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-010"
+      ],
+      "acceptance": [
+        "AC-REP-010"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Direct selected-owner cut and membership control; no database command, authorization or persisted state is exercised. Required control for rejecting lagging, unrelated or unselected preparation owners."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "methodName": "LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches",
+      "instanceName": "LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches(True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/StoragePreparationLocalityTests.cs",
+      "sourceSha256": "d17eed9a53b4e09577c29e7b699b9e9d09a67f6c31be985641f006e92a7ef79f",
+      "lineNumber": 58,
+      "endLineNumber": 75,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-010"
+      ],
+      "acceptance": [
+        "AC-REP-010"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Direct selected-owner cut and membership control; no database command, authorization or persisted state is exercised. Required control for rejecting lagging, unrelated or unselected preparation owners."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
+      "methodName": "LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy",
+      "instanceName": "LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/StoragePreparationLocalityTests.cs",
+      "sourceSha256": "d17eed9a53b4e09577c29e7b699b9e9d09a67f6c31be985641f006e92a7ef79f",
+      "lineNumber": 77,
+      "endLineNumber": 86,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-010"
+      ],
+      "acceptance": [
+        "AC-REP-010"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Direct selected-owner cut and membership control; no database command, authorization or persisted state is exercised. Required control for rejecting lagging, unrelated or unselected preparation owners."
+    },
+    {
       "className": "KeyLoad.FunctionalTests.TestInfrastructure.Cases.LoggerModelControlSelectionTests",
       "reportClassName": "KeyLoad.FunctionalTests.TestInfrastructure.Cases.LoggerModelControlSelectionTests",
       "methodName": "ExactSelectionBuildsTheOwnedClusterModelAndSettlesDisposal",
@@ -64752,7 +64830,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(CooperativeE*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(Ord*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(CooperativeE*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(Ord*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StorageP*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches*)&(!LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.FunctionalTests.AdminDashboard.AdminStorageObservationTests",
@@ -64896,6 +64974,7 @@
         "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeStorageExecutionOptionsTests",
         "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests",
+        "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkManifestCardinalityTests",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockReadBudgetWholeFlowTests",
@@ -64912,6 +64991,8 @@
         "CapabilityManifestAdvertisesSearchAndJoinProfiles",
         "CountOnlyShapeDefaultsDepthToZero",
         "EnabledBankStartsWithTheExactEmptyFixedSchema",
+        "LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches",
+        "LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy",
         "MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation",
         "SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation",
         "UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation",
@@ -65446,6 +65527,7 @@
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedCommitsAndCursorContinuation|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedCommitsAndCursorContinuation",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence",
+        "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests|PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes|PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkManifestCardinalityTests|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests|Actual257RecordGenerationRefusesMissingSecondBlockThenExactRepairReplayAndTwoCold|Actual257RecordGenerationRefusesMissingSecondBlockThenExactRepairReplayAndTwoCold",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockReadBudgetWholeFlowTests|SelectedSecondBlockCumulativeBytesRefuseThenExactRepairReplayAndTwoColdOwners|SelectedSecondBlockCumulativeBytesRefuseThenExactRepairReplayAndTwoColdOwners",

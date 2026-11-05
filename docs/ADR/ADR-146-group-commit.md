@@ -1,28 +1,30 @@
 # ADR-146: Group commit
 
-Status: Accepted by owner direction 2026-10-24 ("fix KeyLoad's write path first"). In source; Linux qualification pending.
+Status: Accepted. Current source; exact-source distributed qualification remains a separate gate.
 
 ## Context
 
-Every acknowledged canonical command paid for one durable log sync on every copy.
-The database grain was non-reentrant, so one command at a time ran its preparation,
-its apply on each owner and that owner's sync. On macOS one complete embedded commit
-took about 5.0 ms (`CommitThroughputBenchmarks`, 2026-10-24), and sixteen concurrent
-writers did not change the per-commit time, because each commit still waited for its
-own sync. The Linux benchmark cells measured about 265 acknowledged writes per
-second. Durability must stay equal to the other databases in the comparison, so the
-sync itself stays.
+Concurrent commands can share the physical transaction work on every required
+copy while retaining their individual outcomes and canonical order. A public
+document batch is one command containing several mutations; the commit queue can
+combine several such commands into one physical transaction per copy.
 
 ## Decision
 
-Concurrent canonical commands share one commit and one write-ahead log sync per copy.
+Concurrent canonical commands share one native process-persistent commit per copy.
+The acknowledgement boundary and explicit disk barriers are specified by
+[ADR-003](ADR-003-durability-ack-barrier.md); group commit does not add a disk sync
+per document or command.
 
 - `DatabaseCommitGrain` is `[Reentrant]`. `ApplyAsync` queues the command and
   returns when its batch decides it. One drain at a time takes every queued
   command, in submission order, as one batch. Commands that arrive while a batch
   persists form the next batch. Nothing limits the queue or the batch.
-- `ISiloDatabaseService.PrepareBatchAsync` prepares the batch at the owner with the
-  highest cut, the same owner as before. For a command that already committed it
+- `ISiloDatabaseService.PrepareBatchAsync` prepares the batch at a selected owner
+  after completing retained gaps to the highest canonical cut. At equal cuts the
+  commit grain prefers its selected local copy, avoiding a full-batch remote
+  preparation round trip. This changes neither the selected copy set nor the
+  requirement for all copies to persist the batch. For a command that already committed it
   returns the retained original, as `ReadStoredCommandAsync` did. Business time never
   decreases along a batch. Preparation reads the committed state, which does not yet
   hold the effects of the earlier commands in the batch. So the prepared prefix stops
@@ -30,8 +32,10 @@ Concurrent canonical commands share one commit and one write-ahead log sync per 
   preparation records queue retry decisions, or whose preparation fails. That command
   is then prepared first in the next batch, exactly as it would be alone.
 - `ISiloDatabaseService.ApplyBatchAsync` applies the prepared commands, in order, as
-  one ZoneTree transaction on every owner and then awaits one `IAtomicStore.SyncAsync`
-  before it returns ([ADR-011](ADR-011-current-format.md)). Each command is one
+  one ZoneTree transaction on every owner. The current `ProcessDurable` path
+  publishes through ZoneTree's process-persistent WAL; disk sync remains
+  engine-owned periodic work. Explicit `IAtomicStore.SyncAsync` awaits the native
+  WAL APIs when a caller requests that disk barrier. Each command is one
   action of that commit (`IAtomicActionStaging`):
   - It sees the writes of the actions before it.
   - Its `Reset` covers only its own writes.
@@ -69,11 +73,12 @@ Concurrent canonical commands share one commit and one write-ahead log sync per 
 
 ## Consequences
 
-- With many concurrent writers, one sync on each copy acknowledges many commands.
+- With many concurrent writers, one physical commit on each copy acknowledges many commands.
   The latency of a single write is unchanged: its batch holds only that command.
-- Durability is unchanged. Every acknowledged command is in a synced ZoneTree
-  transaction on every copy before its caller sees success, and ZoneTree replays a
-  transaction whole or drops it.
+- Every acknowledged command is in a process-persistent ZoneTree transaction on
+  every required copy before its caller sees success. Process interruption and
+  power-loss persistence require distinct qualification; a grouped commit does
+  not strengthen the selected durability contract.
 - Readers wait only for a batch's apply, as they waited for one command's apply.
 - A batch is one ordinary ZoneTree transaction. The `last-batch` row is a system
   row, written only by commits that persist several outcomes.
