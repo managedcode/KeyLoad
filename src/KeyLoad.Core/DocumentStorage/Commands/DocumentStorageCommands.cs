@@ -14,18 +14,17 @@ public static class DocumentStorageCommands
     internal const string DeleteDocumentMutationKind = "deleteDocument";
     internal const string DeletedDocumentJson = "{}";
     internal const int MaximumPatchOperations = 256;
-    internal static DocumentMutationResult Put(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, PutDocument put, DateTimeOffset now, DocumentMutationContext context)
+    internal static DocumentMutationResult Put(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, PutDocument put, DateTimeOffset now, DocumentMutationContext context, ResourceDefinition resource, ResourceLifetime lifetime)
     {
         const int ActualEmptyCount = 0;
         const int PreviousRevisionValidationBoundary = 0;
         const int PreviousRevisionStep = 1;
         JsonData.Identifier(put.Id);
-        var resource = engine.Resource(tx, partition, put.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
         if (previous is not null)
         {
-            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+            EntityReferenceLifetime.RequireStored(previous.Reference, lifetime);
         }
 
         if (previous is { Deleted: false })
@@ -53,13 +52,13 @@ public static class DocumentStorageCommands
         }
 
         engine.Authorization.RequireWriteRow(principal, access);
-        var document = new DocumentRecord(EntityReferenceLifetime.Bind(tx, new(partition, put.Collection, put.Id), resource), checked((previous?.Revision ?? PreviousRevisionValidationBoundary) + PreviousRevisionStep), json, access, now);
+        var document = new DocumentRecord(EntityReferenceLifetime.Bind(new(partition, put.Collection, put.Id), lifetime), checked((previous?.Revision ?? PreviousRevisionValidationBoundary) + PreviousRevisionStep), json, access, now);
         engine.UpdateIndexes(tx, principal, resource, previous is { Deleted: false } ? previous : null, document);
         tx.PutRecord(context.Key, document);
         return new(new(PutDocumentMutationKind, put.Collection, put.Id, document.Revision), document);
     }
 
-    internal static DocumentMutationResult Patch(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, PatchDocument patch, DateTimeOffset now, DocumentMutationContext context)
+    internal static DocumentMutationResult Patch(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PatchDocument patch, DateTimeOffset now, DocumentMutationContext context, ResourceDefinition resource, ResourceLifetime lifetime)
     {
         const int PatchesLengthFirstCount = 1;
         const int RevisionStep = 1;
@@ -68,12 +67,11 @@ public static class DocumentStorageCommands
             throw Errors.Fail(ErrorCode.ResourceExhausted, PatchOperationBudgetMessage);
         }
 
-        var resource = engine.Resource(tx, partition, patch.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
         if (previous is not null)
         {
-            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+            EntityReferenceLifetime.RequireStored(previous.Reference, lifetime);
         }
 
         if (previous is null || previous.Deleted)
@@ -101,15 +99,14 @@ public static class DocumentStorageCommands
         return new(new(PatchDocumentMutationKind, patch.Collection, patch.Id, updated.Revision), updated);
     }
 
-    internal static DocumentMutationResult Delete(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, DeleteDocument delete, DateTimeOffset now, DocumentMutationContext context)
+    internal static DocumentMutationResult Delete(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, DeleteDocument delete, DateTimeOffset now, DocumentMutationContext context, ResourceDefinition resource, ResourceLifetime lifetime)
     {
         const int RevisionStep = 1;
-        var resource = engine.Resource(tx, partition, delete.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
         if (previous is not null)
         {
-            EntityReferenceLifetime.RequireStored(tx, previous.Reference, resource);
+            EntityReferenceLifetime.RequireStored(previous.Reference, lifetime);
         }
 
         if (previous is null || previous.Deleted)

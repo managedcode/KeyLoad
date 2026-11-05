@@ -12,8 +12,7 @@ internal sealed class DocumentMutationImageReadTests
     private const long MetadataByteTolerance = 2_048;
     private const long MutationAndOutcomeBorrowedPoints = 6;
     private const long PlacementWitnessBorrowedPoints = 3;
-    private const long ReplacementLifetimeBindingBorrowedPoints = 1;
-    private const long ResourceLifetimeBorrowedPoints = 3;
+    private const long ResourceLifetimeBorrowedPoints = 2;
     private const long TableWriteModeBorrowedPoints = 1;
     private const long NewPutBorrowedPoints = MutationAndOutcomeBorrowedPoints
         + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints + TableWriteModeBorrowedPoints;
@@ -37,11 +36,8 @@ internal sealed class DocumentMutationImageReadTests
             var small = await MeasureExisting(SmallJson, action);
             var large = await MeasureExisting(LargeJson(), action);
             var payloadDelta = LargeValueLength - 1;
-            var expectedPoints = NewPutBorrowedPoints
-                + (action == ImageAction.Replace ? ReplacementLifetimeBindingBorrowedPoints : 0);
-
-            await Assert.That(small.Points).IsEqualTo(expectedPoints);
-            await Assert.That(large.Points).IsEqualTo(expectedPoints);
+            await Assert.That(small.Points).IsEqualTo(NewPutBorrowedPoints);
+            await Assert.That(large.Points).IsEqualTo(NewPutBorrowedPoints);
             await Assert.That(Math.Abs((large.Bytes - small.Bytes) - payloadDelta))
                 .IsLessThanOrEqualTo(MetadataByteTolerance);
         }

@@ -26,16 +26,25 @@ public static class ProjectionOutbox
     internal static byte[] OutboxHeadKey(PartitionRef partition) => KeySpace.Partition(PartitionRecordFamilies.OutboxHead, partition);
     internal static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition(ProjectionConsumerSpace, consumer.Partition, consumer.Name);
     internal static void AppendOutbox(IAtomicTransaction tx, PartitionRef partition, int ordinal, CommitToken token,
-        DateTimeOffset now, Mutation mutation, MutationReceipt receipt, DocumentRecord? before, DocumentRecord? after)
+        DateTimeOffset now, Mutation mutation, MutationReceipt receipt, DocumentRecord? before, DocumentRecord? after,
+        ref OutboxHead? head)
     {
         const int TailStep = 1;
         const int AppendedRecordCount = 1;
         var headKey = OutboxHeadKey(partition);
-        var head = ChangeFeedsValidation.ReadOutboxHead(tx, headKey);
+        if (head is null)
+        {
+            head = ChangeFeedsValidation.ReadOutboxHead(tx, headKey);
+        }
+        else
+        {
+            ChangeFeedsValidation.RequireValidOutboxHead(head);
+        }
         var entry = new OutboxEntry(checked(head.Tail + TailStep), ordinal, token, now, mutation, receipt, before, after);
         var payload = OrleansSerialization.Serialize(entry);
         tx.Put(OutboxKey(partition, entry.Sequence), payload);
-        tx.PutRecord(headKey, head with { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
+        head = head with { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length };
+        tx.PutRecord(headKey, head);
     }
 
     internal static ProjectionConsumerInfo ConfigureProjectionConsumer(this DatabaseEngine engine, IAtomicTransaction tx, ConfigureProjectionConsumerRequest request, ProjectionMaintenanceAuthority? authority)

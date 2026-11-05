@@ -18,6 +18,9 @@ public static class AtomicMutationApplication
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
         var originalPayload = preparingComposition ? operation!.Value! : null;
         List<QueueRetryDecision>? previewChoices = preparingComposition ? [] : null;
+        ResourceDefinition? definition = null;
+        ResourceLifetime? lifetime = null;
+        OutboxHead? outboxHead = null;
         foreach (var (mutation, derived) in engine.ExpandCommandMutations(tx, principal, partition, mutations, now, compositionBudget))
         {
             var documentId = mutation switch
@@ -30,11 +33,19 @@ public static class AtomicMutationApplication
             var key = documentId is null ? null : DocumentStorageExecutionDocuments.DocumentKey(partition, mutation.Resource, documentId);
             var before = key is null ? null : tx.GetRecord<DocumentRecord>(key);
             var context = new DocumentMutationContext(key!, before);
+            if (mutation is not (PutDocument or PatchDocument or DeleteDocument))
+            {
+                definition = null;
+            }
+            else if (definition?.Name != mutation.Resource)
+            {
+                (definition, lifetime) = ResourceDefinitionBinding.ReadBoundResourcePair(tx, partition, mutation.Resource, ResourceKind.Collection);
+            }
             DocumentMutationResult? image = mutation switch
             {
-                PutDocument put => engine.Put(tx, principal, partition, put, now, context),
-                PatchDocument patch => engine.Patch(tx, principal, partition, patch, now, context),
-                DeleteDocument delete => engine.Delete(tx, principal, partition, delete, now, context),
+                PutDocument put => engine.Put(tx, principal, partition, put, now, context, definition!, lifetime!),
+                PatchDocument patch => engine.Patch(tx, principal, patch, now, context, definition!, lifetime!),
+                DeleteDocument delete => engine.Delete(tx, principal, delete, now, context, definition!, lifetime!),
                 _ => null
             };
             var effectOperation = preparingComposition ? engine.PrepareCompositionQueueRetry(tx, operation!, partition, mutation, originalPayload!, previewChoices!) : operation;
@@ -50,7 +61,7 @@ public static class AtomicMutationApplication
             receipts.Add(receipt);
             var after = image?.After;
             ProjectionOutbox.AppendOutbox(tx, partition, receipts.Count - AtomicMutationApplicationAdjacentElementOffset,
-                token, now, mutation, receipt, before, after);
+                token, now, mutation, receipt, before, after, ref outboxHead);
             if (before is not null && after is not null && before.Access != after.Access)
             {
                 ChangeFeedsExecutionChangeFeeds.AdvanceVisibilityEpoch(tx, partition, mutation.Resource);

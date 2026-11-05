@@ -26,6 +26,9 @@ public static class JsonData
     private const string WildcardPathSegment = "*";
     private const string NullJsonValue = "null";
     private const int MaximumIdentifierBytes = 256;
+    private const char FirstControlRangeEnd = '\u001f';
+    private const char SecondControlRangeStart = '\u007f';
+    private const char SecondControlRangeEnd = '\u009f';
 
     /// <summary>Returns canonical JSON while enforcing the serializer's default nesting and decimal-number policy.</summary>
     /// <param name="json">Owned input JSON text.</param>
@@ -189,7 +192,9 @@ public static class JsonData
     /// <param name="value">Identifier text to validate.</param>
     public static void Identifier(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || Encoding.UTF8.GetByteCount(value) > MaximumIdentifierBytes || value.Any(char.IsControl))
+        if (string.IsNullOrWhiteSpace(value) || Encoding.UTF8.GetByteCount(value) > MaximumIdentifierBytes
+            || value.AsSpan().ContainsAnyInRange(char.MinValue, FirstControlRangeEnd)
+            || value.AsSpan().ContainsAnyInRange(SecondControlRangeStart, SecondControlRangeEnd))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidIdentifierDetail);
         }

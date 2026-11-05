@@ -15,21 +15,24 @@ internal static class DocumentPathDiagnosticScenario
     private const string NumberPath = "/number";
     private const int QueryOperations = 10_000;
 
-    internal static async Task RunAsync(int records, int nodes, CancellationToken token)
+    internal static async Task RunAsync(int records, int nodes, CancellationToken token,
+        int batchRecords = DocumentPathDiagnosticCorpus.BatchRecords)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(batchRecords);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromMinutes(5));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var fixture = await FunctionalGateFixture.StartAsync(nodes, nodes, deadline.Token);
-            await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(fixture, records, nodes, deadline.Token), failures);
+            await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(fixture, records, nodes, batchRecords, deadline.Token), failures);
             fixture.PreserveEvidence = failures.Count != 0;
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExecuteAsync(FunctionalGateFixture fixture, int records, int nodes, CancellationToken token)
+    private static async Task ExecuteAsync(FunctionalGateFixture fixture, int records, int nodes, int batchRecords,
+        CancellationToken token)
     {
         var output = Path.Combine(AppContext.BaseDirectory, "performance-investigation",
             "documents-" + records + "-n" + nodes + "-" + Guid.NewGuid().ToString("N"));
@@ -47,7 +50,7 @@ internal static class DocumentPathDiagnosticScenario
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await MeasureAsync(output, phases, "bulk-create", records, () => LoadAsync(sdk, partition, records, nodes, token));
+            await MeasureAsync(output, phases, "bulk-create", records, () => LoadAsync(sdk, partition, records, nodes, batchRecords, token));
             await MeasureAsync(output, phases, "random-point-read", records, () => ReadAsync(sdk, partition, records, token));
             await MeasureAsync(output, phases, "point-predicate-query", QueryOperations,
                 () => QueryAsync(sdk, partition, records, token));
@@ -63,9 +66,10 @@ internal static class DocumentPathDiagnosticScenario
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task LoadAsync(KeyLoadClient sdk, PartitionRef partition, int records, int nodes, CancellationToken token)
+    private static async Task LoadAsync(KeyLoadClient sdk, PartitionRef partition, int records, int nodes, int batchRecords,
+        CancellationToken token)
     {
-        var batch = DocumentPathDiagnosticCorpus.BatchRecords;
+        var batch = batchRecords;
         var batches = (records + batch - 1) / batch;
         await Parallel.ForEachAsync(Enumerable.Range(0, batches), Parallelism(token), async (index, cancellation) =>
         {

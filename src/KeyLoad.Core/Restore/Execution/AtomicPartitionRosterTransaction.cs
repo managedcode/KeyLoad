@@ -148,9 +148,11 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             return (false, default(Candidate?));
         }
 
-        var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
-        var retained = candidates.ContainsKey(partition);
-        return ((Candidate?)(retained ? null : new(partition, rosterKey))) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(Candidate?));
+        if (candidates.ContainsKey(partition))
+        {
+            return (false, default(Candidate?));
+        }
+        return (true, new Candidate(partition, AtomicPartitionRosterKeys.Partition(partition)));
     }
 
     private void RetainCandidate(Candidate? candidate)

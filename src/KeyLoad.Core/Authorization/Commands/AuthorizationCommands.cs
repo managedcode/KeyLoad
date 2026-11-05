@@ -12,6 +12,7 @@ public static class AuthorizationCommands
             throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
         }
 
+        ResourceDefinition? resource = null;
         foreach (var mutation in request.Mutations)
         {
             ProtocolValidation.ValidateMutationStructure(mutation);
@@ -24,7 +25,11 @@ public static class AuthorizationCommands
             engine.Authorization.Require(principal, request.Partition, mutation.Resource, BatchMutationCapability(mutation));
             engine.RequireQueueTransferCapabilities(principal, mutation);
             engine.RequireRecurringSagaCapabilities(principal, mutation);
-            var resource = engine.BatchResource(view, request.Partition, mutation.Resource);
+            // Authorization only reads this cut; adjacent mutations share the same validated resource.
+            if (resource?.Name != mutation.Resource)
+            {
+                resource = engine.BatchResource(view, request.Partition, mutation.Resource);
+            }
             if (mutation is StoreAggregateSnapshot)
             {
                 engine.Authorization.RequireReplayInput(principal, resource);
