@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ZoneTree.Transactional;
 
@@ -5,6 +6,67 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal sealed class NativeMvccStorageTests
 {
+    [Test]
+    public async Task IndependentNativeWritersCommitFromTheSameSnapshotAndSurviveReopen()
+    {
+        using var files = new StoreFileFixture();
+        using (var tree = ZoneTreeTreeFactory.Open(new(files.DirectoryPath)))
+        {
+            using var first = tree.BeginTransaction();
+            using var second = tree.BeginTransaction();
+            using var before = tree.BeginReadOnlyTransaction();
+            await Assert.That(first.SnapshotTimestamp).IsEqualTo(second.SnapshotTimestamp);
+            first.Upsert(new byte[] { 0x10 }, new byte[] { 0xA0 });
+            second.Upsert(new byte[] { 0x20 }, new byte[] { 0xB0 });
+            await Assert.That(second.TryCommit()).IsTrue();
+            await Assert.That(first.TryCommit()).IsTrue();
+            await Assert.That(first.CommitTimestamp).IsGreaterThan(second.CommitTimestamp);
+            await Assert.That(Rows(before)).IsEmpty();
+            using var after = tree.BeginReadOnlyTransaction();
+            await Assert.That(after.SnapshotTimestamp).IsEqualTo(first.CommitTimestamp);
+            await Assert.That(Rows(after)).IsEquivalentTo(new[] { "10=A0", "20=B0" },
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await tree.SyncWALAsync(TestContext.Current!.Execution.CancellationToken);
+        }
+        using var reopened = ZoneTreeTreeFactory.Open(new(files.DirectoryPath), requireExisting: true);
+        using var cold = reopened.BeginReadOnlyTransaction();
+        await Assert.That(Rows(cold)).IsEquivalentTo(new[] { "10=A0", "20=B0" },
+            TUnit.Assertions.Enums.CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task SharedBookkeepingCreatesAConflictBetweenOtherwiseIndependentNativeWriters()
+    {
+        using var files = new StoreFileFixture();
+        using var tree = ZoneTreeTreeFactory.Open(new(files.DirectoryPath));
+        Memory<byte> shared = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.PositionKey);
+        using var first = tree.BeginTransaction();
+        using var second = tree.BeginTransaction();
+        await Assert.That(first.TryGet(shared, out _)).IsFalse();
+        await Assert.That(second.TryGet(shared, out _)).IsFalse();
+        first.Upsert(new byte[] { 0x10 }, new byte[] { 0xA0 });
+        second.Upsert(new byte[] { 0x20 }, new byte[] { 0xB0 });
+        first.Upsert(shared, new byte[] { 0x01 });
+        second.Upsert(shared, new byte[] { 0x01 });
+        await Assert.That(first.TryCommit()).IsTrue();
+        await Assert.That(second.TryCommit()).IsFalse();
+        using (var after = tree.BeginReadOnlyTransaction())
+        {
+            await Assert.That(after.TryGet(new byte[] { 0x10 }, out var retained)).IsTrue();
+            await Assert.That(retained.Span.SequenceEqual(new byte[] { 0xA0 })).IsTrue();
+            await Assert.That(after.ContainsKey(new byte[] { 0x20 })).IsFalse();
+        }
+        using var healthy = tree.BeginTransaction();
+        healthy.Upsert(new byte[] { 0x20 }, new byte[] { 0xB0 });
+        healthy.Upsert(shared, new byte[] { 0x02 });
+        await Assert.That(healthy.TryCommit()).IsTrue();
+        using var final = tree.BeginReadOnlyTransaction();
+        await Assert.That(final.TryGet(new byte[] { 0x20 }, out var applied)).IsTrue();
+        await Assert.That(applied.Span.SequenceEqual(new byte[] { 0xB0 })).IsTrue();
+        await Assert.That(final.TryGet(shared, out var position)).IsTrue();
+        await Assert.That(position.Span.SequenceEqual(new byte[] { 0x02 })).IsTrue();
+    }
+
     [Test]
     public async Task NativeCommitAndRollbackKeepTheCapturedSnapshotAndLiteralValuesExact()
     {

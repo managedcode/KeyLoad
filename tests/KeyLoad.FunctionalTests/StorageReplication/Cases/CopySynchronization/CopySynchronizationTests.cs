@@ -43,6 +43,7 @@ internal sealed class CopySynchronizationTests
     {
         var source = cluster.Nodes[0];
         var replica = cluster.Nodes[1];
+        fault.InterruptedSilo = replica.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
         timeout.CancelAfter(source.Timing.CompletionTimeout);
         var bounded = timeout.Token;

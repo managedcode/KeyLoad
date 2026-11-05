@@ -5,10 +5,15 @@ internal static class StorageCopyBatchOutcomes
 {
     /// <summary>Acknowledges the prefix every copy applied with the same sequences and results.</summary>
     /// <returns>True when all copies agree, so the owners' cut can advance to the batch position.</returns>
-    internal static bool Accept(StorageBatchResult[] results, StorageCopyOutcome[] outcomes)
+    internal static bool Accept(StorageCopyBatchAcknowledgement[] results, StorageCopyOutcome[] outcomes)
     {
-        var original = results[StorageCopyContract.FirstOwner];
+        var original = results[StorageCopyContract.FirstOwner].Outcome
+            ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.DifferentOutcomes);
         var applied = results.Max(result => result.Applied.Length);
+        if (applied > outcomes.Length || original.Applied.Length != applied)
+        {
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.DifferentOutcomes);
+        }
         if (results.Any(result => result.Position != original.Position || result.Applied.Length != applied))
         {
             Differ(outcomes, StorageCopyContract.FirstOwner, applied);
@@ -18,8 +23,8 @@ internal static class StorageCopyBatchOutcomes
         for (var index = StorageCopyContract.FirstOwner; index < applied; index++)
         {
             var expected = original.Applied[index];
-            if (results.Any(result => result.Applied[index].Sequence != expected.Sequence
-                || !(StorageCopyAcknowledgements.Same((result.Applied[index].Result /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */), (expected.Result /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */)) /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */)))
+            var decision = StorageCopyBatchAcknowledgements.Decision(expected);
+            if (results.Any(result => result.Applied[index] != decision))
             {
                 Differ(outcomes, index, applied);
                 return false;

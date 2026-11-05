@@ -36,12 +36,13 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
     public Task<ImmutableArray<StoredCommand>> ReadLastCommittedCommandsAsync(CancellationToken cancellationToken)
         => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommands(cancellationToken));
 
-    public Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
-        long firstSequence, CancellationToken cancellationToken)
+    public async Task<StorageCopyBatchAcknowledgement> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
+        long firstSequence, bool includeOutcome, CancellationToken cancellationToken)
     {
         var database = Isolated.Host.Database;
         // Each native commit has already published the data and outcomes into the process-persistent WAL.
-        return database.ApplyStorageOperationsAsync(operations, firstSequence, cancellationToken);
+        var result = await database.ApplyStorageOperationsAsync(operations, firstSequence, cancellationToken);
+        return StorageCopyBatchAcknowledgements.Create(result, includeOutcome);
     }
 
     public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId)

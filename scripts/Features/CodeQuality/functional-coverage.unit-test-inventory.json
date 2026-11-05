@@ -49881,7 +49881,7 @@
       "methodName": "ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands",
       "instanceName": "ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/CopySynchronizationTests.cs",
-      "sourceSha256": "8351f7f64a786268f935030d2f23d458a4790c9d0f84a6d8269b96787d42da4d",
+      "sourceSha256": "47d5636289259821c85dec614e98dc012caa27300b5c36745019baa067dc6894",
       "lineNumber": 14,
       "endLineNumber": 25,
       "classification": "functional",
@@ -49899,7 +49899,7 @@
       "methodName": "InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair",
       "instanceName": "InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/CopySynchronizationTests.cs",
-      "sourceSha256": "8351f7f64a786268f935030d2f23d458a4790c9d0f84a6d8269b96787d42da4d",
+      "sourceSha256": "47d5636289259821c85dec614e98dc012caa27300b5c36745019baa067dc6894",
       "lineNumber": 27,
       "endLineNumber": 39,
       "classification": "functional",
@@ -50002,6 +50002,96 @@
       ],
       "acceptance": [
         "AC-REP-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "methodName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed",
+      "instanceName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Decision)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/StorageBatchAcknowledgementFailureTests.cs",
+      "sourceSha256": "c51c003c414718417cdde924d145628d8d720acf4a373796002ce44eca1a9782",
+      "lineNumber": 12,
+      "endLineNumber": 25,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-011"
+      ],
+      "acceptance": [
+        "AC-REP-011"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "methodName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed",
+      "instanceName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(MissingOutcome)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/StorageBatchAcknowledgementFailureTests.cs",
+      "sourceSha256": "c51c003c414718417cdde924d145628d8d720acf4a373796002ce44eca1a9782",
+      "lineNumber": 12,
+      "endLineNumber": 25,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-011"
+      ],
+      "acceptance": [
+        "AC-REP-011"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "methodName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed",
+      "instanceName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Prefix)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/StorageBatchAcknowledgementFailureTests.cs",
+      "sourceSha256": "c51c003c414718417cdde924d145628d8d720acf4a373796002ce44eca1a9782",
+      "lineNumber": 12,
+      "endLineNumber": 25,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-011"
+      ],
+      "acceptance": [
+        "AC-REP-011"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+      "methodName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed",
+      "instanceName": "InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Sequence)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/StorageBatchAcknowledgementFailureTests.cs",
+      "sourceSha256": "c51c003c414718417cdde924d145628d8d720acf4a373796002ce44eca1a9782",
+      "lineNumber": 12,
+      "endLineNumber": 25,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-011"
+      ],
+      "acceptance": [
+        "AC-REP-011"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementTests",
+      "methodName": "CopiesConfirmEveryDecisionWhileOnlyOneReturnsMutationPayloads",
+      "instanceName": "CopiesConfirmEveryDecisionWhileOnlyOneReturnsMutationPayloads",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/StorageBatchAcknowledgementTests.cs",
+      "sourceSha256": "be10f4dbe007ffe668df0d4b54a7e07bd20bdd6cc27a2ba3d0929af0b97c5401",
+      "lineNumber": 15,
+      "endLineNumber": 23,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-011"
+      ],
+      "acceptance": [
+        "AC-REP-011"
       ]
     },
     {
@@ -61048,12 +61138,34 @@
     {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
       "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
+      "methodName": "IndependentNativeWritersCommitFromTheSameSnapshotAndSurviveReopen",
+      "instanceName": "IndependentNativeWritersCommitFromTheSameSnapshotAndSurviveReopen",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/NativeMvccStorageTests.cs",
+      "sourceSha256": "e2c24fd23060007a85b321821b903e2aa4ece35b0ec9db331e4f20c140c143f1",
+      "lineNumber": 9,
+      "endLineNumber": 35,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MVCC-001",
+        "REQ-STORAGE-MVCC-002"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MVCC-001",
+        "AC-STORAGE-MVCC-002"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual pinned native engine transactions through the product tree factory: overlapping snapshots, independent keys or a shared bookkeeping conflict, exact state and healthy continuation. This is a required engine integration control; complete KeyLoad command and distributed acknowledgement proof is separate."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
       "methodName": "NativeCommitAndRollbackKeepTheCapturedSnapshotAndLiteralValuesExact",
       "instanceName": "NativeCommitAndRollbackKeepTheCapturedSnapshotAndLiteralValuesExact",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/NativeMvccStorageTests.cs",
-      "sourceSha256": "5bb5f24167c9e65afdf1925d25ac4ab9437aa4aed6f00e35043769bb601d4985",
-      "lineNumber": 8,
-      "endLineNumber": 49,
+      "sourceSha256": "e2c24fd23060007a85b321821b903e2aa4ece35b0ec9db331e4f20c140c143f1",
+      "lineNumber": 70,
+      "endLineNumber": 111,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -61071,9 +61183,9 @@
       "methodName": "SerializableRangeConflictRollsBackEveryWriteThenHealthyCommitSucceeds",
       "instanceName": "SerializableRangeConflictRollsBackEveryWriteThenHealthyCommitSucceeds",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/NativeMvccStorageTests.cs",
-      "sourceSha256": "5bb5f24167c9e65afdf1925d25ac4ab9437aa4aed6f00e35043769bb601d4985",
-      "lineNumber": 51,
-      "endLineNumber": 78,
+      "sourceSha256": "e2c24fd23060007a85b321821b903e2aa4ece35b0ec9db331e4f20c140c143f1",
+      "lineNumber": 113,
+      "endLineNumber": 140,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -61084,6 +61196,26 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Actual published MVCC engine operations through the product tree factory. Required API integration control; complete KeyLoad command, journal, acknowledgement and recovery operations retain their separate provider and process cases."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
+      "methodName": "SharedBookkeepingCreatesAConflictBetweenOtherwiseIndependentNativeWriters",
+      "instanceName": "SharedBookkeepingCreatesAConflictBetweenOtherwiseIndependentNativeWriters",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/NativeMvccStorageTests.cs",
+      "sourceSha256": "e2c24fd23060007a85b321821b903e2aa4ece35b0ec9db331e4f20c140c143f1",
+      "lineNumber": 37,
+      "endLineNumber": 68,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-STORAGE-MVCC-001"
+      ],
+      "acceptance": [
+        "AC-STORAGE-MVCC-001"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Actual pinned native engine transactions through the product tree factory: overlapping snapshots, independent keys or a shared bookkeeping conflict, exact state and healthy continuation. This is a required engine integration control; complete KeyLoad command and distributed acknowledgement proof is separate."
     },
     {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -64830,7 +64962,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(CooperativeE*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(Ord*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StorageP*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches*)&(!LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(CooperativeE*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(Ord*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StorageB*)|(StorageP*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!LocalCopyBecomesPrimaryOnlyAfterItsCanonicalCutMatches*)&(!LocalCopyOutsideTheSelectedOwnerSetDoesNotReplaceARequiredCopy*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.FunctionalTests.AdminDashboard.AdminStorageObservationTests",
@@ -64974,6 +65106,8 @@
         "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeStorageExecutionOptionsTests",
         "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementTests",
         "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkManifestCardinalityTests",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests",
@@ -65527,6 +65661,11 @@
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedCommitsAndCursorContinuation|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedCommitsAndCursorContinuation",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Decision)",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(MissingOutcome)",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Prefix)",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementFailureTests|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed|InvalidAcknowledgementLeavesTheWriteUnknownThenExactRetryAndHealthyWriteSucceed(Sequence)",
+        "KeyLoad.FunctionalTests.StorageReplication.StorageBatchAcknowledgementTests|CopiesConfirmEveryDecisionWhileOnlyOneReturnsMutationPayloads|CopiesConfirmEveryDecisionWhileOnlyOneReturnsMutationPayloads",
         "KeyLoad.FunctionalTests.StorageReplication.StoragePreparationLocalityTests|PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes|PreparationUsesTheCoordinatorsSelectedLocalCopyAndRetainsBothOutcomes",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkManifestCardinalityTests|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests|Actual257RecordGenerationRefusesMissingSecondBlockThenExactRepairReplayAndTwoCold|Actual257RecordGenerationRefusesMissingSecondBlockThenExactRepairReplayAndTwoCold",

@@ -4,10 +4,6 @@ namespace KeyLoad.Clustering;
 /// <summary>Publishes only copy counts observed after every required store returned its persisted result.</summary>
 internal static class StorageCopyAcknowledgements
 {
-    internal static bool Same(Result<object> /* KLD0041: Preserve the current heterogeneous persisted batch-result shape while comparing copy decisions and attaching observed copy counts. */ first, Result<object> /* KLD0041: Preserve the current heterogeneous persisted batch-result shape while comparing copy decisions and attaching observed copy counts. */ second)
-        => first.IsSuccess == second.IsSuccess &&
-            (first.IsSuccess || Errors.Code(first.Problem).Value == Errors.Code(second.Problem).Value);
-
     internal static Result<object> /* KLD0041: Preserve the current heterogeneous persisted batch-result shape while comparing copy decisions and attaching observed copy counts. */ Attach(Result<object> /* KLD0041: Preserve the current heterogeneous persisted batch-result shape while comparing copy decisions and attaching observed copy counts. */ result, int copies)
     {
         if (result.IsFailed)

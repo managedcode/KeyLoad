@@ -15,8 +15,10 @@ public partial interface ISiloDatabaseService : IGrainService
     /// command decisions at the selected store for the prefix that one commit can apply.</summary>
     Task<ImmutableArray<Command<DatabaseCommand>>> PrepareBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
         CancellationToken cancellationToken);
-    /// <summary>Applies exactly the prepared operations, in order, through one ZoneTree atomic commit.</summary>
-    Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence,
+    /// <summary>Applies the prepared prefix through one native commit and confirms its actual decisions.
+    /// Only the selected result copy includes the original outcomes.</summary>
+    Task<StorageCopyBatchAcknowledgement> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
+        long firstSequence, bool includeOutcome,
         CancellationToken cancellationToken);
     /// <summary>Joins a server-owned maintenance session's actual cleanup after cancellation or revocation.</summary>
     Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId);

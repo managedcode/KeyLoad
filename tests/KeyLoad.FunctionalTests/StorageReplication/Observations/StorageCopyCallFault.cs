@@ -7,10 +7,12 @@ namespace KeyLoad.FunctionalTests.StorageReplication;
 /// <summary>Refuses one original copy transport and holds its real repair RPC before execution.</summary>
 internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallFilter
 {
-    private const int RefusedCopy = 2;
+    private const int FirstRefusal = 1;
     private const int OperationsArgument = 0;
-    private const int CancellationArgument = 2;
+    private const int CancellationArgument = 3;
     private int sends;
+    private int refused;
+    internal SiloAddress? InterruptedSilo { get; set; }
     internal TaskCompletionSource RepairArrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource RepairSettled { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -23,14 +25,19 @@ internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallF
             await context.Invoke().ConfigureAwait(true);
             return;
         }
-        var attempt = Interlocked.Increment(ref sends);
-        if (attempt == RefusedCopy)
+        Interlocked.Increment(ref sends);
+        if (!SystemTargetGrainId.TryParse(context.TargetId, out var target) || InterruptedSilo is null)
+        {
+            throw new InvalidOperationException("The copy interruption requires its actual target silo.");
+        }
+        var selectedTarget = target.GetSiloAddress().Equals(InterruptedSilo);
+        if (selectedTarget && Interlocked.CompareExchange(ref refused, FirstRefusal, 0) == 0)
         {
             throw new IOException("The selected original storage copy transport was interrupted.");
         }
         try
         {
-            if (attempt > RefusedCopy)
+            if (selectedTarget)
             {
                 RepairArrived.TrySetResult();
                 var token = (CancellationToken)context.Request.GetArgument(CancellationArgument)!;
@@ -40,7 +47,7 @@ internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallF
         }
         finally
         {
-            if (attempt > RefusedCopy)
+            if (selectedTarget)
             {
                 RepairSettled.TrySetResult();
             }

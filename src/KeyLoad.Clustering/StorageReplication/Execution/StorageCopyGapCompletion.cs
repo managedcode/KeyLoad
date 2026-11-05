@@ -32,7 +32,7 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
             cancellationToken.ThrowIfCancellationRequested();
             var missing = Missing(committed, owner.Cut.Position, maximum);
             var applied = await storage.On(owner.Address).ApplyBatchAsync(missing,
-                owner.Cut.Position + StorageCopyContract.NextSequence, cancellationToken);
+                owner.Cut.Position + StorageCopyContract.NextSequence, includeOutcome: false, cancellationToken);
             if (applied.Position != maximum || applied.Applied.Length != missing.Length)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);

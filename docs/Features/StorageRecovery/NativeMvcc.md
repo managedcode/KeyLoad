@@ -15,7 +15,7 @@ transaction; native serializable conflicts retry the complete effect-free body. 
 the existing unknown-outcome and replay contract. The operation compiler retains
 its per-action preparation semantics.
 
-ZoneTree's write-ahead log, in `SyncCompressed` mode, is the only redo log and
+ZoneTree's transactional write-ahead log, in `Shared` mode, is the only redo log and
 supplies ordered recovery: on open ZoneTree replays it and drops a transaction whose
 commit never reached the log ([ADR-011](../../ADR/ADR-011-current-format.md)).
 Native commit supplies atomic visibility and synchronous process-persistent WAL
@@ -46,7 +46,9 @@ including an empty value.
 `DiskDeletionTests.DiskDeletionKeepsExactRowsAcrossTwoReopens` exercises that
 complete operation and rejects resurrection of a deleted disk key.
 
-`NativeMvccStorageTests` exercises the actual product tree factory, uncommitted
+`NativeMvccStorageTests` exercises the actual product tree factory, independent
+writers from the same snapshot, the conflict introduced by a shared bookkeeping
+key, cold reopen, uncommitted
 visibility, commit, disposal rollback, stable snapshots, exact binary/empty
 values, serializable range conflicts and healthy subsequent commits. Existing
 `TombstoneValueTests`, read-cut, range, backup and real process recovery cases
@@ -62,16 +64,13 @@ engine's block buffers, including when the block compression method is `None`.
 See [NonTransactionalTables](../RelationalStorage/NonTransactionalTables.md) for the
 second native tree, WAL ordering and independent backup cuts.
 
-## Shared WAL publication status
+## Shared WAL publication
 
-[ZoneTree PR #215](https://github.com/ZoneTree/ZoneTree/pull/215), merged on
-2026-11-02, introduces `Shared` and `AsyncShared` journals with ordered recovery
-across segments. Its durable commit APIs synchronize before publishing visibility;
-concurrent commits can share that synchronization. Ordinary `Commit()` still
-publishes without awaiting a disk barrier. Failed durable synchronization retains
-an uncertain transaction outcome.
-
-The published package checked on 2026-11-02 remains 2.1.0. The merged PR is not part
-of KeyLoad's pinned dependency yet. Adopting a published package containing it still
-requires native API, WAL, recovery and performance checks. Current process-crash
-tests do not establish power-loss durability or financial-system qualification.
+The pinned ZoneTree 2.1.2 package supplies `Shared` and `AsyncShared` journals
+with ordered recovery across segments. KeyLoad explicitly selects `Shared` for
+the transactional tree and retains `SyncCompressed` for plain-table data.
+Native durable commit APIs synchronize before publishing visibility; concurrent
+commits can share that synchronization. The current `ProcessDurable` path uses
+ordinary commits, which publish without awaiting a disk barrier. Failed durable
+synchronization retains an uncertain transaction outcome. Current process-crash
+tests do not establish power-loss durability or complete deployed qualification.

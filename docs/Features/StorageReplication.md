@@ -42,6 +42,15 @@ canonical outcome. `CommitReceipt.PersistedCopies` records that actual count;
 persisted copies. A stopped required copy blocks successful writes even when
 other copies can still serve reads.
 
+Only the selected result copy returns full command outcomes over Orleans.
+Other copies return the actual applied prefix's canonical sequences and
+success/error-code decisions. The coordinator compares those decisions and
+positions before attaching the observed copy count to the selected original
+result. Missing full results or mismatched decisions leave the write outcome
+unknown. Copy repair uses the same compact acknowledgement. Every copy still
+persists its complete command outcome for replay; this transport shape removes
+duplicate response payloads rather than any durable outcome or copy check.
+
 The canonical record is a execution `ManagedCode.Communication.Command<DatabaseCommand>`.
 The original command ID, verified subject, timestamp, input and prepared choices
 are retained with the execution `Result<object>` and canonical sequence in one local
@@ -100,6 +109,7 @@ lagging local copy cannot replace a required advanced copy.
 | REQ-REP-008: concurrent canonical commands share one process-persistent native commit per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
 | REQ-REP-009: retained interrupted copy work is completed without requiring a new write. | AC-REP-009: interrupt one actual copy RPC, observe the background repair RPC, keep a read barrier available while repair is held, then verify the original document and sequence on both copies, exact retry and healthy continuation with joined cleanup. | `CopySynchronizationTests.InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair`; local and delivered-source qualification remain separate. |
 | REQ-REP-010: preparation prefers a selected local copy only at the same canonical cut. | AC-REP-010: the actual prepare call targets the coordinator's silo when it is a selected current copy; both copies retain exact data, revision and replayed outcome, and a healthy command follows. A different incarnation, lagging cut or unselected local silo cannot replace an advanced required owner. | `StoragePreparationLocalityTests` separates owner-selection checks from a real two-host command, replay and follow-up. Aspire throughput and delivered-source qualification remain separate. |
+| REQ-REP-011: secondary copy responses omit duplicated outcome payloads while retaining the original copy-agreement checks. | AC-REP-011: a real two-host batch returns one full outcome and one compact acknowledgement with the same persisted decision; exact bodies, revisions, replay and healthy continuation hold. Wrong sequence, decision, prefix or a missing selected outcome return `UnknownWriteOutcome` after the real commit, then an exact retry resolves it without duplicate effects. | `StorageBatchAcknowledgementTests` and `StorageBatchAcknowledgementFailureTests`; local, delivered-source and throughput qualification remain separate. |
 
 ## Source and verification
 

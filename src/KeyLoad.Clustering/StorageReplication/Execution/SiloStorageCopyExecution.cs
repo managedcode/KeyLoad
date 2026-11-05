@@ -42,14 +42,15 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             cancellationToken.ThrowIfCancellationRequested();
             // Every owner applies the same prepared commands from the same cut in one commit, so the copies persist
             // concurrently and the next batch starts only after all of them.
-            var applies = new Task<StorageBatchResult>[owners.Length];
+            var applies = new Task<StorageCopyBatchAcknowledgement>[owners.Length];
             applying = true;
             for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
             {
                 applies[index] = storage.On(owners[index].Address)
-                    .ApplyBatchAsync(prepared, maximum + StorageCopyContract.NextSequence, cancellationToken);
+                    .ApplyBatchAsync(prepared, maximum + StorageCopyContract.NextSequence,
+                        includeOutcome: index == StorageCopyContract.FirstOwner, cancellationToken);
             }
-            StorageBatchResult[] results;
+            StorageCopyBatchAcknowledgement[] results;
             try
             {
                 results = await Task.WhenAll(applies);
