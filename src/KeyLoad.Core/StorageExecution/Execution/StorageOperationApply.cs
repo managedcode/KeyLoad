@@ -42,7 +42,7 @@ public static class StorageOperationApply
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var verified = engine.OwnCommand(operation);
-        if (!engine.IsSiloLocalOperation(verified))
+        if (!engine.IsOwnedSiloLocalOperation(verified))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidStorageOperationScope);
         }

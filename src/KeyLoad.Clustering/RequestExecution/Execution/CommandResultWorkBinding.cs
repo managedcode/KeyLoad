@@ -10,21 +10,22 @@ internal static class CommandResultWorkBinding
     private const string Uncertain = "The write outcome is unknown. Retry the same command ID.";
     private const string OriginalFailureKey = "keyload.execution-command-work-binding-failure";
 
-    internal static async Task BindBeforePublicationAsync(DatabaseEngine database,
-        TimeProvider clock, DecodedGrainRequest request, GrainOperationReply reply,
+    internal static Task BindBeforePublicationAsync(DatabaseEngine database,
+        DecodedGrainRequest request, GrainOperationReply reply,
         ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         if (reply.Error is not null)
         {
-            return;
+            return Task.CompletedTask;
         }
         try
         {
             work.RequireResourceLifetimeBinding(binding);
             var proof = RequireProof(request, reply);
-            await BindCurrentAsync(database, clock, request, proof, proof.Lifetimes,
+            BindCurrent(database, request, proof, proof.Lifetimes,
                 work, binding, token);
             work.Check();
+            return Task.CompletedTask;
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -55,7 +56,7 @@ internal static class CommandResultWorkBinding
         }
     }
 
-    private static async Task BindCurrentAsync(DatabaseEngine database, TimeProvider clock,
+    private static void BindCurrent(DatabaseEngine database,
         DecodedGrainRequest request, CommandWorkProof proof,
         ImmutableArray<ResourceLifetime> lifetimes, ReadExecutionBudget work,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
@@ -63,9 +64,8 @@ internal static class CommandResultWorkBinding
         work.RequireResourceLifetimeBinding(binding);
         token.ThrowIfCancellationRequested();
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
-        var principal = GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
-        database.BindAuthenticatedCommandResultLifetimes(principal.Id, proof.PolicyEpoch,
-            lifetimes, work, binding);
+        database.BindAuthenticatedCommandResultLifetimes(proof.PolicyEpoch,
+            lifetimes, work, binding, view => GrainRequestAuthority.ReloadForRequest(database, view, request.Envelope));
     }
 
     internal static CommandWorkProof RequireProof(DecodedGrainRequest request, GrainOperationReply reply)

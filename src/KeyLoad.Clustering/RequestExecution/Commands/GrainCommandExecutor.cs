@@ -64,7 +64,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             {
                 WorkProof = CommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
             };
-            await CommandResultWorkBinding.BindBeforePublicationAsync(database, clock,
+            await CommandResultWorkBinding.BindBeforePublicationAsync(database,
                 request, reply, budget, work, operationToken);
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {

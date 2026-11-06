@@ -32,6 +32,31 @@ internal static class GrainRequestAuthority
         return principal;
     }
 
+    internal static PrincipalRecord ReloadForRequest(DatabaseEngine database, IKeyValueView view,
+        GrainRequestEnvelope envelope)
+    {
+        try
+        {
+            var protectedJournal = envelope.Purpose == GrainContracts.RuntimeJournalPurpose
+                && envelope.PrincipalId == RuntimeJournalIdentity.ProtectedPrincipalId;
+            if (!protectedJournal)
+            {
+                RuntimeJournalIdentity.RequirePublicCredential(envelope.PrincipalId!);
+            }
+            var principal = database.Principal(view, envelope.PrincipalId!, database.EvaluationClock.GetUtcNow());
+            if (protectedJournal)
+            {
+                RuntimeJournalIdentity.RequireProtected(principal);
+            }
+            return principal;
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
+    }
+
     internal static PrincipalRecord ReloadDocumentPrincipal(DatabaseEngine database, IKeyValueView view, string principalId)
     {
         try

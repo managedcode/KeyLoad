@@ -111,6 +111,8 @@ The [competitor source review](docs/implementation/competitor-performance-review
 
 Full product functional coverage remains **unqualified**. Load tests and benchmarks contribute no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
+The [document and key-value review](docs/implementation/document-keyvalue-performance-review.md) records the current request-path repairs, original MongoDB/Redis comparison artifacts and their remaining qualification.
+
 Complete Linux cluster, recovery, fault and coverage qualification remains open; see the [current status](docs/implementation/status.json).
 
 [Status](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/implementation/comparative-benchmarks.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)

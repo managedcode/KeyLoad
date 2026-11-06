@@ -60,7 +60,7 @@ public static class StorageOperationBatchApply
         for (var index = 0; index < verified.Length; index++)
         {
             verified[index] = engine.OwnCommand(operations[index]);
-            if (engine.IsSiloLocalOperation(verified[index]))
+            if (engine.IsOwnedSiloLocalOperation(verified[index]))
             {
                 throw Errors.Fail(ErrorCode.Validation, StorageOperationApply.InvalidStorageOperationScope);
             }

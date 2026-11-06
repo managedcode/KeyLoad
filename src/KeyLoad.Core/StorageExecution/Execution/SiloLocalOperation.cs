@@ -14,12 +14,17 @@ public static class SiloLocalOperation
     public static bool IsSiloLocalOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var verified = engine.OwnCommand(operation);
-        return verified.Value!.Kind switch
+        return engine.IsOwnedSiloLocalOperation(engine.OwnCommand(operation));
+    }
+
+    /// <summary>Classifies a command already independently owned by this execution boundary.</summary>
+    internal static bool IsOwnedSiloLocalOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation)
+    {
+        return operation.Value!.Kind switch
         {
             OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase => true,
-            OperationKind.ConfigureProjectionConsumer => IsSiloLocalConsumer(OperationProtocol.Payload<ConfigureProjectionConsumerRequest>(verified).Definition),
-            OperationKind.CommitProjectionBatch or OperationKind.ReleaseProjectionConsumer => engine.Store.Read(view => engine.IsSiloLocalProjection(view, verified)),
+            OperationKind.ConfigureProjectionConsumer => IsSiloLocalConsumer(OperationProtocol.Payload<ConfigureProjectionConsumerRequest>(operation).Definition),
+            OperationKind.CommitProjectionBatch or OperationKind.ReleaseProjectionConsumer => engine.Store.Read(view => engine.IsSiloLocalProjection(view, operation)),
             _ => false
         };
     }

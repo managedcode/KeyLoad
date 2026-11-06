@@ -37,9 +37,7 @@ public static class ResourceEffectCapture
                 engine.ObserveCompositionPrefix(preparation, principal, operation, preparationPosition!.Value, preserveBudgetFailure);
             }
 
-            var admission = new ResourceEffectAdmission(scope.Capture(), null, null);
-            scope.Activate(admission);
-            return admission;
+            return new ResourceEffectAdmission(scope.Capture(), null, null);
         }
         catch (KeyLoadException error) when (!preserveBudgetFailure || error.Code != ErrorCode.BudgetExceeded)
         {

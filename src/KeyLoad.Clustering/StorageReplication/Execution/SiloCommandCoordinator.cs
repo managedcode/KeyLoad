@@ -55,7 +55,7 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     private Task<Result<TResult>> SubmitOperationAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return database.IsSiloLocalOperation(operation)
+        return database.IsOwnedSiloLocalOperation(operation)
             ? ApplyLocalAsync<TResult>(operation, cancellationToken)
             : Owner.ApplyAsync<TResult>(operation, cancellationToken);
     }

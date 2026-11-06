@@ -20,9 +20,10 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
         try
         {
             var request = DecodeRequest(envelope);
-            if (request.Envelope.ReadKind == GrainReadKind.Document)
+            if (request.Envelope.ReadKind is GrainReadKind.Document or GrainReadKind.Query or GrainReadKind.AstQuery
+                || request.Envelope.CommandKind == OperationKind.Batch)
             {
-                return await ExecuteDocumentAsync(request, cancellationToken);
+                return await ExecuteUnaryAsync(request, cancellationToken);
             }
             return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
                 token => CreateStream(request, envelope, token), request.Envelope.RequestId, new CqrsStreamPurpose(() => request), cancellationToken);
@@ -69,7 +70,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
             () => owner.Acquire(requestId, RequestWorkKind.RequestProducer), token);
     }
 
-    private async Task<GrainOperationReply> ExecuteDocumentAsync(DecodedGrainRequest request, CancellationToken token)
+    private async Task<GrainOperationReply> ExecuteUnaryAsync(DecodedGrainRequest request, CancellationToken token)
     {
         var owner = borrowWorkOwner();
         var purpose = new CqrsStreamPurpose();

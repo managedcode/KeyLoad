@@ -24,15 +24,11 @@ internal sealed class ResourceEffectBindingScope
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }
-        if (observed.Contains(lifetime))
-        {
-            return;
-        }
         observed.Add(lifetime);
     }
 
     internal ImmutableArray<ResourceLifetime> Capture()
-        => observed.OrderBy(value => value.TenantId, StringComparer.Ordinal)
+        => observed.Count <= 1 ? [.. observed] : observed.OrderBy(value => value.TenantId, StringComparer.Ordinal)
             .ThenBy(value => value.DatabaseId, StringComparer.Ordinal)
             .ThenBy(value => value.ResourceName, StringComparer.Ordinal)
             .ThenBy(value => value.Incarnation.Value, StringComparer.Ordinal).ToImmutableArray();
@@ -72,8 +68,7 @@ internal sealed class ResourceEffectBindingScope
 
     internal void RequireComplete()
     {
-        if (admitted is not null && !OrleansSerialization.Serialize(Capture()).AsSpan()
-            .SequenceEqual(OrleansSerialization.Serialize(admitted.Bindings)))
+        if (admitted is not null && !Capture().AsSpan().SequenceEqual(admitted.Bindings.AsSpan()))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }
@@ -81,7 +76,7 @@ internal sealed class ResourceEffectBindingScope
 
     internal void Activate(ResourceEffectAdmission value)
     {
-        if (!OrleansSerialization.Serialize(Capture()).AsSpan().SequenceEqual(OrleansSerialization.Serialize(value.Bindings)))
+        if (!Capture().AsSpan().SequenceEqual(value.Bindings.AsSpan()))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }
