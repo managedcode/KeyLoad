@@ -11,7 +11,7 @@ internal static class AnalyticsBoundCoreFlow
         => AnalyticsBoundCoreOwner.RunAsync(HealthyAsync, token);
 
     internal static Task HealthyAsync(TestDatabase fixture, RequestWorkOwner owner, CancellationToken token)
-        => AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
+        => AnalyticsBoundCoreOwner.LeaseAsync(owner, async (lease, ledger, work) =>
             await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
             {
                 var expected = new AnalyticsEventsPage([new(D.First, D.From.AddMinutes(1),

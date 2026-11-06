@@ -15,6 +15,9 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     }
     private readonly long storePosition;
     private readonly long appliedIndex;
+    private readonly long currentAppliedIndex;
+    private readonly PartitionRef? currentPartition;
+    private readonly ISet<PartitionRef>? readPartitions;
     private readonly Dictionary<PartitionRef, byte[]> candidates = [];
     private readonly Dictionary<(string Tenant, string Database, string Resource), bool> resourceModes = [];
     private bool? transactionalData;
@@ -22,11 +25,15 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     private readonly record struct Candidate(PartitionRef Partition, byte[] Key);
 
     internal AtomicPartitionRosterTransaction(IAtomicTransaction inner,
-        long storePosition, long appliedIndex)
+        long storePosition, long appliedIndex, long currentAppliedIndex, PartitionRef? currentPartition,
+        ISet<PartitionRef>? readPartitions = null)
     {
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         EffectAdmission = new();
         this.storePosition = storePosition;
+        this.currentAppliedIndex = currentAppliedIndex;
+        this.currentPartition = currentPartition;
+        this.readPartitions = readPartitions;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
             ? appliedIndex : AtomicPartitionRosterProtocol.NoCanonicalSequence;
     }
@@ -97,13 +104,19 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     void IResourceEffectCompletion.RequireCompleteResourceEffects() => EffectAdmission.RequireComplete();
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
-        => AtomicPartitionRosterPreparation.Prepare(inner, storePosition, appliedIndex, prepare);
+        => AtomicPartitionRosterPreparation.Prepare(inner, storePosition, appliedIndex, currentAppliedIndex, currentPartition, readPartitions, prepare);
 
     void IResourceEffectObservation.ObserveLifetime(ResourceLifetime lifetime)
         => EffectAdmission.ObserveLifetime(lifetime);
 
     void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetime lifetime)
-        => EffectAdmission.Observe(partition, lifetime);
+    {
+        EffectAdmission.Observe(partition, lifetime);
+        if (partition != currentPartition)
+        {
+            readPartitions?.Add(partition);
+        }
+    }
 
     internal void PersistCandidates()
     {
@@ -112,10 +125,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             return;
         }
 
-        var appliedBytes = inner.ReadOwnedValue(KeySpace.AppliedBytes);
-        var currentAppliedIndex = appliedBytes is null
-            ? AtomicPartitionRosterProtocol.NoCanonicalSequence
-            : OrleansSerialization.Deserialize<long>(appliedBytes);
         foreach (var candidate in candidates)
         {
             var existingBytes = inner.ReadOwnedValue(candidate.Value);
@@ -123,7 +132,8 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             if (existing is not null)
             {
                 AtomicPartitionRosterEntryValidation.Validate(existing, candidate.Key, storePosition,
-                    currentAppliedIndex);
+                    candidate.Key == currentPartition ? currentAppliedIndex
+                        : StorageOperationApply.ReadCanonicalSequence(inner, candidate.Key));
                 continue;
             }
 
@@ -132,9 +142,11 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
                 throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry);
             }
 
-            var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
+            var firstSeenAppliedIndex = candidate.Key == currentPartition ? appliedIndex
+                : AtomicPartitionRosterProtocol.NoCanonicalSequence;
+            var firstSeenStorePosition = firstSeenAppliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
                 ? AtomicPartitionRosterProtocol.NoStorePosition : storePosition;
-            var entry = new AtomicPartitionCatalogEntry(candidate.Key, firstSeenStorePosition, appliedIndex);
+            var entry = new AtomicPartitionCatalogEntry(candidate.Key, firstSeenStorePosition, firstSeenAppliedIndex);
             inner.Put(candidate.Value, OrleansSerialization.Serialize(entry));
         }
     }

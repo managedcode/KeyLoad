@@ -46,7 +46,7 @@ internal static class SqlTypedInsertHot
         var at = database.EvaluationClock.GetUtcNow();
         var placement = store.Read(view => database.ReadPlacementWitness(view, partition));
         var expectedToken = new CommitToken(placement.Incarnation, partition.AtomicPartitionId,
-            checked(database.LastApplied + NextCommit));
+            checked(ExpectedCanonicalCommit.Applied(database, partition) + NextCommit));
         var result = SqlTypedInsertLiteral.Apply(database, command, at);
         return new(command, at, result, SqlTypedInsertAssertions.OutcomeBytes(store, partition, command.CommandId), expectedToken);
     }

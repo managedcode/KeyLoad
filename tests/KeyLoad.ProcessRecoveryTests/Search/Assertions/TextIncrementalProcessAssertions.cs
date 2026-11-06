@@ -71,7 +71,7 @@ internal static class TextIncrementalProcessAssertions
         await Assert.That(verified.Complete.IndexSha256).IsEqualTo(healthy.Complete.IndexSha256);
         await Assert.That(verified.Complete.ThroughSequence).IsEqualTo(healthy.Complete.ThroughSequence);
         await Assert.That(verified.AppliedPosition).IsEqualTo(healthy.AppliedPosition);
-        await Assert.That(verified.StorePosition).IsEqualTo(healthy.StorePosition);
+        await Assert.That(verified.StorePosition).IsGreaterThanOrEqualTo(healthy.StorePosition);
         await Assert.That(verified.Canonical.RecordCount).IsEqualTo(healthy.Canonical.RecordCount);
         await Assert.That(verified.Canonical.Sha256.SequenceEqual(healthy.Canonical.Sha256)).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(verified.OriginalReceipt).SequenceEqual(OrleansSerialization.Serialize(healthy.OriginalReceipt))).IsTrue();

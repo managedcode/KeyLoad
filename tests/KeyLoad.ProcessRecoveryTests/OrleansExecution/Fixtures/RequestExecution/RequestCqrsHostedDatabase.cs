@@ -20,8 +20,8 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         RequestCqrsHostedProtocol.Domain, RequestCqrsHostedProtocol.Partition);
     internal ICommitCoordinator Coordinator => owner.Coordinator;
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(StorageCommandKeys.Applied(Partition)) is { } bytes
+            ? OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes).Position : default(long), Store.Position));
 
     internal Result<object> Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
         Guid? id = null, DateTimeOffset? time = null, CancellationToken cancellationToken = default) where T : notnull

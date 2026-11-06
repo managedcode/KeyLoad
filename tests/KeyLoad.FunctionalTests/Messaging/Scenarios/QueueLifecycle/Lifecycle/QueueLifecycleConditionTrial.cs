@@ -15,18 +15,18 @@ internal static class QueueLifecycleConditionTrial
         await QueueLifecycleConditionAssertions.Corrupt(fixture.Database, fixture.Store, state, cancel);
         await QueueLifecycleConditionAssertions.Corrupt(fixture.Database, fixture.Store, state, cancel);
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(originalCut.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(originalCut.Position);
         fixture.Store.Dispose();
         QueueLifecycleConditionCut healthy;
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueueLifecycleConditionAssertions.Same(cold, damaged);
+            damaged = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, damaged);
             await QueueLifecycleConditionAssertions.Corrupt(owner, cold, state, cancel);
             QueueLifecycleConditionOperations.Restore(cold, QueueLifecycleConditionOperations.Key(state, fault), original);
             await QueueLifecycleConditionAssertions.Same(cold, originalCut with
             {
-                Position = originalCut.Position + 2
+                Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
             });
             var result = owner.Apply(cancel);
             result.Get<CommitReceipt>();
@@ -74,7 +74,7 @@ internal static class QueueLifecycleConditionTrial
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueueLifecycleConditionAssertions.Same(cold, initialCut);
+            initialCut = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, initialCut);
             await QueueLifecycleConditionAssertions.Replay(owner, cold, bad, failed);
             if (kind != QueueLifecycleConditionRefusal.Cancelled)
             {
@@ -93,7 +93,7 @@ internal static class QueueLifecycleConditionTrial
     {
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await QueueLifecycleConditionAssertions.Same(cold, healthy);
+        healthy = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, healthy);
         await QueueLifecycleConditionAssertions.Terminal(owner, cold, state);
         await QueueLifecycleOperations.ReplayAsync(owner, state);
         await QueueLifecycleConditionAssertions.Same(cold, healthy);

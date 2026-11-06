@@ -38,7 +38,7 @@ internal static class CompetingInboxSeed
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await ready.Task.WaitAsync(token);
-            state.EffectPosition = fixture.Database.LastApplied + 1;
+            state.EffectPosition = ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Partition) + 1;
         }, failures);
         release.TrySetResult();
         state.Results = new Result<object>[tasks.Length];

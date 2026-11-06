@@ -19,6 +19,7 @@ internal static class AggregateSnapshotRaceCold
             store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             fixture.Store = store;
             fixture.Database = fixture.Harness.CreateConfiguredDatabase(store);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             await ServerFailureObserver.ObserveAsync(() => AggregateSnapshotRaceValues.ConservedAsync(fixture, image, identity, position), failures);
             await ServerFailureObserver.ObserveAsync(() => AggregateSnapshotRaceFlow.ObserveAsync(fixture,
                 () => AggregateSnapshotRaceModel.RequireAsync(fixture, true)), failures);

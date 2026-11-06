@@ -18,7 +18,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
                 db, OperationKind.ReceiveSubscription, request, request.RequestId, token));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
                 KeySpace.PartitionOutcome(request.Subscription.Source.Partition, "root", request.RequestId)))).IsNull();
         }
@@ -35,7 +35,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(result, original);
         await Assert.That(OrleansSerialization.Serialize(result).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     internal static async Task SettledAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,

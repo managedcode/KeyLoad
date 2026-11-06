@@ -42,7 +42,7 @@ internal static class RemoteTransferRepairArithmeticFlow
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         fixture.Reopen();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync((ZoneTreeStore)fixture.Store, faultImage, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync((ZoneTreeStore)fixture.Store, faultImage, position, identity);
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         fixture.Store.Commit((tx, _) => { tx.Put(key, original.IntentBytes); return true; });
         await RemoteTransferRepairArithmeticAssertions.RestoredAsync(fixture, original, advancedHistory);
@@ -54,7 +54,7 @@ internal static class RemoteTransferRepairArithmeticFlow
         position = fixture.Store.Position;
         identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Reopen();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync((ZoneTreeStore)fixture.Store, settled, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync((ZoneTreeStore)fixture.Store, settled, position, identity);
         await RemoteTransferRepairArithmeticAssertions.SettledAsync(fixture, original, completed, advancedHistory);
         await RemoteTransferRepairArithmeticAssertions.HealthyAsync(fixture);
         await RemoteTransferRepairArithmeticAssertions.SettledAsync(fixture, original, completed, advancedHistory);

@@ -52,7 +52,7 @@ internal static class SubscriptionGroupProgressAuthorityFlow
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, image, position, identity);
         await SubscriptionGroupProgressAuthorityAssertions.RefuseAsync(db, first, fresh, request, emptyRequest, ack, token);
         first.Commit((tx, _) =>
         {

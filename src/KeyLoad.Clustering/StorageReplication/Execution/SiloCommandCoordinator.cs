@@ -46,7 +46,8 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     {
         var cut = await Owner.ReadCutAsync(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        if (database.Store.Identity.Incarnation != cut.Incarnation || database.LastApplied < cut.Position)
+        if (database.Store.Identity.Incarnation != cut.Incarnation || !database.Store.Read(view => cut.Partitions.All(part =>
+                StorageOperationApply.ReadCanonicalSequence(view, part.Partition) >= part.Position)))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.RecoveryRequired);
         }
@@ -55,8 +56,13 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     private Task<Result<TResult>> SubmitOperationAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return database.IsOwnedSiloLocalOperation(operation)
-            ? ApplyLocalAsync<TResult>(operation, cancellationToken)
+        if (database.IsOwnedSiloLocalOperation(operation))
+        {
+            return ApplyLocalAsync<TResult>(operation, cancellationToken);
+        }
+        return StorageCommandKeys.PartitionOf(operation) is { } partition
+            ? grains.GetGrain<IPartitionCommitGrain>(PartitionCommitGrainIdentity.For(database.Store.Identity.Incarnation, partition))
+                .ApplyAsync<TResult>(database.Store.Identity.Incarnation, partition, operation, cancellationToken)
             : Owner.ApplyAsync<TResult>(operation, cancellationToken);
     }
 

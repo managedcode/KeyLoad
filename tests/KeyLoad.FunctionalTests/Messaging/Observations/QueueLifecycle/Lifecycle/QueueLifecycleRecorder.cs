@@ -35,7 +35,7 @@ internal sealed class QueueLifecycleRecorder(DatabaseEngine database, QueueLaneR
         var store = owner.Store;
         var placement = owner.ReadAtomicPartitionPlacement(Subject, lane.Partition);
         var token = new CommitToken(placement.Incarnation, lane.Partition.AtomicPartitionId,
-            checked(owner.LastApplied + 1));
+            checked(ExpectedCanonicalCommit.Applied(owner, lane.Partition) + 1));
         var before = store.Read(view =>
         {
             var page = view.Scan(KeySpace.Partition(MetadataFamily, lane.Partition, lane.Queue), MetadataReadBound);

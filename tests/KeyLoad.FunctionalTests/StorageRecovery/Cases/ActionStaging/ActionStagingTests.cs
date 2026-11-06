@@ -21,6 +21,7 @@ internal sealed class ActionStagingTests
         => PreparationOwnershipOwner.RunAsync(async owner =>
         {
             var position = owner.Store.Position;
+            var publications = owner.Publication.Count;
             var observed = owner.Store.Commit((transaction, _) =>
             {
                 var staging = (IAtomicActionStaging)transaction;
@@ -50,7 +51,9 @@ internal sealed class ActionStagingTests
             await Assert.That(observed.Child.First).IsEquivalentTo(FirstValue, CollectionOrdering.Matching);
             await Assert.That(observed.Child.Second).IsEquivalentTo(SecondValue, CollectionOrdering.Matching);
             await Assert.That(observed.Child.Child).IsNull();
-            await Assert.That(owner.Store.Position).IsEqualTo(position + OneCommit);
+            await Assert.That(owner.Publication.Count).IsEqualTo(publications + OneCommit);
+            await Assert.That(owner.Store.Position).IsEqualTo(owner.Publication.Position);
+            await Assert.That(owner.Store.Position).IsGreaterThan(position);
             await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(FirstKey))).IsEquivalentTo(FirstValue, CollectionOrdering.Matching);
             await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(SecondKey))).IsEquivalentTo(SecondValue, CollectionOrdering.Matching);
             await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(DiscardedKey))).IsNull();

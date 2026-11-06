@@ -20,7 +20,7 @@ internal static class QueueDeadlineCapacitySeed
             MaxDeadLetterBytes = fault == QueueDeadlineCapacityFault.FullDeadLetterMaxPark ? InsufficientDeadLetterBytes : null
         });
         var lane = new QueueLaneRef(fixture.Partition, Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var due = start.AddSeconds(LeaseSeconds);
         var input = new EnqueueMessage(Queue, Message, QueueDeadlineCapacityProtocol.Json, QueueDeadlineCapacityProtocol.Json,
             NotBefore: kind == QueueDeadlineKind.PromoteScheduled ? due : null,

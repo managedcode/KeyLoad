@@ -21,7 +21,7 @@ internal static class QueueLifecycleHistoryAssertions
             var identity = OrleansSerialization.Serialize(store.Identity);
             var actual = database.Apply(observation.Operation);
             await ResultAsync(database, lane, observation, actual);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
     }
 

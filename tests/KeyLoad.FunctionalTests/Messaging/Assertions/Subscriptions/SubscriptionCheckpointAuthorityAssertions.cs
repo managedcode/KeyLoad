@@ -57,7 +57,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
                 db, OperationKind.SubscriptionDelivery, command, command.CommandId, token));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         }
     }
 
@@ -78,7 +78,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
         await ReplayResultAssertions.Same<CommitReceipt>(result, original);
         await Assert.That(OrleansSerialization.Serialize(result).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     internal static async Task SettledClaimAsync(DatabaseEngine db, ZoneTreeStore store,
@@ -97,7 +97,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
         await RefusalAsync(result);
         var after = store.Read(view => view.ReadOwnedValue(key));
         await Assert.That(after is not null && after.AsSpan().SequenceEqual(saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     internal static async Task StaleAsync(DatabaseEngine db, ZoneTreeStore store,
@@ -117,7 +117,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
         await RefusalAsync(replay);
         await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     private static async Task RefusalAsync(Result<object> result)

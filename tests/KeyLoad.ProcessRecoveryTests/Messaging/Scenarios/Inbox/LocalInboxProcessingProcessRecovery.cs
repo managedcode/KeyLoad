@@ -81,7 +81,7 @@ internal static class LocalInboxProcessingProcessRecovery
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await LocalInboxProcessingRecoveryImage.ExactAsync(store.Identity, identity);
-                await Assert.That(store.Position).IsEqualTo(finalPosition);
+                await Assert.That(store.Position).IsGreaterThanOrEqualTo(finalPosition);
                 await Assert.That(LocalInboxProcessingRecoveryImage.All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
                 await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 var database = TargetInboxRecoveryDatabase.Open(store);

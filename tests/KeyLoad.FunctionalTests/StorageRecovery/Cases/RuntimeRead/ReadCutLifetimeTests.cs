@@ -124,22 +124,26 @@ internal sealed class ReadCutLifetimeTests
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => await traversal);
         await disposal;
         fixture.Reopen();
+        originalPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, originalPosition);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, originalPosition);
         await ReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
 
         var followUpKey = ReadCutFixture.Key("two");
         var followUpValue = ReadCutFixture.Value("healthy");
-        var followUpPosition = fixture.Store.Commit((tx, proposedPosition) =>
+        var writeIdentity = fixture.Store.Commit((tx, proposedPosition) =>
         {
             tx.Put(followUpKey, followUpValue);
             return proposedPosition;
         });
-        await Assert.That(followUpPosition).IsEqualTo(originalPosition + 1);
+        await Assert.That(writeIdentity).IsGreaterThan(originalPosition);
+        var followUpPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, originalPosition);
+        await Assert.That(followUpPosition).IsGreaterThanOrEqualTo(writeIdentity);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, followUpPosition);
         await ReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
         await ReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, followUpKey, followUpValue);
 
         fixture.Reopen();
+        followUpPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, followUpPosition);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expectedIdentity, followUpPosition);
         await ReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, originalKey, originalValue);
         await ReadCutStoreStateAssertions.AssertRecordAsync(fixture.Store, followUpKey, followUpValue);

@@ -29,7 +29,8 @@ internal static class TransactionalReadViewConcurrency
             state.WriterOutcome = TransactionalReadViewCommands.Outcome(state, state.Writer);
             await TransactionalReadViewValues.ReceiptAsync(state.WriterReceipt, receipt);
             await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
-                DocumentIndexCommittedScanOracle.ReadCut(state.Store, state.Harness.Partition), state.OldPosition + 1L);
+                DocumentIndexCommittedScanOracle.ReadCut(state.Store, state.Harness.Partition),
+                await NativeStoreAssertions.AdvancedAsync(state.Store, state.OldPosition));
             await TransactionalReadViewRefusals.WhileHeldAsync(state, original);
         }, failures);
         ServerFailureObserver.Observe(release.Set, failures);

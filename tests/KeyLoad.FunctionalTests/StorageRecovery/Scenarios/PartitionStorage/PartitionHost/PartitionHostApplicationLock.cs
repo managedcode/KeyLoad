@@ -19,7 +19,7 @@ internal static class PartitionHostApplicationLock
         await Assert.That(original.IsFaulted).IsTrue();
         await Assert.That(ReferenceEquals(original, session.Owner.OpenAsync(session.Context))).IsTrue();
         await Assert.That(ReferenceEquals(original, session.Owner.Opening)).IsTrue();
-        Assert.ThrowsExactly<InvalidOperationException>(() => session.Owner.Borrow());
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = session.Owner.Session.Host);
         await Assert.That(session.Owner.CanReleaseRoot).IsTrue();
         var entries = Directory.EnumerateFileSystemEntries(directory).ToArray();
         await Assert.That(entries.Length).IsEqualTo(PartitionHostApplicationProtocol.OneFailure);

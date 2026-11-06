@@ -68,7 +68,7 @@ internal static class QueueGraphIdentityAssertions
 
     internal static async Task HealthyAsync(QueueGraphIdentityState state, DatabaseEngine engine, ZoneTreeStore store)
     {
-        var nextPosition = checked(engine.LastApplied + 1);
+        var nextPosition = checked(ExpectedCanonicalCommit.Applied(engine, state.Fixture.Partition) + 1);
         var receipt = engine.Apply(state.Healthy).Get<CommitReceipt>();
         var expected = new CommitReceipt(state.Healthy.CommandId, new(store.Identity.Incarnation, state.Fixture.Partition.AtomicPartitionId,
                 nextPosition), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker, 1),

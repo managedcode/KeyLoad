@@ -57,7 +57,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         };
         var request = new CommandRequest(id, owner.Source.Partition,
             [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreTestOperations.Revisions((D.First, revision)))]);
-        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         return owner.Database.CreateCommand(OperationKind.Batch, id, D.Root, owner.Database.EvaluationClock.GetUtcNow(),
             request, work);
     }
@@ -76,14 +76,15 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         var business = A.BusinessImage(fixture);
         var original = Issue(fixture, fixture.Foreign, 2, token);
         var index = owner.ReadCanonicalCut().AppliedPosition + 1;
+        var applied = owner.Database.LastApplied;
         var position = owner.Store.Position;
         var result = owner.Submit(original);
         await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.OwnershipLost, ChangedLifetime)), result);
         await Assert.That(result.Value).IsNull();
         await Assert.That(A.BusinessImage(fixture).SequenceEqual(business, StringComparer.Ordinal)).IsTrue();
         await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(index);
-        await Assert.That(owner.Database.LastApplied).IsEqualTo(index);
-        await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
+        await Assert.That(owner.Database.LastApplied).IsEqualTo(applied + 1);
+        await Assert.That(owner.Store.Position).IsGreaterThan(position);
         // Failed command metadata is a legitimate execution commit, not a business mutation.
         var key = OutcomeStoreOracle.PartitionKey(owner.Source.Partition, D.Root, original.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;

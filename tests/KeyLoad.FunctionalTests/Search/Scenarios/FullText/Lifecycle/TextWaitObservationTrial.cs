@@ -68,7 +68,7 @@ internal static class TextWaitObservationTrial
                 position = database.Store.Position;
             }
             var expected = new CommitToken(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId,
-                database.Database.LastApplied);
+                ExpectedCanonicalCommit.Applied(database.Database, database.Partition));
             var result = await search.WaitForIndexAsync(principal, request, token);
             await Assert.That(result.SchemaVersion).IsEqualTo(1L);
             await Assert.That(result.PolicyEpoch).IsEqualTo(future is null ? 2L : 1L);

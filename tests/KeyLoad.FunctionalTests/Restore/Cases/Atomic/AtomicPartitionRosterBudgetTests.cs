@@ -26,7 +26,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
         }, FirstRevision, SeedJson, new RowAccess(), fixture.Database.EvaluationClock.GetUtcNow());
         fixture.Store.Commit((transaction, position) =>
         {
-            var bounded = new AtomicPartitionRosterTransaction(transaction, position, NoAppliedIndex);
+            var bounded = new AtomicPartitionRosterTransaction(transaction, position, NoAppliedIndex, NoAppliedIndex, null);
             bounded.Put(KeySpace.Partition(PartitionRecordFamilies.Document, first,
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), [FirstStagedValue]);
             bounded.Reset();

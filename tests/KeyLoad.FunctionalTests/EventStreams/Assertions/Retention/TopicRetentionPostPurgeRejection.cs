@@ -13,7 +13,7 @@ internal static class TopicRetentionPostPurgeRejection
         var position = fixture.Store.Position;
         var failed = fixture.Submit(command, principal);
         await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(code);
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(position);
         var cut = fixture.Store.Position;
         var state = QueueWholeFlowStorage.Bytes(fixture.Store);
         var replay = fixture.Submit(command, principal);

@@ -50,6 +50,7 @@ internal static class PartitionRecordOwnedCutContinuation
         {
             token.ThrowIfCancellationRequested();
             fixture.Reopen();
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
             await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
             await PartitionRecordOwnedCutAssertions.ImageAsync(fixture.Store, image, position, token);
             await PartitionRecordOwnedCutAssertions.RetainedSecondAsync(held, original);

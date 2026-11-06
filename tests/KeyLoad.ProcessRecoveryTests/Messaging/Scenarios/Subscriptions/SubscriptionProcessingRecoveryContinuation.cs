@@ -42,7 +42,7 @@ internal static class SubscriptionProcessingRecoveryContinuation
         store.Dispose();
         using var cold = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution());
         var reopened = TargetInboxRecoveryDatabase.Open(cold);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        _ = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(outcomeKey))!.AsSpan().SequenceEqual(outcome)).IsTrue();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(inboxKey))!.AsSpan().SequenceEqual(inbox)).IsTrue();

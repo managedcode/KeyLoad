@@ -33,5 +33,4 @@ internal static class CrashFixtureValues
     internal const string ItemKey = "item";
     internal const int ItemCount = 3;
     internal const int LeaseSeconds = 300;
-    internal const long InitialCrashPosition = 2;
 }

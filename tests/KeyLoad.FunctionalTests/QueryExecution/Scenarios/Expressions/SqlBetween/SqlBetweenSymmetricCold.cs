@@ -19,6 +19,7 @@ internal static class SqlBetweenSymmetricCold
                     {
                         Incarnation = storeIdentity.Incarnation
                     }, storeIdentity.NodeId, database.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = database.CreateConfiguredDatabase(store);

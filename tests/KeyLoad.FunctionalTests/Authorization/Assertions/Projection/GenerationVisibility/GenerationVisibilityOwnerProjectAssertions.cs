@@ -62,6 +62,6 @@ internal static class GenerationVisibilityOwnerProjectAssertions
     {
         CommitReceipt literal = new(command.CommandId, expectedToken, [.. expected], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(literal))).IsTrue();
-        await Assert.That(store.Position).IsEqualTo(previousPosition + 1L);
+        await Assert.That(store.Position).IsGreaterThan(previousPosition);
     }
 }

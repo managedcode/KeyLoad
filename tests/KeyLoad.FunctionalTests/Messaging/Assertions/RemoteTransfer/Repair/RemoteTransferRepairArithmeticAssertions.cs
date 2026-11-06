@@ -39,7 +39,7 @@ internal static class RemoteTransferRepairArithmeticAssertions
         var command = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferRepairCold.Apply(fixture, original.Complete));
         await Assert.That(command.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(command.Message).IsEqualTo(RemoteTransferRepairProtocol.Invalid);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync((ZoneTreeStore)fixture.Store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync((ZoneTreeStore)fixture.Store, image, position, identity);
         await OriginalsAsync(fixture, original);
     }
 
@@ -93,7 +93,7 @@ internal static class RemoteTransferRepairArithmeticAssertions
             fixture.DestinationQueue, RemoteTransferRepairColdProtocol.Message), new MessageInspection(
                 new(RemoteTransferRepairColdProtocol.Message, MessageState.Acked, 1, 3L, 1L, null, null, LeaseVersion: 1L), null, null));
         await RemoteTransferAttemptCold.AccountingAsync(fixture, original.Transfer.TransferId, advancedHistory ? 2L : 1L);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync((ZoneTreeStore)fixture.Store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync((ZoneTreeStore)fixture.Store, cut, position, identity);
     }
 
     private static async Task OriginalsAsync(RemoteTransferDatabase fixture, RemoteTransferRepairArithmeticOriginal original)

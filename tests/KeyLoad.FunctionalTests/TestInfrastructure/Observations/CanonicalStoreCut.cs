@@ -5,7 +5,7 @@ internal sealed record CanonicalStoreCut(byte[] Identity, long Position, long Ap
 {
     internal static CanonicalStoreCut Read(TestDatabase database) => database.Store.Read(view =>
         new CanonicalStoreCut(OrleansSerialization.Serialize(database.Store.Identity), database.Store.Position,
-            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : 0L,
+            view.ReadOwnedValue(StorageCommandKeys.Applied(database.Partition)) is { } bytes ? OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes).Position : 0L,
             CanonicalStoreImage.Bytes(view)));
 
     internal async Task RequireAsync(CanonicalStoreCut actual)

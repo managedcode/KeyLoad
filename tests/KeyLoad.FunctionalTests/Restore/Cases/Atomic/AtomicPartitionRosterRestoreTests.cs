@@ -22,13 +22,14 @@ internal sealed class AtomicPartitionRosterRestoreTests
             var operation = AtomicPartitionRosterRestoreFixture.Operation(fixture.Database, AtomicPartitionRosterRestoreFixture.NewId);
             var result = newApplied == NoApplied
                 ? fixture.Database.Apply(operation)
-                : fixture.Database.ApplyStorageOperation(operation, checked(fixture.Database.LastApplied + 1),
+                : fixture.Database.ApplyStorageOperation(operation, checked(ExpectedCanonicalCommit.Applied(fixture.Database, AtomicPartitionRosterFixture.Source) + 1),
                     TestContext.Current!.Execution.CancellationToken).Result;
             await Assert.That(Errors.Code(result.Problem).Value).IsNull();
             var position = fixture.Target.Position;
             await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(operation), result);
             await Assert.That(fixture.Target.Position).IsEqualTo(position);
             fixture.Reopen();
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Target, position);
             await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(operation), result);
             await Assert.That(fixture.Target.Position).IsEqualTo(position);
             await AtomicPartitionRosterRestoreAssertions.LiteralDocumentAsync(fixture, AtomicPartitionRosterRestoreFixture.NewId);

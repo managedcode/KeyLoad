@@ -49,7 +49,7 @@ internal sealed class ConfiguredVectorProfileSchemaTests
 
         await Assert.That(original.Problem?.Detail).IsEqualTo(ExpectedDetail(failure));
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
-        await Assert.That(database.Store.Position).IsEqualTo(beforePosition + 1);
+        await Assert.That(database.Store.Position).IsGreaterThan(beforePosition);
         await Assert.That(ConfiguredVectorProfileFlow.StateBytes(database, id, global: true)).IsEquivalentTo(state, CollectionOrdering.Matching);
         var key = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, Collection);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))).IsNull();

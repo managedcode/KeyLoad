@@ -27,14 +27,8 @@ internal static class AnnPublicWholeFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var request = AnnMaintenanceTestData.Pin(database);
-                var settings = new Dictionary<string, string?>
-                {
-                    [ExactThreshold] = threshold.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                    [SearchBreadth] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                    [EfSearch] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                };
                 await using var runtime = new AnnMaintenanceTestRuntime(database,
-                    configuration: new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
+                    configuration: Configuration(threshold, breadth));
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var began = await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.Begin);
@@ -44,6 +38,17 @@ internal static class AnnPublicWholeFlow
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    internal static IConfiguration Configuration(int threshold, int breadth)
+    {
+        var settings = new Dictionary<string, string?>
+        {
+            [ExactThreshold] = threshold.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            [SearchBreadth] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            [EfSearch] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        };
+        return new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
     }
 
     internal static ApproximateSearchRequest Request(TestDatabase database, AnnMaintenanceRequest pin)

@@ -14,7 +14,7 @@ internal static class CredentialStatusOutcome
         var entry = database.ReadStoredOutcome(id);
         var operation = entry.PreparedCommand ?? throw new InvalidOperationException(P.Failure);
         await Assert.That(entry.CanonicalSequence).IsEqualTo(expectedIndex);
-        await Assert.That(database.ReadCanonicalCut().AppliedPosition).IsEqualTo(expectedIndex);
+        await Assert.That(NativeStoreAssertions.Applied(database.Store, null)).IsEqualTo(expectedIndex);
         await Assert.That(operation.CommandId).IsEqualTo(id);
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.ConfigureApiKey);
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);

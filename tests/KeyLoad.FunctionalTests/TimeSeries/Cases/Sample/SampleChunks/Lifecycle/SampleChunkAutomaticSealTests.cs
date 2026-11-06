@@ -17,26 +17,28 @@ internal sealed class SampleChunkAutomaticSealTests
             .Select(index => new SampleData(Prefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 SampleChunkCanonicalFixture.Start.AddTicks(index), Value)).ToImmutableArray();
         var beforePosition = fixture.Owner.Store.Position;
-        var beforeApplied = fixture.Owner.Database.LastApplied;
+        var beforeApplied = fixture.Owner.ReadCanonicalCut().AppliedPosition;
         var receipt = fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, samples, SampleChunkCanonicalFixture.Tags));
         var request = fixture.Request with
         {
             Limit = SampleChunkTestData.MaximumRecords + One
         };
+        beforePosition = await NativeStoreAssertions.AdvancedAsync(fixture.Owner.Store, beforePosition);
         var actual = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
         var revision = checked(SampleChunkCanonicalFixture.FirstRevision + samples.Length + One);
         var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until, SampleChunkCanonicalFixture.FirstGeneration, revision,
             samples.Length, null, [.. samples.Select((sample, index) => new SampleRecord(
                 SampleChunkCanonicalFixture.Series, sample, index + One, SampleChunkCanonicalFixture.Tags))],
-            beforePosition + One);
-        await CutAsync(fixture, receipt, actual, beforePosition + One, beforeApplied + One);
+            beforePosition);
+        await CutAsync(fixture, receipt, actual, beforePosition, beforeApplied + One);
         await EqualAsync(expected, actual);
         var correction = fixture.Commit(new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             [SampleChunkCanonicalFixture.Late], SampleChunkCanonicalFixture.Tags));
+        beforePosition = await NativeStoreAssertions.AdvancedAsync(fixture.Owner.Store, beforePosition);
         var corrected = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
-        await CutAsync(fixture, correction, corrected, beforePosition + 2, beforeApplied + 2);
+        await CutAsync(fixture, correction, corrected, beforePosition, beforeApplied + 2);
         var correctedExpected = expected with
         {
             Revision = revision + One,
@@ -44,7 +46,7 @@ internal sealed class SampleChunkAutomaticSealTests
             Records = [.. expected.Records.Append(new SampleRecord(SampleChunkCanonicalFixture.Series,
                 SampleChunkCanonicalFixture.Late, samples.Length + One, SampleChunkCanonicalFixture.Tags))
                 .OrderBy(row => row.Sample.Timestamp.UtcTicks).ThenBy(row => row.Sequence)],
-            CutPosition = beforePosition + 2
+            CutPosition = beforePosition
         };
         await EqualAsync(correctedExpected, corrected);
         await Assert.That(corrected.Generation).IsEqualTo(SampleChunkCanonicalFixture.FirstGeneration);
@@ -52,13 +54,14 @@ internal sealed class SampleChunkAutomaticSealTests
         var raw = fixture.Raw();
         var merge = fixture.Commit(new MergeSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, corrected.Revision));
+        beforePosition = await NativeStoreAssertions.AdvancedAsync(fixture.Owner.Store, beforePosition);
         var merged = fixture.Owner.Database.ReadSampleChunkWindow(SampleChunkCanonicalFixture.Principal, request);
-        await CutAsync(fixture, merge, merged, beforePosition + 3, beforeApplied + 3);
+        await CutAsync(fixture, merge, merged, beforePosition, beforeApplied + 3);
         await EqualAsync(correctedExpected with
         {
             Generation = SampleChunkCanonicalFixture.MergedGeneration,
             Revision = revision + One + One,
-            CutPosition = beforePosition + 3
+            CutPosition = beforePosition
         }, merged);
         await Assert.That(fixture.Raw()).IsEqualTo(raw);
     }
@@ -69,7 +72,7 @@ internal sealed class SampleChunkAutomaticSealTests
         await Assert.That(result.CutPosition).IsEqualTo(physicalPosition);
         await Assert.That(fixture.Owner.Store.Position).IsEqualTo(physicalPosition);
         await Assert.That(receipt.Token.Position).IsEqualTo(appliedPosition);
-        await Assert.That(fixture.Owner.Database.LastApplied).IsEqualTo(appliedPosition);
+        await Assert.That(fixture.Owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(appliedPosition);
     }
 
     private static async Task EqualAsync(SampleChunkWindowResult expected, SampleChunkWindowResult actual)

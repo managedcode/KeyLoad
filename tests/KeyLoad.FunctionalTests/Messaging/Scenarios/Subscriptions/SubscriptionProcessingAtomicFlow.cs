@@ -20,7 +20,7 @@ internal static class SubscriptionProcessingAtomicFlow
             MaxWindow = 3
         });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         var claim = Create(fixture.Database, OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
         var originalClaim = fixture.Database.Apply(claim);
@@ -40,8 +40,9 @@ internal static class SubscriptionProcessingAtomicFlow
         var position = fixture.Store.Position;
         var canonicalPosition = fixture.Database.LastApplied;
         var failure = fixture.Database.Apply(failed);
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
         await SubscriptionProcessingAtomicAssertions.RollbackAsync(fixture.Database, fixture.Store,
-            group, failed, failure, before, position + 1);
+            group, failed, failure, before, position);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(canonicalPosition + 1);
         var failureBytes = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, failed.CommandId);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(fixture.Database, fixture.Store,
@@ -53,7 +54,7 @@ internal static class SubscriptionProcessingAtomicFlow
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, cut, position, identity);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, first, group, failed, failure, failureBytes);
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), originalClaim);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
@@ -87,7 +88,8 @@ internal static class SubscriptionProcessingAtomicFlow
         var oncePosition = store.Position;
         var onceCanonical = db.LastApplied;
         var onceResult = db.Apply(onceOperation);
-        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, onceOperation, beforeOnce, oncePosition + 1);
+        oncePosition = await NativeStoreAssertions.AdvancedAsync(store, oncePosition);
+        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, onceOperation, beforeOnce, oncePosition);
         await Assert.That(db.LastApplied).IsEqualTo(onceCanonical + 1);
         var projected = onceResult.Get<SubscriptionProcessingResult>();
         await Assert.That(projected.AlreadyProcessed).IsTrue();
@@ -131,7 +133,7 @@ internal static class SubscriptionProcessingAtomicFlow
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, cut, position, identity);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(cold, second, group, failed, failure, failureBytes);
         foreach (var receipt in receipts)
         {
@@ -148,7 +150,7 @@ internal static class SubscriptionProcessingAtomicFlow
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(second, group);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(cold, second, group.Source, source);
         await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(cold, second, group,
-            QueueWholeFlowStorage.Clock(second).AddSeconds(1), token);
+            QueueWholeFlowStorage.Clock(second, group.Source.Partition).AddSeconds(1), token);
     }
 
     private static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id, DateTimeOffset time)

@@ -9,7 +9,7 @@ internal static class AnalyticsBoundCoreRefusals
         {
             var principal = new PrincipalRecord(D.Reader, fixture.Partition.TenantId, [], []) { PolicyEpoch = 1 };
             _ = fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
-            await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
+            await AnalyticsBoundCoreOwner.LeaseAsync(owner, async (lease, ledger, work) =>
                 await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                 {
                     var error = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -24,8 +24,8 @@ internal static class AnalyticsBoundCoreRefusals
     internal static Task BindingAsync(CancellationToken token)
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
-            await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-                await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (other, otherLedger, _) =>
+            await AnalyticsBoundCoreOwner.LeaseAsync(owner, async (lease, ledger, work) =>
+                await AnalyticsBoundCoreOwner.LeaseAsync(owner, async (other, otherLedger, _) =>
                     await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                     {
                         Assert.ThrowsExactly<InvalidOperationException>(() =>

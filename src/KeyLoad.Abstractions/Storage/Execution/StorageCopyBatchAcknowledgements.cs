@@ -1,13 +1,17 @@
-namespace KeyLoad.Clustering;
+namespace KeyLoad;
 
 /// <summary>Projects the decisions actually persisted by a copy into the current replication response.</summary>
 public static class StorageCopyBatchAcknowledgements
 {
     /// <summary>Retains full outcomes only for the copy selected to answer the command's caller.</summary>
-    public static StorageCopyBatchAcknowledgement Create(StorageBatchResult result, bool includeOutcome)
+    public static StorageCopyBatchAcknowledgement Create(StorageBatchResult result)
     {
         ArgumentNullException.ThrowIfNull(result) /* KLD0041: The BCL null guard checks this existing StorageBatchResult reference through its object parameter. */;
-        return new(result.Position, [.. result.Applied.Select(Decision)], includeOutcome ? result : null);
+        return new(result.Position, [.. result.Applied.Select(Decision)],
+            result with { Replication = null })
+        {
+            Replication = result.Replication
+        };
     }
 
     internal static StorageCopyCommandAcknowledgement Decision(StorageOperationResult result)

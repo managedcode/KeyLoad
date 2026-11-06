@@ -1,3 +1,5 @@
+using ZoneTree.Transactional;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Compiles staged writes against the owning native transaction snapshot.</summary>
@@ -10,7 +12,10 @@ internal static class ZoneTreeCommitCompilation
         runtime.CurrentOperation.Check();
         runtime.Check();
         var transaction = new ZoneTreeTransaction(runtime);
-        var position = checked(runtime.Position + 1);
+        // The native write identity is known before publication and is covered by its eventual commit timestamp.
+        // It is not a dense counter or a committed read cut.
+        var native = (ITransaction<Memory<byte>, Memory<byte>>)runtime.CurrentOperation.Snapshot.Transaction;
+        var position = native.TransactionId;
         T result;
         try
         {

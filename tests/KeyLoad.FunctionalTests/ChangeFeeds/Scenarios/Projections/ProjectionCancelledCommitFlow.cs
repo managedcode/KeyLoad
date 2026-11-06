@@ -32,7 +32,8 @@ internal static class ProjectionCancelledCommitFlow
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, continued.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, reopenedPosition);
             await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state);
             await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
             var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Consumer));
@@ -51,6 +52,7 @@ internal static class ProjectionCancelledCommitFlow
         ProjectionConsumerIdentityState state, string[] image, long position, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await ProjectionConsumerIdentityAssertions.SameAsync(cold, image, position);
         await ProjectionCancelledCommitAssertions.RefuseAsync(owner, cold, state, token);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(owner, state);

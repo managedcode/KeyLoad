@@ -35,7 +35,7 @@ internal static class BinderFieldLineageAuthority
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
 
-        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.LastApplied);
+        await Assert.That(receipt.Token.Position).IsEqualTo(NativeStoreAssertions.Applied(fixture.Store, fixture.Partition));
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await BinderFieldLineagePages.EqualAsync<MutationReceipt[]>([new(PutDocumentKind, Collection, DocumentId, OriginalRevision)],
             receipt.Mutations.ToArray());

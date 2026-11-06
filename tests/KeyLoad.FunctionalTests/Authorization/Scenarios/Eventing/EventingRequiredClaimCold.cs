@@ -25,6 +25,7 @@ internal static class EventingRequiredClaimCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var database = db.CreateConfiguredDatabase(store);

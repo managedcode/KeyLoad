@@ -10,7 +10,7 @@ internal static class PartitionStorageHealthy
     internal static async Task<PartitionStorageCommit> ExecuteAsync(IServiceProvider source,
         CancellationToken token)
     {
-        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host;
         var definition = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId,
             new(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId));
         var configured = await owner.Coordinator.RuntimeSubmitAsync<object>(OperationKind.ConfigureResource,
@@ -39,7 +39,7 @@ internal static class PartitionStorageHealthy
     {
         await PartitionStorageReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);
         var before = PartitionStorageReplay.ReadCut(source);
-        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host;
         var reply = await owner.Coordinator.RuntimeSubmitAsync<object>(OperationKind.Batch, P.Command, P.Root,
             P.Request(), cancellationToken: token).ConfigureAwait(false);
         await RequireReceiptAsync(reply, original.Receipt).ConfigureAwait(false);

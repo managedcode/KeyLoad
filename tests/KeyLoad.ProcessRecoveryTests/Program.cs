@@ -45,7 +45,7 @@ var directory = args[DirectoryArgument];
 var stage = Enum.Parse<CommitStage>(args[StageArgument]);
 var mutationIndex = int.Parse(args[MutationArgument], CultureInfo.InvariantCulture);
 var mode = args.Length > ModeArgument ? args[ModeArgument] : CrashFixtureValues.CommitMode;
-var boundary = new CanonicalCrashBoundary(stage, mutationIndex, initiallyArmed: false);
+var boundary = new CanonicalCrashBoundary(stage, mutationIndex);
 using var store = new ZoneTreeStore(new(directory)
 {
     FaultObserver = boundary.Observe

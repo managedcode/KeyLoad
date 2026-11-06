@@ -6,9 +6,8 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class IdentityRepairContinuation
 {
-    private const long HealthyIncrement = 1;
-    private const int SourceRows = 3;
-    private const int RestoredRows = 4;
+    private const int SourceRows = 2;
+    private const int RestoredRows = 3;
     private const byte OriginalKey = 0x10;
     private const byte OriginalValue = 0x30;
     private const byte FollowupKey = 0x20;
@@ -21,7 +20,7 @@ internal static class IdentityRepairContinuation
         using (var repaired = Open(files.DirectoryPath))
         {
             await RequireIdentityAsync(originalIdentity, repaired.Identity);
-            await Assert.That(repaired.Position).IsEqualTo(originalPosition);
+            originalPosition = await NativeStoreAssertions.ReopenedAsync(repaired, originalPosition);
             await Assert.That(repaired.Read(view => view.ReadOwnedValue([OriginalKey]))!)
                 .IsEquivalentTo(new byte[] { OriginalValue }, CollectionOrdering.Matching);
             await Assert.That(repaired.Read(view => view.ReadOwnedValue([FollowupKey]))).IsNull();
@@ -30,7 +29,7 @@ internal static class IdentityRepairContinuation
                 transaction.Put([FollowupKey], [FollowupValue]);
                 return position;
             });
-            await Assert.That(repaired.Position).IsEqualTo(originalPosition + HealthyIncrement);
+            originalPosition = await NativeStoreAssertions.AdvancedAsync(repaired, originalPosition);
         }
         using var destinations = new CurrentStorageFixture();
         var backupPosition = await ColdBackupAsync(files, destinations, originalIdentity, originalPosition, token);
@@ -43,8 +42,8 @@ internal static class IdentityRepairContinuation
         await Assert.That(restoredIdentity.SigningKey.Span.SequenceEqual(originalIdentity.SigningKey.Span)).IsFalse();
         await Assert.That(restoredIdentity.DispatchPaused).IsTrue();
         await RequireBackupUnchangedAsync(destinations.Backup, backup, token);
-        await RequireRestoredAsync(destinations.Restored, restoredIdentity, backupPosition);
-        await RequireRestoredAsync(destinations.Restored, restoredIdentity, backupPosition);
+        var restoredPosition = await RequireRestoredAsync(destinations.Restored, restoredIdentity, 0L);
+        await RequireRestoredAsync(destinations.Restored, restoredIdentity, restoredPosition);
         await RequireSourceAfterRestoreAsync(files.DirectoryPath, originalIdentity, backupPosition);
     }
 
@@ -56,19 +55,21 @@ internal static class IdentityRepairContinuation
     {
         using var cold = Open(files.DirectoryPath);
         await RequireIdentityAsync(originalIdentity, cold.Identity);
-        await Assert.That(cold.Position).IsEqualTo(originalPosition + HealthyIncrement);
+        originalPosition = await NativeStoreAssertions.ReopenedAsync(cold, originalPosition);
         await RequireRowsAsync(cold, restored: false);
         var cut = await cold.CreateBackupAsync(destinations.Backup, token);
-        await Assert.That(cut).IsEqualTo(originalPosition + HealthyIncrement);
+        await Assert.That(cut).IsEqualTo(originalPosition);
         return cut;
     }
 
-    private static async Task RequireRestoredAsync(string directory, StoreIdentity expected, long backupPosition)
+    private static async Task<long> RequireRestoredAsync(string directory, StoreIdentity expected, long previousPosition)
     {
         using var cold = Open(directory);
         await RequireIdentityAsync(expected, cold.Identity);
-        await Assert.That(cold.Position).IsEqualTo(backupPosition + HealthyIncrement);
+        var position = await NativeStoreAssertions.ReopenedAsync(cold, previousPosition);
+        await Assert.That(position).IsGreaterThan(0L);
         await RequireRowsAsync(cold, restored: true);
+        return position;
     }
 
     private static async Task RequireSourceAfterRestoreAsync(string directory, StoreIdentity originalIdentity,
@@ -76,7 +77,7 @@ internal static class IdentityRepairContinuation
     {
         using var source = Open(directory);
         await RequireIdentityAsync(originalIdentity, source.Identity);
-        await Assert.That(source.Position).IsEqualTo(position);
+        await NativeStoreAssertions.ReopenedAsync(source, position);
         await RequireRowsAsync(source, restored: false);
     }
 
@@ -90,8 +91,7 @@ internal static class IdentityRepairContinuation
         var expected = new Dictionary<string, byte[]>(StringComparer.Ordinal)
         {
             [Convert.ToHexString(new byte[] { OriginalKey })] = [OriginalValue],
-            [Convert.ToHexString(new byte[] { FollowupKey })] = [FollowupValue],
-            [Convert.ToHexString(StoreFileFixture.PositionKey)] = StoreFileFixture.PositionValue(store.Position)
+            [Convert.ToHexString(new byte[] { FollowupKey })] = [FollowupValue]
         };
         if (restored)
         {

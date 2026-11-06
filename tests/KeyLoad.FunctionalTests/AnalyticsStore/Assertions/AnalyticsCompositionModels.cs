@@ -32,7 +32,7 @@ internal static class AnalyticsCompositionModels
             await O.EqualAsync(new global::KeyLoad.GraphTraversal([anchor, expectedReference],
                 [new(id, expectedReference, anchor, P.Label, P.EmptyJson, 1)]), graph);
             var stream = new StreamRef(partition, P.Events, id);
-            var readCut = owner.Database.LastApplied;
+            var readCut = ExpectedCanonicalCommit.Applied(owner.Database, partition);
             var page = owner.Database.ReadStream(D.Root, stream, cancellationToken: owner.CallerToken);
             var sequence = commits.ToList().IndexOf(commit) + 1;
             await O.EqualAsync(new StreamPage(stream, new(1, 1, 1),

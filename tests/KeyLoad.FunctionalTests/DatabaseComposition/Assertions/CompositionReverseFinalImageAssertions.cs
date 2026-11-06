@@ -31,7 +31,7 @@ internal static class CompositionReverseFinalImageAssertions
         await A.EqualAsync(state.Request, ((CommandRequest)retained.Value!.Input));
         await OutcomeAsync(owner, state.Seed, state.SeedReceipt, null);
         await Assert.That(owner.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
-            view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(state.Original.Timestamp));
+            view.ReadOwnedValue(StorageCommandKeys.Clock(state.Request.Partition))!))).IsEqualTo(new DateTimeOffset(state.Original.Timestamp));
         await ModelsAsync(owner, state);
     }
 

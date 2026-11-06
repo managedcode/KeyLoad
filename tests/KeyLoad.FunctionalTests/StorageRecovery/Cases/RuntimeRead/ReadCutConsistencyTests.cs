@@ -43,7 +43,7 @@ internal sealed class ReadCutConsistencyTests
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(currentRows).IsEquivalentTo(new[] { $"doc/{FirstId}={NewFirst}", $"doc/{ThirdId}={NewThird}" },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(fixture.Store.Position).IsEqualTo(expectedPosition + 1);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(expectedPosition);
     }
 
     private static string[] ReadSnapshot(ZoneTreeReadCutLease lease)

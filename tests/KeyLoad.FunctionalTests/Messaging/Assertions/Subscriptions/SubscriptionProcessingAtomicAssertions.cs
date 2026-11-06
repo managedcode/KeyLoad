@@ -12,7 +12,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     internal static string[] DomainImage(ZoneTreeStore store, SubscriptionRef group, Guid id)
     {
         var own = new[] { KeySpace.PartitionOutcome(group.Source.Partition, "root", id),
-            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes, KeySpace.AppliedBytes, KeySpace.LastCommandBytes }
+            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), StorageCommandKeys.Clock(group.Source.Partition), StorageCommandKeys.Applied(group.Source.Partition) }
             .Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(store).Where(row =>
             !own.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();
@@ -38,7 +38,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     {
         await Assert.That(DomainImage(store, group, operation.CommandId)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
+        await Assert.That(QueueWholeFlowStorage.Clock(store, group.Source.Partition)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.CommandId);
         var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
             group.Source.Partition, "root", operation.CommandId)));
@@ -59,7 +59,7 @@ internal static class SubscriptionProcessingAtomicAssertions
             await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(original, JsonDefaults.Options));
             await Assert.That(OutcomeBytes(store, group, operation.CommandId).AsSpan().SequenceEqual(saved)).IsTrue();
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
         }
     }
 
@@ -107,7 +107,7 @@ internal static class SubscriptionProcessingAtomicAssertions
         await ReplayResultAssertions.Same<SubscriptionProcessingResult>(
             OrleansSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result, original);
         await Assert.That(OutcomeBytes(store, group, operation.CommandId).AsSpan().SequenceEqual(saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
     }
 }
 

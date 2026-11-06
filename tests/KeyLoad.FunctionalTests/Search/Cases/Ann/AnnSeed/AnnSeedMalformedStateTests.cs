@@ -101,7 +101,7 @@ internal sealed class AnnSeedMalformedStateTests
         using var database = AnnSeedTestSupport.Create(1);
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(KeySpace.AppliedBytes, OrleansSerialization.Serialize(-1L));
+            transaction.Put(StorageCommandKeys.Applied(database.Partition), OrleansSerialization.Serialize(new StoragePartitionPosition(database.Partition, -1L)));
             return true;
         });
         var position = database.Store.Position;

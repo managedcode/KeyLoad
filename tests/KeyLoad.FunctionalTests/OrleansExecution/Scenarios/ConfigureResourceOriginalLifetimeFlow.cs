@@ -63,7 +63,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
     {
         Command<DatabaseCommand>? original = null;
         ResourceLifetime? lifetime = null;
-        await O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
+        await O.LeaseAsync(owner, Guid.NewGuid(), async (lease, work) =>
         {
             var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, expected)
             {
@@ -92,7 +92,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
 
     private static Task ReplayAsync(TestDatabase fixture, RequestWorkOwner owner, Command<DatabaseCommand> original,
         ResourceDefinition expected, ResourceLifetime lifetime, CancellationToken token)
-        => O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
+        => O.LeaseAsync(owner, Guid.NewGuid(), async (lease, work) =>
         {
             await Assert.That(lease.Dependencies.IsEmpty).IsTrue();
             await A.UnchangedAsync(fixture, async () =>
@@ -104,7 +104,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
 
     private static Task RefusedAsync(TestDatabase fixture, RequestWorkOwner owner,
         Command<DatabaseCommand> original, CancellationToken token)
-        => O.LeaseAsync(fixture, owner, Guid.NewGuid(), async (lease, work) =>
+        => O.LeaseAsync(owner, Guid.NewGuid(), async (lease, work) =>
         {
             await A.UnchangedAsync(fixture, async () =>
             {

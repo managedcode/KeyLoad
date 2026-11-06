@@ -72,7 +72,7 @@ internal static class SubscriptionPendingCounterAuthorityFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await SubscriptionPendingCounterAuthorityAssertions.RefuseAsync(db, cold, fresh, emptyRequest, due, token);
         cold.Commit((tx, _) =>
         {
@@ -92,7 +92,7 @@ internal static class SubscriptionPendingCounterAuthorityFlow
         await Assert.That(stale.Problem?.Detail).IsEqualTo(StaleDetail);
 
         await Assert.That(stale.Value).IsNull();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, stable, stablePosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, stable, stablePosition, identity);
         await SubscriptionPendingCounterAuthorityContinuation.RunAsync(db, cold, fixture.Directory,
             group, received, fresh, due,
             [new(OperationKind.SubscriptionDelivery, nack, nack.CommandId, nacked),

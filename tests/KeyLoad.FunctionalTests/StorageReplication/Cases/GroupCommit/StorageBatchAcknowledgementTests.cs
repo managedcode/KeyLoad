@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Globalization;
-using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
@@ -31,6 +30,7 @@ internal sealed class StorageBatchAcknowledgementTests
         var bounded = timeout.Token;
         var creation = Guid.NewGuid();
         source.Database.Configure(Collection, ResourceKind.Collection, id: creation);
+        await StorageCoordinatorPlacement.ActivateAsync(cluster, remote: true, bounded);
         var before = source.Database.ReadCanonicalCut().AppliedPosition;
         var mutations = Enumerable.Range(0, Documents).Select(index => (Mutation)new PutDocument(Collection, Id(index), Json, 0))
             .ToImmutableArray();

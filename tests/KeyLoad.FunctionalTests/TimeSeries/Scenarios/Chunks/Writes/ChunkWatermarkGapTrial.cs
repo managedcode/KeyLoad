@@ -18,7 +18,7 @@ internal static class ChunkWatermarkGapTrial
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         var firstCold = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, firstCold);
+        firstCold = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, firstCold);
         await ChunkWatermarkGapAssertions.Healthy(fixture, second: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         Append(fixture, SecondOutside);
@@ -26,7 +26,7 @@ internal static class ChunkWatermarkGapTrial
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         var secondCold = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, secondCold);
+        secondCold = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, secondCold);
         await ChunkWatermarkGapAssertions.Healthy(fixture, second: true);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, secondCold);

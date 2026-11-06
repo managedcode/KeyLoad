@@ -10,7 +10,6 @@ internal static class TextIndexWaitExecution
     private const string WaitAppliedCorrupt = "The canonical applied position is invalid.";
     private const string WaitInvalidRequest = "A text field and acknowledged minimum token are required.";
     private const string WaitProviderUnavailable = "Execution text index waiting is unavailable.";
-    private const long WaitInitialPosition = 0;
 
     internal static WaitForIndexResult Execute(DatabaseEngine database, ITextProjection? textProjection,
         QueryExecutionOptions execution, IQueryReadCutObserver? readCutObserver, string principalId,
@@ -27,12 +26,8 @@ internal static class TextIndexWaitExecution
             var path = JsonData.PathSegments(request.TextField);
             var authority = new BudgetedReadView(view, budget);
             database.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WaitTokenInvalid);
-            var bytes = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
-            var applied = OrleansSerialization.Deserialize<long>(bytes);
-            if (applied < WaitInitialPosition)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
-            }
+            var bytes = authority.ReadOwnedValue(StorageCommandKeys.Applied(request.Partition)) ?? throw Errors.Fail(ErrorCode.Corruption, WaitAppliedCorrupt);
+            var applied = StorageOperationApply.ReadCanonicalSequence(bytes, request.Partition, WaitAppliedCorrupt);
             if (request.MinimumToken.Position > applied)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, WaitTokenFuture);

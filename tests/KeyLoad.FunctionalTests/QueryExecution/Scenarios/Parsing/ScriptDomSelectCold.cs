@@ -19,6 +19,7 @@ internal static class ScriptDomSelectCold
                     {
                         Incarnation = identity.Incarnation
                     }, identity.NodeId, database.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identityBytes);

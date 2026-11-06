@@ -17,7 +17,7 @@ internal static class EventAppendStateAssertions
     {
         await EventAppendQueueAssertions.VerifyAsync(database.Store, committed, healthy);
         await EventAppendIndexAssertions.VerifyAsync(database.Store, committed, healthy);
-        var cut = CrashDatabase.AppliedPosition(database.Store);
+        var cut = CrashDatabase.AppliedPosition(database.Store, EventAppendCrashContract.Partition);
         var page = database.ReadStream(EventAppendCrashContract.Principal, EventAppendCrashContract.Stream);
         var ids = new List<string> { EventAppendCrashContract.SeedId };
         if (committed)
@@ -82,7 +82,7 @@ internal static class EventAppendStateAssertions
         {
             throw new InvalidOperationException(FixtureOverflow);
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator +
+        return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });
 

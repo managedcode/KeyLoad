@@ -19,28 +19,31 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
         var seeds = CreateSeeds(database);
         var walk = new GraphWalkSpec(GraphSearchTestSupport.Graph, [.. seeds], 0, SeedCount, 1);
 
-        var baselineClock = new GraphSearchReachabilitySortClock();
-        var baseline = ReadReachability(database, walk, baselineClock, CancellationToken.None);
+        var baseline = ReadReachability(database, walk, CancellationToken.None);
         await AssertOrdered(database, baseline, seeds);
 
-        await AssertCancellation(database, walk, baselineClock.TimestampCalls - 2);
-        await AssertOrdered(database, ReadReachability(database, walk, TimeProvider.System, CancellationToken.None), seeds);
+        await AssertCancellation(database, walk);
+        await AssertOrdered(database, ReadReachability(database, walk, CancellationToken.None), seeds);
     }
 
-    private static async Task AssertCancellation(TestDatabase database, GraphWalkSpec walk, long cancelAt)
+    private static async Task AssertCancellation(TestDatabase database, GraphWalkSpec walk)
     {
         using var cancellation = new CancellationTokenSource();
-        var clock = new GraphSearchReachabilitySortClock(cancellation, cancelAt: cancelAt);
+        var budget = new ReadExecutionBudget(cancellation.Token);
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            ReadReachability(database, walk, clock, cancellation.Token));
+            database.Database.WithQueryView(PrincipalId, database.Partition, GraphSearchTestSupport.Documents,
+                (view, principal, _) =>
+                {
+                    cancellation.Cancel();
+                    return database.Database.ReadGraphSearchReachability(view, principal, database.Partition, walk, budget);
+                }));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(clock.CancellationTriggered).IsTrue();
     }
 
     private static GraphSearchReachability[] ReadReachability(TestDatabase database, GraphWalkSpec walk,
-        TimeProvider clock, CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return database.Database.WithQueryView(PrincipalId, database.Partition,
             GraphSearchTestSupport.Documents, (view, principal, _) =>
                 database.Database.ReadGraphSearchReachability(view, principal, database.Partition, walk, budget));

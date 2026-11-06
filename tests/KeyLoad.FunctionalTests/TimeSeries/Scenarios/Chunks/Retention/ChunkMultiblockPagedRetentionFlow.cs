@@ -43,12 +43,12 @@ internal static class ChunkMultiblockPagedRetentionFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var beforePosition = fixture.Store.Position;
-            var beforeApplied = fixture.Owner.LastApplied;
+            var beforeApplied = NativeStoreAssertions.Applied(fixture.Store, fixture.Partition);
             var authority = fixture.Store.Identity;
             var issued = ChunkMultiblockPagedRetentionOperations.Expire(fixture);
             var expected = new CommitReceipt(issued.Operation.CommandId, new(authority.Incarnation, fixture.Partition.AtomicPartitionId, checked(beforeApplied + CommitIncrement)), [new(ExpireKind, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, purged)], authority.Durability, (authority.Durability == DurabilityProfile.Buffered ? 0 : 1));
             await Assert.That(JsonDefaults.Serialize(issued.Receipt).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-            await Assert.That(fixture.Store.Position).IsEqualTo(beforePosition + CommitIncrement);
+            await Assert.That(fixture.Store.Position).IsGreaterThan(beforePosition);
             await ChunkMultiblockPagedRetentionRows.PageAsync(fixture, purged, more);
             await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy: false);
         }, failures);
@@ -63,7 +63,7 @@ internal static class ChunkMultiblockPagedRetentionFlow
         {
             var cut = SampleRawIntegrityAssertions.Capture(fixture.Store);
             fixture.Reopen();
-            await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
+            cut = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, cut);
             await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy);
             await ChunkMultiblockPagedRetentionRepresentation.RecordsAsync(fixture, healthy);
             await SampleChunkPartialRetentionAssertions.Replay(fixture);

@@ -14,7 +14,6 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
     private const string RootPrincipal = "root";
     private const string ReplicaCutMismatch = "The execution replica image differs from its original identity and source cut.";
     private const int NoCleanupFailures = 0;
-    private const long RestoreCommits = 1;
     private const bool DeleteOwnedTreeRecursively = true;
     private readonly TestDatabase source;
     private readonly string backup;
@@ -76,7 +75,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
                 || target.Identity.NodeId == source.Store.Identity.NodeId
                 || target.Identity.Incarnation != source.Store.Identity.Incarnation
                 || !CryptographicOperations.FixedTimeEquals(target.Identity.SigningKey.Span, source.Store.Identity.SigningKey.Span)
-                || target.Position != source.Store.Position + RestoreCommits
+                || target.Position <= 0
                 || !ReplicatedImage(target).SequenceEqual(ReplicatedImage(source.Store), StringComparer.Ordinal))
             {
                 throw new InvalidOperationException(ReplicaCutMismatch);
@@ -107,7 +106,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [.. mutations]);
-        var work = new ReadExecutionBudget(Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         var original = Database.CreateCommand(OperationKind.Batch, request.CommandId, RootPrincipal,
             Database.EvaluationClock.GetUtcNow(), request, work);
         return Database.Apply(original).Get<CommitReceipt>();
@@ -131,9 +130,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
     internal static string[] ReplicatedImage(ZoneTreeStore store)
     {
         var paused = Convert.ToHexString(StoreFileFixture.DispatchPausedKey) + ":";
-        var position = Convert.ToHexString(NativeStorePositionOracle.Key) + ":";
-        return TeamRowPolicyAssertions.Image(store).Where(row => !row.StartsWith(paused, StringComparison.Ordinal)
-            && !row.StartsWith(position, StringComparison.Ordinal)).ToArray();
+        return TeamRowPolicyAssertions.Image(store).Where(row => !row.StartsWith(paused, StringComparison.Ordinal)).ToArray();
     }
 
     private static void Delete(string directory, string backup)

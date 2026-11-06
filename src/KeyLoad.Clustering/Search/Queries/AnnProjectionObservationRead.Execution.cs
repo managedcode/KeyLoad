@@ -22,7 +22,7 @@ internal static partial class AnnProjectionObservationRead
         }
         var request = (GrainPayload.Read<AnnProjectionObservationRequest>((original.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Clustering.AnnProjectionObservationRequest at this closed operation boundary before executing typed code. */);
         var metadata = Require(request, principal, database, clock);
-        var work = new ReadExecutionBudget(clock, cancellationToken);
+        var work = new ReadExecutionBudget(cancellationToken);
         work.AttachResourceLifetimeBinding(binding);
         var admitted = AnnProjectionObservationRead.RequireScope(database, services, principal, request, work, metadata, binding);
         var search = services.GetRequiredService<SearchEngine>();

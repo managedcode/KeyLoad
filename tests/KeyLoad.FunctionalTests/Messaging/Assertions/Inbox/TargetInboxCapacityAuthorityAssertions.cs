@@ -46,7 +46,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
-            state.SourceAck, state.SourceAck.CommandId, QueueWholeFlowStorage.Clock(store)), state.SourceAckResult);
+            state.SourceAck, state.SourceAck.CommandId, QueueWholeFlowStorage.Clock(store, state.SourceAck.Lane.Partition)), state.SourceAckResult);
         await SameAsync(store, image, position);
     }
 

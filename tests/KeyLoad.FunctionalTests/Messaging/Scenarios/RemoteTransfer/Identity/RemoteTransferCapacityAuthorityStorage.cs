@@ -18,7 +18,7 @@ internal static class RemoteTransferCapacityAuthorityStorage
         {
             throw new InvalidOperationException(RuntimeImageExceeded);
         }
-        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
     internal static async Task ImageAsync(RemoteTransferDatabase fixture, string[] image, long position)
@@ -45,7 +45,7 @@ internal static class RemoteTransferCapacityAuthorityStorage
             {
                 throw new InvalidOperationException(RuntimeImageExceeded);
             }
-            var rows = page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(row => new KeyValuePair<byte[], byte[]>(row.Key.ToArray(), row.Value.ToArray())).ToList();
+            var rows = page.Records.Select(row => new KeyValuePair<byte[], byte[]>(row.Key.ToArray(), row.Value.ToArray())).ToList();
             rows.Add(new(key, counter));
             var value = OrleansSerialization.Deserialize<RemoteTransferCapacity>(counter);
             ApplyDamage(tx, key, value, rows, fault);

@@ -34,12 +34,12 @@ internal sealed class DeniedCommandReplayClockTests
         var first = fixture.Database.Apply(original);
         await Assert.That(Errors.Code(first.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(first.Problem?.Detail).IsEqualTo(AdministrationRequired);
-        await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
+        var publishedPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, before);
         var retained = Bytes(fixture.Store);
         var retry = fixture.Database.OwnCommand(original);
         retry.Timestamp = (laterTime ? time.AddSeconds(1) : time).UtcDateTime;
         await SameResultAsync(first, fixture.Database.Apply(retry));
-        await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
+        await Assert.That(fixture.Store.Position).IsEqualTo(publishedPosition);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
         var stored = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.CommandId)))!;
         var lastTime = await VerifyReplicaApplyAsync(fixture, first, retry, stored);

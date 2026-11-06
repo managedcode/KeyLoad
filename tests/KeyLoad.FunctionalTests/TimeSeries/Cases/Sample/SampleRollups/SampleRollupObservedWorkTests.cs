@@ -6,27 +6,30 @@ internal sealed class SampleRollupObservedWorkTests
     [Test]
     public async Task AcSeries023OriginalCancellationAfterActualWorkHasNoResultOrStoreEffect()
     {
-        var clock = new SampleRollupWorkClock();
-        using var db = new TestDatabase(timeProvider: clock);
+        using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);
         db.Commit(SampleRollupWholeFlow.Refresh(0));
         var image = SampleRollupWholeFlow.Image(db);
         var position = db.Store.Position;
         var before = db.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        clock.Arm(() => db.Store.GetReadDiagnostics().BorrowedPointLookups >=
-            before.BorrowedPointLookups + PointThreshold, cancellation.Cancel);
-        SampleRollupResult? result = null;
-        OperationCanceledException error;
-        try
+        var triggered = false;
+        using var observed = new PointObservedStore(db.Store, () =>
         {
-            error = Assert.ThrowsExactly<OperationCanceledException>(() => result = db.Database.ReadSampleRollup(
-                SampleRollupWholeFlow.Root, new(db.Partition, SampleRollupWholeFlow.Set, SampleRollupWholeFlow.Series,
-                    SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End), cancellation.Token));
-        }
-        finally { clock.Disarm(); }
+            if (!triggered && db.Store.GetReadDiagnostics().BorrowedPointLookups >=
+                before.BorrowedPointLookups + PointThreshold)
+            {
+                triggered = true;
+                cancellation.Cancel();
+            }
+        });
+        var owner = db.CreateConfiguredDatabase(observed);
+        SampleRollupResult? result = null;
+        var error = Assert.ThrowsExactly<OperationCanceledException>(() => result = owner.ReadSampleRollup(
+            SampleRollupWholeFlow.Root, new(db.Partition, SampleRollupWholeFlow.Set, SampleRollupWholeFlow.Series,
+                SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End), cancellation.Token));
         var after = db.Store.GetReadDiagnostics();
-        await Assert.That(clock.Triggered).IsTrue();
+        await Assert.That(triggered).IsTrue();
         await Assert.That(result).IsNull();
         await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsGreaterThanOrEqualTo(PointThreshold);
         await Assert.That(after.PointExaminedBytes).IsGreaterThan(before.PointExaminedBytes);

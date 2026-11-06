@@ -17,7 +17,7 @@ internal static class ZoneTreePlainPublication
             runtime.Options.FaultObserver?.Invoke(CommitStage.PlainWriteAheadLogPublished, position, plain.Length);
             ZoneTreeCommitPublication.Stage(runtime, transaction, metadata, position);
             transaction.Commit();
-            ZoneTreeCommitPublication.Committed(runtime, position, plain.Length + metadata.Length);
+            ZoneTreeCommitPublication.Committed(runtime, transaction.CommitTimestamp, plain.Length + metadata.Length);
         }
         catch (Exception original)
         {

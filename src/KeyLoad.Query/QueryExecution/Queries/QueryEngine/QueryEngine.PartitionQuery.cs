@@ -8,12 +8,9 @@ public sealed partial class QueryEngine
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">The public typed partition-query request.</param>
     /// <param name="expectedOwner">The immutable server-owned physical owner tuple.</param>
-    /// <param name="timeProvider">The clock for the operation's single read budget.</param>
     /// <param name="cancellationToken">Cancellation for admission, reads, merge and sizing.</param>
     /// <returns>The complete typed result and scoped read witnesses.</returns>
     public PartitionQueryPage QueryPartitions(string principalId,
-        PartitionQueryRequest request, PhysicalShardRecord expectedOwner,
-        TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
-        => PartitionQueryPublicExecution.Execute(this, principalId, request, expectedOwner,
-            timeProvider, cancellationToken);
+        PartitionQueryRequest request, PhysicalShardRecord expectedOwner, CancellationToken cancellationToken = default)
+        => PartitionQueryPublicExecution.Execute(this, principalId, request, expectedOwner, cancellationToken);
 }

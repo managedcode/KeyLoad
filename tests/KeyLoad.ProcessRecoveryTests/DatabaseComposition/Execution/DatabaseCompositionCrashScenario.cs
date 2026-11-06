@@ -38,7 +38,6 @@ internal static class DatabaseCompositionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store);
         Seed(database);
@@ -50,7 +49,6 @@ internal static class DatabaseCompositionCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, CommandFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedOutboxTailFile),
             tail.ToString(CultureInfo.InvariantCulture));
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

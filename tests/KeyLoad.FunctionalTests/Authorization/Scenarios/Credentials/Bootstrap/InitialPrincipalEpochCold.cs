@@ -25,6 +25,7 @@ internal static class InitialPrincipalEpochCold
                     Incarnation = identity.Incarnation
                 },
                     identity.NodeId, db.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await ServerFailureObserver.ObserveAsync(() => InitialPrincipalEpochHealthy.RequireAsync(fixture,
                     db.CreateConfiguredDatabase(store), store, state, refused, token), failures);
                 await ServerFailureObserver.ObserveAsync(() => InitialPrincipalEpochAssertions.ConserveAsync(store,

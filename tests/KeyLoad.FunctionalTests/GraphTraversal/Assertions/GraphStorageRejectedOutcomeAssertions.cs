@@ -12,13 +12,14 @@ internal static class GraphStorageRejectedOutcomeAssertions
         await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(expectedError);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(expectedDetail);
 
-        await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);
+        var committedPosition = database.Store.Position;
+        await Assert.That(committedPosition).IsGreaterThan(previousPosition);
         var persisted = OutcomeBytes(database, command);
         var retried = GraphStorageReferenceFixture.Submit(database.Database, command);
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(retried, JsonDefaults.Options))
             .IsEquivalentTo(JsonSerializer.SerializeToUtf8Bytes(rejected, JsonDefaults.Options), CollectionOrdering.Matching);
         await Assert.That(OutcomeBytes(database, command)).IsEquivalentTo(persisted, CollectionOrdering.Matching);
-        await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);
+        await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
     }
 
     internal static byte[] CaptureState(TestDatabase database, string vertex, string stream, string message)
@@ -38,7 +39,7 @@ internal static class GraphStorageRejectedOutcomeAssertions
         await Assert.That(CaptureState(database, vertex, stream, message)).IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(database.Database.ReadStream(GraphStorageReferenceFixture.Root,
             new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, stream)).CutPosition)
-            .IsEqualTo(database.Database.LastApplied);
+            .IsEqualTo(database.ReadCanonicalCut().AppliedPosition);
     }
 
     private static byte[] CaptureStream(TestDatabase database, string stream)

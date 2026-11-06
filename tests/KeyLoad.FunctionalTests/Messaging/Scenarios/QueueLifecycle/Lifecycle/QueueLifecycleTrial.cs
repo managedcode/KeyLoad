@@ -8,7 +8,7 @@ internal static class QueueLifecycleTrial
     {
         using var fixture = new TestDatabase();
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
         await QueueLifecycleInitialPhase.RunAsync(fixture.Database, fixture.Store, state, token);
         await QueueLifecycleAuthorityRefusal.OverlappingUsageAsync(fixture.Database, fixture.Store, state);
         await QueueLifecycleBackupRestore.RunAsync(fixture.Store, state, token);

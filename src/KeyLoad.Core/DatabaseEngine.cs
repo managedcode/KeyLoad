@@ -96,8 +96,8 @@ public sealed class DatabaseEngine
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
     public DurabilityProfile Durability { get; set; }
     internal int AcknowledgedPersistedCopies => Durability == DurabilityProfile.Buffered ? EngineResourceAccess.NoPersistedCopies : CommitReceipt.LocalCopyCount;
-    /// <summary>Gets the canonical store's last applied replicated position.</summary>
-    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : EngineResourceAccess.DatabaseEngineNoRetainedBytes);
+    /// <summary>Gets the number of applied canonical commands across independent partition sequences.</summary>
+    public long LastApplied => Store.Read(view => StorageReplicaExecution.ReadPartitionPositions(view).Sum(cut => cut.Position));
 
     internal readonly AnalyticalReadGate analyticalReadGate;
     /// <summary>Gets the number of currently admitted analytical operations on this engine.</summary>

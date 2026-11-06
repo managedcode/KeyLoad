@@ -36,6 +36,7 @@ internal static class AnnLineageColdContinuation
         try
         {
             using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
+            image.Position = await NativeStoreAssertions.ReopenedAsync(store, image.Position);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan()
@@ -64,7 +65,7 @@ internal static class AnnLineageColdContinuation
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = new AnnSeedOptions();
-                var read = new ReadExecutionBudget(database.EvaluationClock, token);
+                var read = new ReadExecutionBudget(token);
                 var current = AnnSeedCollector.CapturePinned(database, AnnProjectionPinTestSupport.Principal,
                     request, Options.Create(seeds), read);
                 await AnnLineageReplayOracle.AssertSeedAsync(current, AnnLineageReplayOracle.Stage.Reprojected);

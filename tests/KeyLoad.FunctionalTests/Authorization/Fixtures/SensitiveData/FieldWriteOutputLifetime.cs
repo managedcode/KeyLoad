@@ -33,6 +33,7 @@ internal sealed class FieldWriteOutputLifetime
             state.Store = cold;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
+                position = await NativeStoreAssertions.ReopenedAsync(cold, position);
                 state.Database = state.Owner.CreateConfiguredDatabase(cold);
                 await FieldWriteOutputAssertions.EqualAsync(identity.NodeId, cold.Identity.NodeId);
                 await FieldWriteOutputAssertions.EqualAsync(identity.Incarnation, cold.Identity.Incarnation);

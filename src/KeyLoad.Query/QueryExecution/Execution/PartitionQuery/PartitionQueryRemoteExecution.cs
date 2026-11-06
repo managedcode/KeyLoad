@@ -12,11 +12,11 @@ internal static partial class PartitionQueryRemoteExecution
     internal static async Task<PartitionQueryPage> ExecuteAsync(QueryEngine engine,
         PartitionQueryRequest request,
         Func<PartitionQueryLeafPlan, ReadExecutionBudget, CancellationToken, Task<PartitionQueryPreparedLeaf>> prepare,
-        Func<CancellationToken, Task> revalidate, TimeProvider clock,
+        Func<CancellationToken, Task> revalidate,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
-        var budget = new ReadExecutionBudget(clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

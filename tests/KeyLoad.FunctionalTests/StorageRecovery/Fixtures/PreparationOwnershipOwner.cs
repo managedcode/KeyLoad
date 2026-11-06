@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.FunctionalTests.StorageRecovery;
 
-internal sealed class PreparationOwnershipOwner(ZoneTreeStore store)
+internal sealed class PreparationOwnershipOwner(ZoneTreeStore store, NativePublicationObservation publication)
 {
     internal static readonly byte[] SeedKey = Encoding.UTF8.GetBytes("execution-prepare/seed");
     internal static readonly byte[] ParentKey = Encoding.UTF8.GetBytes("execution-prepare/parent");
@@ -13,6 +13,7 @@ internal sealed class PreparationOwnershipOwner(ZoneTreeStore store)
     internal static readonly byte[] ParentValue = Encoding.UTF8.GetBytes("parent-stage");
     internal static readonly byte[] ChildValue = Encoding.UTF8.GetBytes("child-stage");
     internal ZoneTreeStore Store => store;
+    internal NativePublicationObservation Publication => publication;
 
     internal static async Task RunAsync(Func<PreparationOwnershipOwner, Task> operation)
     {
@@ -22,13 +23,14 @@ internal sealed class PreparationOwnershipOwner(ZoneTreeStore store)
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             TestContext.Current!.Execution.CancellationToken.ThrowIfCancellationRequested();
-            store = new(new(root), UnitExecutionOptions.StorageExecution());
+            var publication = new NativePublicationObservation();
+            store = new(new(root) { FaultObserver = publication.Observe }, UnitExecutionOptions.StorageExecution());
             store.Commit((transaction, _) =>
             {
                 transaction.Put(SeedKey, SeedValue);
                 return true;
             });
-            await operation(new(store));
+            await operation(new(store, publication));
         }, failures);
         if (store is not null)
         {

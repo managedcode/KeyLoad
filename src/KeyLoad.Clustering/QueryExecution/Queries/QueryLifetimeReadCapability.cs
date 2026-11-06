@@ -9,7 +9,7 @@ namespace KeyLoad.Clustering;
 
 internal static class QueryLifetimeReadCapability
 {
-    internal static GrainValue Execute(DatabaseEngine database, IServiceProvider services, TimeProvider clock,
+    internal static GrainValue Execute(DatabaseEngine database, IServiceProvider services,
         PrincipalRecord principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -18,11 +18,11 @@ internal static class QueryLifetimeReadCapability
         {
             GrainReadKind.PartitionQueryLeaf => new GrainValue(PartitionQueryLifetimeLeafExecution.ExecuteBound(
                 services.GetRequiredService<QueryEngine>(), principal.Id,
-                (GrainPayload.Read<PartitionQueryOwnedLeafRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.QueryExecution.PartitionQueryOwnedLeafRequest at this closed operation boundary before executing typed code. */), owner, clock,
+                (GrainPayload.Read<PartitionQueryOwnedLeafRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.QueryExecution.PartitionQueryOwnedLeafRequest at this closed operation boundary before executing typed code. */), owner,
                 binding, token)) /* KLD0041: The current GrainValue wire slot carries this DistributedSearchLeaf response with its generated runtime type header. */,
             GrainReadKind.DistributedSearchLeaf => new GrainValue(DistributedSearchOwnedLeafExecution.ExecuteBound(database,
                 principal.Id, (GrainPayload.Read<DistributedSearchOwnedLeaf>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.QueryExecution.DistributedSearchOwnedLeaf at this closed operation boundary before executing typed code. */), owner,
-                services.GetRequiredService<IOptions<QueryExecutionOptions>>(), clock,
+                services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
                 binding, token)) /* KLD0041: The current GrainValue wire slot carries this DistributedSearchLeaf response with its generated runtime type header. */,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };

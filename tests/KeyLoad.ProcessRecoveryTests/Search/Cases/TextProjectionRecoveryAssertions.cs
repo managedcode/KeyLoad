@@ -19,7 +19,9 @@ internal static class TextProjectionRecoveryAssertions
         var indexDirectory = Path.Combine(source, "search-indexes");
         using (var store = new ZoneTreeStore(new(source), RecoveryExecutionOptions.StorageExecution()))
         {
-            await AssertCanonicalCutAsync(store, receipt);
+            var position = store.Position;
+            await Assert.That(position).IsGreaterThanOrEqualTo(receipt.Position);
+            await AssertCanonicalCutAsync(store, receipt, position);
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
             var request = new SearchRequest(receipt.Partition, receipt.Collection, "/text", receipt.Query, Limit: 10);
             var oracle = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution()).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
@@ -28,18 +30,18 @@ internal static class TextProjectionRecoveryAssertions
             var actual = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution(), projection).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
 
             await AssertParityAsync(oracle, actual, receipt.ExpectedIds);
-            await AssertCanonicalCutAsync(store, receipt);
-            await AssertSingleCompletedGenerationAsync(indexDirectory, receipt, cancellationToken);
+            await AssertCanonicalCutAsync(store, receipt, position);
+            await AssertSingleCompletedGenerationAsync(indexDirectory, receipt, position, cancellationToken);
         }
         await AssertAuthorityFilesUnchangedAsync(source, receipt, cancellationToken);
     }
 
-    private static async Task AssertCanonicalCutAsync(ZoneTreeStore store, TextCrashReceipt receipt)
+    private static async Task AssertCanonicalCutAsync(ZoneTreeStore store, TextCrashReceipt receipt, long position)
     {
         await Assert.That(store.Identity.NodeId).IsEqualTo(receipt.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(receipt.Incarnation);
         await Assert.That(store.Identity.ReadGeneration).IsEqualTo(receipt.ReadGeneration);
-        await Assert.That(store.Position).IsEqualTo(receipt.Position);
+        await Assert.That(store.Position).IsEqualTo(position);
         var canonicalState = TextCanonicalStateCapture.Capture(store);
         await Assert.That(canonicalState.RecordCount).IsEqualTo(receipt.CanonicalState.RecordCount);
         await Assert.That(canonicalState.Sha256).IsEquivalentTo(receipt.CanonicalState.Sha256,
@@ -85,7 +87,7 @@ internal static class TextProjectionRecoveryAssertions
     }
 
     private static async Task AssertSingleCompletedGenerationAsync(string indexDirectory,
-        TextCrashReceipt receipt, CancellationToken cancellationToken)
+        TextCrashReceipt receipt, long position, CancellationToken cancellationToken)
     {
         var generations = Directory.EnumerateDirectories(indexDirectory)
             .Where(path => Path.GetFileName(path).StartsWith(TextProtocol.GenerationPrefix,
@@ -97,8 +99,8 @@ internal static class TextProjectionRecoveryAssertions
         await Assert.That(manifest.Scope.NodeId).IsEqualTo(receipt.NodeId);
         await Assert.That(manifest.Scope.Incarnation).IsEqualTo(receipt.Incarnation);
         await Assert.That(manifest.Scope.ReadGeneration).IsEqualTo(receipt.ReadGeneration);
-        await Assert.That(manifest.Scope.Position).IsEqualTo(receipt.Position);
-        await Assert.That(manifest.Scope).IsEquivalentTo(receipt.Scope);
+        await Assert.That(manifest.Scope.Position).IsEqualTo(position);
+        await Assert.That(manifest.Scope).IsEquivalentTo(receipt.Scope with { Position = position });
         var records = receipt.ManifestRecords.Select(record =>
             new TextRecord(record.Index, record.Reference, record.Revision)).ToArray();
         await Assert.That(manifest.PostingProof.DocumentCount).IsEqualTo(records.Length);

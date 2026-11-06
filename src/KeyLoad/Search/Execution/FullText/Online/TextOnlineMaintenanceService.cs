@@ -41,7 +41,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
             throw;
         }
         catalog = new(database, root, options, clock, resources, observer);
-        replay = new(database, clock, resources, sessions, catalog, CleanupSessionAsync);
+        replay = new(database, resources, sessions, catalog, CleanupSessionAsync);
     }
 
     public Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
@@ -74,7 +74,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
             var work = session?.Work;
             if (work is null)
             {
-                created = new MaintenanceSessionWork(clock, shutdown.Token);
+                created = new MaintenanceSessionWork(shutdown.Token);
                 work = created;
                 sessions.BeginWork(request.SessionId, created);
             }

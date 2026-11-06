@@ -47,10 +47,11 @@ internal sealed class GraphTraversalIntegrityWholeFlowTests
         using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await GraphTraversalIntegrityAssertions.Image(cold, corruptImage, corruptPosition);
+            corruptPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(cold, corruptImage, corruptPosition);
             await GraphTraversalIntegrityAssertions.Refuse(owner, cold, state, filtered, token);
             GraphTraversalIntegrityFaultRows.Repair(cold, ownedFault);
-            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage, corruptPosition + 1);
+            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage,
+                await NativeStoreAssertions.AdvancedAsync(cold, corruptPosition));
             await GraphTraversalIntegrityAssertions.Healthy(owner, cold, state, null, filtered, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
@@ -61,7 +62,7 @@ internal sealed class GraphTraversalIntegrityWholeFlowTests
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
-        await GraphTraversalIntegrityAssertions.Image(secondCold, continuedImage, continuedPosition);
+        continuedPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(secondCold, continuedImage, continuedPosition);
         await GraphTraversalIntegrityAssertions.Healthy(secondOwner, secondCold, state, continuation, filtered, token);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, state.SeedCommand, state.SeedReceipt);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, continuation.Command, continuation.Receipt);

@@ -1,8 +1,6 @@
 using KeyLoad.FunctionalTests.Messaging;
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Server.Search;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.Search;
@@ -14,24 +12,22 @@ internal static class TextSelectedShutdownAssertions
     private const double Score = 1d / 61d;
 
     internal static async Task VerifyAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
-        TextIndexMaintenanceRequest maintenance, QueryObservedWorkClock clock, CancellationToken token)
+        TextIndexMaintenanceRequest maintenance, CancellationToken token)
     {
         _ = await TextMaintenancePhaseFlow.FinishAsync(database, runtime, maintenance, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var projection = new TextSelectedProjection(TextBilingualAudit.Open(database), runtime.Owner, runtime.Owner);
             await ServerFailureObserver.ObserveAsync(() => HeldAsync(database, runtime, maintenance,
-                new(database.Database, UnitExecutionOptions.QueryExecution(), projection), clock, token), failures);
+                runtime.Search, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await using var reopened = new TextMaintenanceTestRuntime(database);
-            using var projection = new TextSelectedProjection(TextBilingualAudit.Open(database), reopened.Owner, reopened.Owner);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
+                var search = reopened.Search;
                 await LiteralAsync(database, await search.SearchAsync(Root, Request(database, maintenance), token));
             }, failures);
         }, failures);
@@ -39,16 +35,21 @@ internal static class TextSelectedShutdownAssertions
     }
 
     private static async Task HeldAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
-        TextIndexMaintenanceRequest maintenance, SearchEngine search, QueryObservedWorkClock clock, CancellationToken token)
+        TextIndexMaintenanceRequest maintenance, SearchEngine search, CancellationToken token)
     {
         var request = Request(database, maintenance);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var reads = runtime.Owner.SelectedPostingReads(request.TextIndex!);
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var release = new ManualResetEventSlim();
-        clock.Arm(() => runtime.Owner.SelectedPostingReads(request.TextIndex!) > reads,
-            () => { entered.TrySetResult(); release.Wait(token); });
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var observed = 0;
+        using var observation = global::KeyLoad.Query.Search.TextPostingObservation.Enter(async current =>
+        {
+            Interlocked.Increment(ref observed);
+            entered.TrySetResult();
+            await release.Task.WaitAsync(current);
+        });
         Task<RankedDocument[]>? original = null;
         Task? shutdown = null;
         var failures = new List<Exception>();
@@ -65,8 +66,7 @@ internal static class TextSelectedShutdownAssertions
         }
         finally
         {
-            release.Set();
-            clock.Disarm();
+            release.TrySetResult();
             if (original is not null)
             {
                 await ServerFailureObserver.ObserveAsync(async () => await LiteralAsync(database, await original), failures);
@@ -77,7 +77,8 @@ internal static class TextSelectedShutdownAssertions
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        await Assert.That(clock.Triggered).IsTrue();
+        await Assert.That(observed).IsEqualTo(1);
+        await Assert.That(runtime.Owner.SelectedPostingReads(request.TextIndex!)).IsGreaterThan(reads);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

@@ -26,7 +26,7 @@ internal static class QueueViewLeaseIsolationFlow
                 QueueViewLeaseIsolationImages.RequireRoots(owner);
                 await owner.ReopenAsync();
                 QueueViewLeaseIsolationImages.RequireRoots(owner);
-                await QueueViewLeaseIsolationImages.SameAsync(owner, original);
+                original = await QueueViewLeaseIsolationImages.ReopenedAsync(owner, original);
                 await WaveAsync(state);
                 await QueueViewLeaseIsolationImages.SameAsync(owner, original);
             }

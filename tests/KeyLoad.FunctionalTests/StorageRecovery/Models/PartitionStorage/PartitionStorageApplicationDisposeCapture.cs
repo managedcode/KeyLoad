@@ -12,6 +12,6 @@ internal sealed record PartitionStorageApplicationDisposeCapture(
     {
         var owner = services.GetRequiredService<PartitionHostApplicationOwner>();
         return new(owner, services.GetRequiredService<OrleansNode>(),
-            services.GetRequiredService<ServerConnectionRegistry>(), owner.Borrow().DirectoryPath);
+            services.GetRequiredService<ServerConnectionRegistry>(), owner.Session.Host.DirectoryPath);
     }
 }

@@ -17,7 +17,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var policy = new SubscriptionPolicy { MaxWindow = 3, MaxAttempts = 2, MaxLeaseSeconds = 1 };
         var group = SubscriptionTestActions.Configure(fixture, policy: policy);
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var first = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
         var firstOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, first, first.RequestId, time);
         var firstResult = fixture.Database.Apply(firstOperation);
@@ -56,7 +56,7 @@ internal static class SubscriptionParkedRecoveryFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, bytes, position, identity);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 1, 0, 3, 3, true, "AttemptsExhausted");
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, cold, group.Source, source);
         await SubscriptionParkedRecoveryAssertions.ReplayAsync(db, cold, group, parkOperation, parked, history);
@@ -132,7 +132,7 @@ internal static class SubscriptionParkedRecoveryFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, bytes, position, identity);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 2, 3, 3, 3, false, null);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, cold, group.Source, source);

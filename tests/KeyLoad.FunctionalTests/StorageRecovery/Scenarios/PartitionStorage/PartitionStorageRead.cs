@@ -12,7 +12,7 @@ internal static class PartitionStorageRead
     internal static async Task RequireAsync(IServiceProvider source,
         CommitToken minimum, CancellationToken token)
     {
-        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
+        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host.Database;
         var clock = source.GetRequiredService<TimeProvider>();
         var principal = database.Store.Read(view => database.Principal(view, P.Root, clock.GetUtcNow()));
         var requestId = Guid.NewGuid();

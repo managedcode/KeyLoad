@@ -22,10 +22,10 @@ internal sealed class SampleRawIntegrityWholeFlowTests
         await SampleRawIntegrityAssertions.RefuseAsync(fixture, expiry);
         var corruptCut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, corruptCut);
+        corruptCut = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, corruptCut);
         await SampleRawIntegrityAssertions.RefuseAsync(fixture, expiry);
         SampleRawIntegrityScenario.Restore(fixture, original);
-        var expectedApplied = fixture.Owner.LastApplied + 1;
+        var expectedApplied = ExpectedCanonicalCommit.Applied(fixture.Owner, fixture.Partition) + 1;
         var expired = fixture.Apply(expiry);
         await SampleRawIntegrityAssertions.ExpiryReceiptAsync(fixture, expired, expiry, expectedApplied);
         await SampleRawIntegrityAssertions.ReplayAsync(fixture, expiry, expired);
@@ -41,7 +41,7 @@ internal sealed class SampleRawIntegrityWholeFlowTests
         await SampleRawIntegrityAssertions.HealthyAsync(fixture, final: true);
         var healthyCut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, healthyCut);
+        healthyCut = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, healthyCut);
         await SampleRawIntegrityAssertions.HealthyAsync(fixture, final: true);
         await SampleRawIntegrityAssertions.ReplayAsync(fixture, expiry, expired);
         await SampleRawIntegrityAssertions.ReplayAsync(fixture, fixture.SeedOperation, fixture.SeedReceipt);

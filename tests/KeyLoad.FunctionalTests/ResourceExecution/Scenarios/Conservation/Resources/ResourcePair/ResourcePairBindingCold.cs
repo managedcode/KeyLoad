@@ -18,11 +18,12 @@ internal static class ResourcePairBindingCold
             token.ThrowIfCancellationRequested();
             await ResourceIncarnationCold.OpenAsync(state.Source, identity, async store =>
             {
+                cut.StorePosition = await NativeStoreAssertions.ReopenedAsync(store, cut.StorePosition);
                 await Assert.That(OrleansSerialization.Serialize(identity).AsSpan()
                     .SequenceEqual(OrleansSerialization.Serialize(store.Identity))).IsTrue();
                 await ResourceIncarnationAssertions.UnchangedAsync(store, image, cut.StorePosition);
                 var database = state.Source.CreateConfiguredDatabase(store);
-                await Assert.That(database.LastApplied).IsEqualTo(cut.AppliedPosition);
+                await Assert.That(ExpectedCanonicalCommit.Applied(database, state.Source.Partition)).IsEqualTo(cut.AppliedPosition);
                 await ReplayAsync(state, store, database);
                 await ResourcePairBindingAssertions.ModelsAsync(state, database);
                 await ResourcePairBindingSql.HealthyAsync(state, database, token);
@@ -30,7 +31,7 @@ internal static class ResourcePairBindingCold
                 await ResourcePairBindingBm25.HealthyAsync(state, database, token, expectedCurrent: wave == Zero);
                 var request = ResourcePairBindingBatch.Request(state.Source.Partition,
                     ColdPrefix + wave.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                var expectedIndex = database.LastApplied + One;
+                var expectedIndex = ExpectedCanonicalCommit.Applied(database, state.Source.Partition) + One;
                 var issued = ResourcePairBindingBatch.Issue(database, request);
                 var result = database.ApplyEmbedded(issued, token);
                 var original = (OutcomeStoreOracle.ReadStored(store, issued)
@@ -39,8 +40,7 @@ internal static class ResourcePairBindingCold
                 state.Remember(original, result, store);
                 await ResourcePairBindingAssertions.PairsAsync(state, store);
                 image = QueueWholeFlowStorage.Bytes(store);
-                cut = store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                    ? OrleansSerialization.Deserialize<long>(bytes) : default(long), store.Position));
+                cut = store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, state.Source.Partition), store.Position));
             });
         }
     }
@@ -49,7 +49,7 @@ internal static class ResourcePairBindingCold
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var applied = database.LastApplied;
+        var applied = ExpectedCanonicalCommit.Applied(database, state.Source.Partition);
         foreach (var value in state.Originals)
         {
             await ResourceIncarnationAssertions.ResultAsync(value.Result, database.Apply(value.Original));
@@ -57,7 +57,7 @@ internal static class ResourcePairBindingCold
                 value.Original.UserId!, value.Original.CommandId).AsSpan().SequenceEqual(value.Outcome)).IsTrue();
         }
         await ResourceIncarnationAssertions.UnchangedAsync(store, image, position);
-        await Assert.That(database.LastApplied).IsEqualTo(applied);
+        await Assert.That(ExpectedCanonicalCommit.Applied(database, state.Source.Partition)).IsEqualTo(applied);
         await ResourcePairBindingAssertions.PairsAsync(state, store);
     }
 }

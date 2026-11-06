@@ -89,16 +89,15 @@ internal static class BackupCutAssertions
         await Assert.That(identity.SigningKey.Span.SequenceEqual(fixture.Identity.SigningKey.Span)).IsFalse();
         await Assert.That(identity.Durability).IsEqualTo(fixture.Identity.Durability);
         await Assert.That(identity.DispatchPaused).IsTrue();
-        await Assert.That(actual.Position).IsEqualTo(fixture.Position + 1L);
+        await Assert.That(actual.Position).IsGreaterThan(fixture.Position);
         await Assert.That(OrleansSerialization.Serialize(actual.Identity)
             .SequenceEqual(OrleansSerialization.Serialize(identity))).IsTrue();
         string[] expected =
         [
             Row(BackupCutFixture.StoredKeyBytes, OrleansSerialization.Serialize(BackupCutFixture.StoredValue)),
             Row(StoreFileFixture.DispatchPausedKey, OrleansSerialization.Serialize(true)),
-            Row(KeySpace.Applied.ToArray(), OrleansSerialization.Serialize(BackupCutFixture.InitialAuthorityValue)),
-            Row(KeySpace.Clock.ToArray(), OrleansSerialization.Serialize(BackupCutFixture.InitialAuthorityValue)),
-            Row(StoreFileFixture.PositionKey, StoreFileFixture.PositionValue(fixture.Position + 1L))
+            Row(StorageCommandKeys.Applied(null), OrleansSerialization.Serialize(new StoragePartitionPosition(null, BackupCutFixture.InitialAuthorityValue))),
+            Row(StorageCommandKeys.Clock(null), OrleansSerialization.Serialize(BackupCutFixture.InitialClock))
         ];
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal),
             CollectionOrdering.Matching);

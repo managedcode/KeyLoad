@@ -22,8 +22,9 @@ internal static class Bm25PrivateAdmissionFlow
         var failures = new List<Exception>();
         try
         {
-            using var database = new TestDatabase();
-            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
+            var publications = new NativePublicationObservation();
+            using var database = new TestDatabase(storeFaultObserver: publications.Observe);
+            await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database, publications), failures);
         }
         catch (Exception error) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -36,7 +37,7 @@ internal static class Bm25PrivateAdmissionFlow
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExecuteAsync(TestDatabase database)
+    private static async Task ExecuteAsync(TestDatabase database, NativePublicationObservation publications)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         database.Configure(Collection, ResourceKind.Collection);
@@ -48,8 +49,10 @@ internal static class Bm25PrivateAdmissionFlow
         var original = Capture(database, Guid.NewGuid(), null, token);
         var phase = ((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input);
         var expected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
+        var count = publications.Count;
         var result = await SubmitAsync(database, original, token);
-        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1, expected);
+        await Assert.That(publications.Count).IsEqualTo(count + 1);
+        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1, expected, publications.WriteIdentity);
         await RequireReplayAsync(database, original, phase, result, token);
         database.Commit(new PutDocument(Collection, Document, ChangedJson, 1, ExplicitReplacement: true));
         var changed = Capture(database, original.CommandId, original.CommandId, token);
@@ -63,9 +66,11 @@ internal static class Bm25PrivateAdmissionFlow
         await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
         var healthy = Capture(database, Guid.NewGuid(), original.CommandId, token);
         var healthyExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
+        count = publications.Count;
         var healthyResult = await SubmitAsync(database, healthy, token);
+        await Assert.That(publications.Count).IsEqualTo(count + 1);
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database,
-            ((Bm25CorpusPublicationPhaseCommand)(healthy).Value!.Input), healthyResult, subject, 2, healthyExpected);
+            ((Bm25CorpusPublicationPhaseCommand)(healthy).Value!.Input), healthyResult, subject, 2, healthyExpected, publications.WriteIdentity);
         var document = database.Database.GetDocument(Root, new(database.Partition, Collection, Document));
         await Assert.That(document!.Json).IsEqualTo(ChangedJson);
     }
@@ -74,7 +79,7 @@ internal static class Bm25PrivateAdmissionFlow
     {
         return Bm25CorpusCapture.Create(database.Database, Root, Subject,
             new(database.Partition, Collection, Field, Term), id, expected,
-            database.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
+            TestDatabase.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
     }
 
     private static async Task RequireReplayAsync(TestDatabase database, Command<DatabaseCommand> original,
@@ -82,7 +87,7 @@ internal static class Bm25PrivateAdmissionFlow
     {
         var before = CanonicalStoreCut.Read(database);
         var retained = OrleansSerialization.Serialize(database.ReadStoredOutcome(original.CommandId));
-        var refreshed = database.Database.CreateVerifiedBm25CorpusPublication(Root, phase, database.CreateReadWork(token));
+        var refreshed = database.Database.CreateVerifiedBm25CorpusPublication(Root, phase, TestDatabase.CreateReadWork(token));
         var replay = await SubmitAsync(database, refreshed, token);
         await ReplayResultAssertions.SameAsync(result, replay);
         await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));

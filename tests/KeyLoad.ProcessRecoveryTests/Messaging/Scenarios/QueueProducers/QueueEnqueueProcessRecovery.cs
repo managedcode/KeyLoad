@@ -14,7 +14,7 @@ internal static class QueueEnqueueProcessRecovery
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
         var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
-        var physicalTarget = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.PhysicalTargetFile), token));
+        var seedTimestamp = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.SeedTimestampFile), token));
         var baseline = OrleansSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
         var command = ((CommandRequest)operation.Value!.Input);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
@@ -33,7 +33,8 @@ internal static class QueueEnqueueProcessRecovery
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         var outcome = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, operation.CommandId);
-        await Assert.That(store.Position).IsEqualTo(outcome is null ? physicalTarget - QueueEnqueueCrashProtocol.First : physicalTarget);
+        var recoveredTimestamp = store.Position;
+        await Assert.That(recoveredTimestamp).IsGreaterThanOrEqualTo(seedTimestamp);
         if (outcome is null)
         {
             await Assert.That(QueueClaimAckRecoveryAssertions.Capture(store)).IsEquivalentTo(baseline, CollectionOrdering.Matching);
@@ -52,7 +53,14 @@ internal static class QueueEnqueueProcessRecovery
             await Assert.That(outcome).IsNull();
         }
         var result = owner.Apply(operation);
-        await Assert.That(store.Position).IsEqualTo(physicalTarget);
+        if (outcome is null)
+        {
+            await Assert.That(store.Position).IsGreaterThan(recoveredTimestamp);
+        }
+        else
+        {
+            await Assert.That(store.Position).IsEqualTo(recoveredTimestamp);
+        }
         await QueueEnqueueProcessAssertions.ReceiptAsync(result, command, target);
         await QueueEnqueueProcessAssertions.InitialAsync(owner, store, command);
         if (outcome is { } retained)
@@ -73,7 +81,7 @@ internal static class QueueEnqueueProcessRecovery
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(cold);
         await QueueEnqueueProcessValueAssertions.IdentityAsync(cold.Identity, identity);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        await Assert.That(cold.Position).IsGreaterThanOrEqualTo(position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await QueueEnqueueProcessAssertions.InitialAsync(owner, cold, command);
         await QueueClaimAckRecovery.ReplayAsync(owner, cold, operation, result, token);

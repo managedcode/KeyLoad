@@ -80,10 +80,16 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
         }
     }
 
+    internal void CloseSearch()
+    {
+        projection?.Dispose();
+        projection = null;
+    }
+
     private void CloseCurrent()
     {
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => { projection?.Dispose(); projection = null; }, failures);
+        ServerFailureObserver.Observe(CloseSearch, failures);
         ServerFailureObserver.Observe(Store.Dispose, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

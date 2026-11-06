@@ -17,9 +17,9 @@ internal static class QueueDeadlineSignedRetry
             RetryBaseMilliseconds = RuntimeQueueDeadlineProtocol.RetryCapMilliseconds
         });
         var lane = new QueueLaneRef(fixture.Partition, RuntimeQueueDeadlineProtocol.Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         fixture.Commit(new EnqueueMessage(lane.Queue, RuntimeQueueDeadlineProtocol.Message, RuntimeQueueDeadlineProtocol.Payload));
-        start = QueueWholeFlowStorage.Clock(fixture.Store);
+        start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         QueueDeadlineOperations.ConfigureWorker(fixture.Database, lane.Partition, start,
             Capability.QueueConsume | Capability.QueueAck | Capability.QueueInspect, RuntimeQueueDeadlineProtocol.First);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);

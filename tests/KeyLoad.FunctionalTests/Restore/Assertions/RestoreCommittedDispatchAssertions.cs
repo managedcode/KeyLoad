@@ -16,7 +16,7 @@ internal static class RestoreCommittedDispatchAssertions
         var operation = fixture.Operation(OperationKind.SetDispatch, false, Guid.NewGuid());
         var result = fixture.SubmitIssued(fixture.Source.Database, operation);
         await Assert.That(result.Get<bool>()).IsTrue();
-        await Assert.That(source.Position).IsEqualTo(before + 1);
+        await NativeStoreAssertions.AdvancedAsync(source, before);
         await AuthorityAsync(source, false);
         var position = source.Position;
         var image = EventingArtifactState.FullBytes(source);

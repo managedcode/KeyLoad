@@ -72,13 +72,14 @@ internal static class ConfiguredVectorProfileFlow
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(Mismatch);
 
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + CommitAdvance);
-        await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
+        var committedPosition = database.Store.Position;
+        await Assert.That(committedPosition).IsGreaterThan(position);
         await Assert.That(ModelBytes(database, command)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.Batch, command, id: command.CommandId);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
-        await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
+        await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
     }
     internal static string[] ModelBytes(TestDatabase database, CommandRequest command, string principal = Root) =>
         StateBytes(database, command.CommandId, principal);
@@ -93,11 +94,10 @@ internal static class ConfiguredVectorProfileFlow
         var outcome = global ? OutcomeStoreOracle.GlobalKey(principal, commandId)
             : OutcomeStoreOracle.PartitionKey(database.Partition, principal, commandId);
         var locator = global ? null : KeySpace.OutcomeLocator(database.Partition, principal, commandId);
-        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(record => !record.Key.Span.SequenceEqual(outcome)
+        return page.Records.Where(record => !record.Key.Span.SequenceEqual(outcome)
             && (locator is null || !record.Key.Span.SequenceEqual(locator))
-            && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)
-            && !record.Key.Span.SequenceEqual(KeySpace.AppliedBytes)
-            && !record.Key.Span.SequenceEqual(KeySpace.LastCommandBytes)).Select(record => Convert.ToHexString(record.Key.Span)
+            && !record.Key.Span.SequenceEqual(StorageCommandKeys.Clock(global ? null : database.Partition))
+            && !record.Key.Span.SequenceEqual(StorageCommandKeys.Applied(global ? null : database.Partition))).Select(record => Convert.ToHexString(record.Key.Span)
                 + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
     internal static async Task HealthyAsync(DatabaseEngine owner, TestDatabase provenance, CancellationToken token)

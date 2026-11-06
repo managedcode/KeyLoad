@@ -52,24 +52,24 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
             token.ThrowIfCancellationRequested();
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
                 receive, receive.RequestId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
                 ack, ack.CommandId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
                 cached, cached.RequestId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
                 empty, empty.RequestId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
                 nack, nack.CommandId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
                 renew, renew.CommandId, token));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => db.GetSubscription("root", receive.Subscription));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
     }
 
@@ -86,7 +86,7 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
     {
         var placement = db.ReadAtomicPartitionPlacement("root", group.Source.Partition);
         return new(placement.Incarnation, group.Source.Partition.AtomicPartitionId,
-            checked(db.LastApplied + 1));
+            checked(ExpectedCanonicalCommit.Applied(db, group.Source.Partition) + 1));
     }
 
     internal static async Task ReceiptAsync(Result<object> actual, SubscriptionDeliveryCommand request,

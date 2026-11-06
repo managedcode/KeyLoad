@@ -17,6 +17,13 @@ internal static class QueueLifecycleConditionAssertions
         await Assert.That(actual.Identity.SequenceEqual(expected.Identity)).IsTrue();
         await Assert.That(actual.Image).IsEquivalentTo(expected.Image, CollectionOrdering.Matching);
     }
+    internal static async Task<QueueLifecycleConditionCut> ReopenedAsync(ZoneTreeStore store, QueueLifecycleConditionCut expected)
+    {
+        var position = await NativeStoreAssertions.ReopenedAsync(store, expected.Position);
+        var current = expected with { Position = position };
+        await Same(store, current);
+        return current;
+    }
     internal static async Task Corrupt(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state, Command<DatabaseCommand> operation)
     {
         var before = Capture(store);

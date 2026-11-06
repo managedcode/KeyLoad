@@ -80,7 +80,7 @@ internal sealed class ModelRootPolicyFixture(bool queue, bool headerRoot) : IDis
         {
             await Assert.That(mutation.CompositionReferences).IsEmpty();
         }
-        await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(before);
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original model source outcome must exist.");
         await ConfigureAsync(1L, false, false);

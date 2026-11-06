@@ -75,7 +75,7 @@ public static class TimeSeriesReadOperations
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         return database.Store.Read(view =>
         {

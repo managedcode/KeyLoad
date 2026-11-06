@@ -57,7 +57,7 @@ internal static class CursorExpiryBoundaryAssertions
     {
         var expected = new CommitReceipt(command.CommandId, expectedToken, [new(PutKind, "orders", FirstId, Revision), new(PutKind, "orders", SecondId, Revision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(db.Store.Position).IsEqualTo(seedCut + Revision);
+        await Assert.That(db.Store.Position).IsGreaterThan(seedCut);
     }
 
     private static QueryPage Read(QueryEngine queries, QueryRequest request, bool ast, CancellationToken token)

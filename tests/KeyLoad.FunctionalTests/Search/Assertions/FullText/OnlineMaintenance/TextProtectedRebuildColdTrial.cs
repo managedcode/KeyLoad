@@ -12,6 +12,7 @@ internal static class TextProtectedRebuildColdTrial
         var beforeCold = QueueWholeFlowStorage.Bytes(owner.Store);
         var coldCut = owner.Store.Position;
         owner.Reopen(removeProjection: true);
+        coldCut = await NativeStoreAssertions.ReopenedAsync(owner.Store, coldCut);
         await TextProtectedRebuildColdAssertions.UnchangedAsync(owner, beforeCold, coldCut);
         await TextProtectedRebuildColdAssertions.DeniedAsync(owner, token);
         TextProtectedRebuildColdSeed.Policy(owner, 3L, allowed: true);
@@ -23,6 +24,7 @@ internal static class TextProtectedRebuildColdTrial
         var repaired = QueueWholeFlowStorage.Bytes(owner.Store);
         var repairedCut = owner.Store.Position;
         owner.Reopen(removeProjection: false);
+        repairedCut = await NativeStoreAssertions.ReopenedAsync(owner.Store, repairedCut);
         await TextProtectedRebuildColdAssertions.UnchangedAsync(owner, repaired, repairedCut);
         await TextProtectedRebuildColdAssertions.CurrentAsync(owner, token);
         foreach (var original in originals)

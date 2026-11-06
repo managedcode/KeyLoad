@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.ProcessRecoveryTests.StorageRecovery;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -20,7 +21,7 @@ internal sealed class TestDatabase : IDisposable
     private const string RootPrincipalId = "root";
     private const string RootCredential = "root.unit-test-credential-32-characters";
     private readonly TestDatabaseCloseState closeState = new();
-    private readonly Func<ZoneTreeStore, DatabaseEngine> createDatabase;
+    private readonly Func<IAtomicStore, DatabaseEngine> createDatabase;
     private readonly IOptions<DatabaseLimits> limits;
     private readonly TestDatabaseOriginalResourceCommands originalResources = new();
 
@@ -122,12 +123,12 @@ internal sealed class TestDatabase : IDisposable
         => OutcomeStoreOracle.ReadStored(Store, command)
             ?? throw new InvalidOperationException("The exact stored test outcome is missing.");
 
-    internal DatabaseEngine CreateConfiguredDatabase(ZoneTreeStore ownedStore) => createDatabase(ownedStore);
+    internal DatabaseEngine CreateConfiguredDatabase(IAtomicStore ownedStore) => createDatabase(ownedStore);
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
-    internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
-        => new(Database.EvaluationClock, cancellationToken);
+        => Store.Read(view => (view.ReadOwnedValue(StorageCommandKeys.Applied(Partition)) is { } bytes
+            ? OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes).Position : default(long), Store.Position));
+    internal static ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
+        => new(cancellationToken);
 
     internal void JoinOwnedResources()
     {

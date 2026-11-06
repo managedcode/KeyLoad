@@ -25,7 +25,7 @@ internal static class GraphTraversalRowCold
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
-                await Assert.That(cold.Position).IsEqualTo(cut);
+                cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
                 await Assert.That(CanonicalStoreImage.Bytes(cold).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await GraphTraversalRowAssertions.ReadAsync(engine, cold, db, true, token);
                 await GraphTraversalRowContinuation.ReplayAsync(engine, cold, command, receipt, outcome, token);

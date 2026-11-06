@@ -66,8 +66,7 @@ internal sealed class EventingArtifactFixture
         Database = Source.CreateConfiguredDatabase(Target);
     }
     internal (long AppliedPosition, long StorePosition) ReadTargetCut()
-        => Database.Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Database.Store.Position));
+        => Database.Store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, Source.Partition), Database.Store.Position));
 
     internal Command<DatabaseCommand> ReadTargetIssuedOperation(Guid originalId)
         => OutcomeStoreOracle.ReadStored(Database, originalId, CancellationToken.None).PreparedCommand;
@@ -85,7 +84,7 @@ internal sealed class EventingArtifactFixture
     internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T value, Guid id, string principal = Principal)
     {
         var database = Target is null ? Source.Database : Database;
-        var committed = QueueWholeFlowStorage.Clock(Target ?? Source.Store);
+        var committed = QueueWholeFlowStorage.Clock(Target ?? Source.Store, Source.Partition);
         return database.CreateCommand(kind, id, principal, Time < committed ? committed : Time,
             JsonSerializer.Serialize(value, JsonDefaults.Options));
     }

@@ -65,8 +65,8 @@ internal static class SharedDomainModelAssertions
         await Assert.That(actual.Events.Length).IsEqualTo(checked((int)tail));
         await Assert.That(actual.HasMore).IsFalse();
         await Assert.That(actual.Cursor).IsNull();
-        await Assert.That(actual.CutPosition).IsEqualTo(database.LastApplied);
-        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.LastApplied);
+        await Assert.That(actual.CutPosition).IsEqualTo(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, scope.Partition)));
+        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, scope.Partition)));
         List<EventRecord> expected = [];
         if (tail > NoRevision)
         {

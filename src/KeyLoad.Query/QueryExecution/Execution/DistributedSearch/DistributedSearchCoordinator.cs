@@ -19,7 +19,7 @@ internal static partial class DistributedSearchCoordinator
         ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: BCL null validation accepts the prepare Func reference through its object parameter. */;
         ArgumentNullException.ThrowIfNull(sourceBarrier) /* KLD0041: BCL null validation accepts the sourceBarrier Func reference through its object parameter. */;
         ArgumentNullException.ThrowIfNull(clock) /* KLD0041: BCL null validation accepts the clock TimeProvider reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(clock, original);
+        var budget = new ReadExecutionBudget(original);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

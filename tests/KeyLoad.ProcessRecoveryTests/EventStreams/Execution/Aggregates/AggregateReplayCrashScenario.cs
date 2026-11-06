@@ -41,7 +41,6 @@ internal static class AggregateReplayCrashScenario
         const int InitialStateSchemaVersion = 1;
         const int NoSnapshotVersion = 0;
         const int InitialGeneration = 1;
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store);
         Seed(database);
@@ -50,7 +49,6 @@ internal static class AggregateReplayCrashScenario
         var request = new CommandRequest(SnapshotCommandId, Partition, [command]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SnapshotCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

@@ -19,7 +19,7 @@ internal static class AnnPublicSearchExecutor
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Execute(database, projection, principalId, request, budget, execution));

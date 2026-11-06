@@ -25,6 +25,7 @@ internal static class DocumentLiveProfileCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var database = db.CreateConfiguredDatabase(store);

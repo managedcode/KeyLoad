@@ -23,6 +23,7 @@ internal static class SparseCompositePrefixCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, fixture.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(cold, position);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await SqlOffsetRefusals.UnchangedAsync(cold, image, position, bytes);

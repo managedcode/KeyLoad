@@ -6,43 +6,43 @@ namespace KeyLoad.FunctionalTests.Authorization;
 
 internal static class RequiredProcessingPolicyRefusal
 {
-    private static string[] Image(ZoneTreeStore store, byte[] outcome, byte[] locator) => store.Read(view =>
+    private static string[] Image(ZoneTreeStore store, PartitionRef partition, byte[] outcome, byte[] locator) => store.Read(view =>
     {
         var page = view.Scan([], 4096);
         if (page.HasMore)
         {
             throw new InvalidOperationException("The complete required-processing image exceeded its bound.");
         }
-        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(row => !row.Key.Span.SequenceEqual(outcome) && !row.Key.Span.SequenceEqual(locator)
-            && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes) && !row.Key.Span.SequenceEqual(KeySpace.AppliedBytes)
-                && !row.Key.Span.SequenceEqual(KeySpace.LastCommandBytes))
+        return page.Records.Where(row => !row.Key.Span.SequenceEqual(outcome) && !row.Key.Span.SequenceEqual(locator)
+            && !row.Key.Span.SequenceEqual(StorageCommandKeys.Clock(partition)) && !row.Key.Span.SequenceEqual(StorageCommandKeys.Applied(partition)))
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
     internal static async Task<byte[]> FreshAsync(RequiredProcessingPolicyFixture fixture, Command<DatabaseCommand> operation,
         ErrorCode code, string detail, CancellationToken token)
     {
         var store = fixture.Harness.Store;
+        var partition = fixture.Harness.Partition;
         var outcome = KeySpace.PartitionOutcome(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         var locator = KeySpace.OutcomeLocator(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(outcome))).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locator))).IsNull();
-        var before = Image(store, outcome, locator);
+        var before = Image(store, fixture.Harness.Partition, outcome, locator);
         var position = store.Position;
-        var expectedApplied = checked(fixture.Harness.Database.LastApplied + 1L);
+        var expectedApplied = checked(store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, partition)) + 1L);
         var identity = OrleansSerialization.Serialize(store.Identity);
-        var clock = store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+        var clock = store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(StorageCommandKeys.Clock(partition))!));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
             await RequiredProcessingPolicyAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token), code, detail), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(Image(store, outcome, locator).SequenceEqual(before)).IsTrue(), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position + 1L), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
-            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue(), failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(Image(store, fixture.Harness.Partition, outcome, locator).SequenceEqual(before)).IsTrue(), failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsGreaterThan(position), failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(partition)))!
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(new StoragePartitionPosition(partition, expectedApplied)))).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(locator))!
             .AsSpan().SequenceEqual(outcome)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
-            view.ReadOwnedValue(KeySpace.ClockBytes)!))).IsGreaterThanOrEqualTo(clock), failures);
+            view.ReadOwnedValue(StorageCommandKeys.Clock(partition))!))).IsGreaterThanOrEqualTo(clock), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         var bytes = RequiredProcessingPolicyAssertions.Outcome(store, fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         await ExistingAsync(fixture.Harness.Database, store, fixture.Harness.Partition, operation, bytes, code, detail, token);

@@ -36,6 +36,7 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
         using var original = new ZoneTreeStore(Options, UnitExecutionOptions.StorageExecution());
         Identity = original.Identity;
         original.Commit((transaction, _) => { transaction.Put(Key, Value); return true; });
+        Position = original.Position;
     }
 
     internal string DirectoryPath
@@ -55,6 +56,7 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
         get;
     }
     internal byte[] Key { get; } = Encoding.UTF8.GetBytes(KeyText);
+    internal long Position { get; }
     internal byte[] Value { get; } = Encoding.UTF8.GetBytes(ValueText);
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFile);
     internal string HiddenIdentityPath => IdentityPath + HiddenSuffix;

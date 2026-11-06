@@ -17,7 +17,7 @@ internal sealed class TestDatabaseOriginalResourceCommands
         {
             return (false, default(long?));
         }
-        return (true, ((long?)(database.LastApplied)));
+        return (true, ((long?)(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, null)))));
     }
 
     internal void Observe(DatabaseEngine database, Command<DatabaseCommand> command, Result<object> result,

@@ -19,7 +19,7 @@ internal static class SubscriptionOldCutHealthy
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.LeaseUntil).IsEqualTo(SubscriptionOldCutState.Epoch.AddSeconds(61));
         var processing = state.Processing(delivery.Token, "input4");
-        var position = database.LastApplied;
+        var position = NativeStoreAssertions.Applied(store, state.Group.Source.Partition);
         var completed = state.Apply(database, OperationKind.SubscriptionProcessing, processing,
             processing.CommandId, SubscriptionOldCutState.Worker).Get<SubscriptionProcessingResult>();
         state.FreshProcessing = completed.Receipt;

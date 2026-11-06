@@ -121,9 +121,9 @@ internal sealed class DocumentSessionReadTests
         db.Configure(Collection, ResourceKind.Collection);
         var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
-        var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+        var original = db.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(db.Partition)))
             ?? throw new InvalidOperationException("The execution applied seed is missing.");
-        db.Store.Commit((transaction, _) => { transaction.Delete(KeySpace.AppliedBytes); return true; });
+        db.Store.Commit((transaction, _) => { transaction.Delete(StorageCommandKeys.Applied(db.Partition)); return true; });
         var before = Snapshot(db);
         var position = db.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Root, reference, receipt.Token));
@@ -131,7 +131,7 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(error.Message).IsEqualTo("The canonical applied position is invalid.");
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
+        db.Store.Commit((transaction, _) => { transaction.Put(StorageCommandKeys.Applied(db.Partition), original); return true; });
         await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
     }
 
@@ -144,10 +144,10 @@ internal sealed class DocumentSessionReadTests
         db.Configure(Collection, ResourceKind.Collection);
         var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
-        var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+        var original = db.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(db.Partition)))
             ?? throw new InvalidOperationException("The execution applied seed is missing.");
-        var corrupt = truncated ? original[..^1] : OrleansSerialization.Serialize(-First);
-        db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, corrupt); return true; });
+        var corrupt = truncated ? original[..^1] : OrleansSerialization.Serialize(new StoragePartitionPosition(db.Partition, -First));
+        db.Store.Commit((transaction, _) => { transaction.Put(StorageCommandKeys.Applied(db.Partition), corrupt); return true; });
         var before = Snapshot(db);
         var position = db.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.GetDocument(Root, reference, receipt.Token));
@@ -156,7 +156,7 @@ internal sealed class DocumentSessionReadTests
             ? "The internal binary payload is invalid." : "The canonical applied position is invalid.");
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
+        db.Store.Commit((transaction, _) => { transaction.Put(StorageCommandKeys.Applied(db.Partition), original); return true; });
         await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
         var next = Apply(db, SecondJson, First);
         await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);

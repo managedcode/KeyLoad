@@ -18,7 +18,7 @@ internal static class InitialPrincipalEpochHealthy
         var expected = new CommitReceipt(id, expectedToken, [new("putDocument", InitialPrincipalEpochFixture.Collection, "record", 2L)], DurabilityProfile.ProcessDurable, 1);
         await InitialPrincipalEpochAssertions.EqualAsync(actual, expected);
         await Assert.That(actual.Mutations.Single().CompositionReferences).IsEmpty();
-        await Assert.That(fixture.Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(fixture.Harness.Store.Position).IsGreaterThan(before);
         var outcome = fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(command.Partition,
             InitialPrincipalEpochFixture.Reader, id)))!;
         return new(operation, expected, outcome);

@@ -11,7 +11,6 @@ internal sealed class AtomicPartitionRosterValidationTests
     private const long AppliedIndexStep = 1;
     private const long NoStorePosition = 0;
     private const long NegativeAppliedIndex = -1;
-    private const long FutureStorePositionStep = 2;
     private const string RootPrincipalId = "root";
     private const string DocumentId = "invalid-roster-document";
     private const string DocumentJson = "{\"value\":1}";
@@ -24,7 +23,7 @@ internal sealed class AtomicPartitionRosterValidationTests
         await AssertInvalidEntryAsync(_ => Entry(NoStorePosition, FirstSeenIndex + AppliedIndexStep));
         await AssertInvalidEntryAsync(position => Entry(position, NoStorePosition,
             partition: AtomicPartitionRosterFixture.Destination));
-        await AssertInvalidEntryAsync(position => Entry(checked(position + FutureStorePositionStep), NoStorePosition));
+        await AssertInvalidEntryAsync(_ => Entry(long.MaxValue, NoStorePosition));
         await AssertInvalidEntryAsync(_ => Entry(NoStorePosition, NoStorePosition));
         await AssertInvalidEntryAsync(_ => Entry(NoStorePosition, NegativeAppliedIndex));
     }
@@ -36,7 +35,7 @@ internal sealed class AtomicPartitionRosterValidationTests
         var malformedKey = KeyCodec.Encode(PartitionRecordFamilies.Document);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Commit((transaction, position) =>
         {
-            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoStorePosition);
+            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoStorePosition, NoStorePosition, null);
             roster.Put(malformedKey, [MalformedKeyValue]);
             return true;
         }));

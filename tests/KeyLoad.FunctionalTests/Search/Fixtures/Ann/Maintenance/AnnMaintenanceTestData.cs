@@ -21,8 +21,9 @@ internal static class AnnMaintenanceTestData
         return new(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field,
             AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId, placement, AnnMaintenanceMode.Build);
     }
-    internal static ProjectionBatch Read(TestDatabase database, AnnMaintenanceRequest request, long upper)
-        => database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, new(request.Consumer, PageLimit, upper));
+    internal static ProjectionBatch Read(TestDatabase database, AnnMaintenanceRequest request, long upper,
+        int pageLimit = PageLimit)
+        => database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, new(request.Consumer, pageLimit, upper));
     internal static CommitProjectionBatchRequest Intent(ProjectionBatch page)
         => new(Guid.NewGuid(), page.Consumer.Consumer, page.Token, []);
     internal static ProjectionBatchResult Commit(TestDatabase database, CommitProjectionBatchRequest intent)

@@ -31,7 +31,7 @@ internal static class UserAnalyticsProcessMutations
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
         var original = Issue(host, OperationKind.Batch, command, command.CommandId, token);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
-            P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + P.Created)), [new(AnalyticsStoreProtocol.UpsertKind, P.Store, update ? P.First : P.Second, update ? P.Updated : P.Created)], host.Database.Durability,
+            P.Partition.AtomicPartitionId, checked(CrashDatabase.AppliedPosition(host.Database.Store, P.Partition) + P.Created)), [new(AnalyticsStoreProtocol.UpsertKind, P.Store, update ? P.First : P.Second, update ? P.Updated : P.Created)], host.Database.Durability,
             host.Database.Durability == DurabilityProfile.Buffered ? BufferedPersistedCopies : LocalPersistedCopies);
         token.ThrowIfCancellationRequested();
         var actual = host.Database.Apply(original).Get<CommitReceipt>();
@@ -50,7 +50,7 @@ internal static class UserAnalyticsProcessMutations
 
     private static Command<DatabaseCommand> Issue(PartitionHost host, OperationKind kind, object payload, Guid id, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(host.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         return host.Database.CreateCommand(kind, id, PartitionStoreProtocol.AdministratorId,
             TimeProvider.System.GetUtcNow(), payload, work);
     }

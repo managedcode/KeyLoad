@@ -127,12 +127,12 @@ internal sealed class PackedAnnValidationTests
         var options = new PackedAnnOptions();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var canceledBuildBudget = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var canceledBuildBudget = new AnnWorkBudget(new ReadExecutionBudget(cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() =>
             PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), canceledBuildBudget));
 
         var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget());
-        var canceledSearchBudget = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var canceledSearchBudget = new AnnWorkBudget(new ReadExecutionBudget(cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() =>
             index.Search(new float[] { 1f, 0f }, 1, null, canceledSearchBudget));
     }

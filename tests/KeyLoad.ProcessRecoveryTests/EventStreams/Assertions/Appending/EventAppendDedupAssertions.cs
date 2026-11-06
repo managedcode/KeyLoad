@@ -33,8 +33,11 @@ internal static class EventAppendDedupAssertions
                 [new AppendEvents(EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, [item], ExpectedStreamRevision.Any)]);
             var original = database.CreateCommand(OperationKind.Batch, id, EventAppendCrashContract.Principal, time, JsonSerializer.Serialize(command, JsonDefaults.Options));
             var beforePosition = database.Store.Position;
+            var beforeApplied = CrashDatabase.AppliedPosition(database.Store, EventAppendCrashContract.Partition);
             var rejected = database.Apply(original);
-            await Assert.That(database.Store.Position).IsEqualTo(beforePosition + 1);
+            await Assert.That(database.Store.Position).IsGreaterThan(beforePosition);
+            await Assert.That(CrashDatabase.AppliedPosition(database.Store, EventAppendCrashContract.Partition))
+                .IsEqualTo(beforeApplied + 1);
             await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
             await Assert.That(rejected.Problem?.Detail).IsEqualTo(changed ? ConflictDetail : DuplicateDetail);
             var afterRejectionPosition = database.Store.Position;

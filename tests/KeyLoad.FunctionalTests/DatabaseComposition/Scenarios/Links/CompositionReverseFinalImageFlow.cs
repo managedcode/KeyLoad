@@ -25,9 +25,9 @@ internal static class CompositionReverseFinalImageFlow
         var receipt = new CommitReceipt(original.CommandId, owner.NextToken(), [new("deleteDocument", D.Collection, D.Id, 2)], DurabilityProfile.ProcessDurable, 1);
         var position = owner.Store.Position;
         await A.ReceiptAsync(receipt, owner.Submit(original).Get<CommitReceipt>());
-        await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
+        await Assert.That(owner.Store.Position).IsGreaterThan(position);
         await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(receipt.Token.Position);
-        await Assert.That(owner.Database.LastApplied).IsEqualTo(receipt.Token.Position);
+        await Assert.That(ExpectedCanonicalCommit.Applied(owner.Database, owner.Source.Partition)).IsEqualTo(receipt.Token.Position);
         var state = new CompositionReverseFinalImageState(bound, request, original, receipt, seed, seedReceipt);
         await A.UnchangedAsync(owner, async () =>
         {
@@ -44,7 +44,7 @@ internal static class CompositionReverseFinalImageFlow
         await VerifyAsync(owner, state);
         for (var cold = 0; cold < 2; cold++)
         {
-            await A.UnchangedAsync(owner, owner.ReopenAsync);
+            await SafeProjectorOperationImages.ReopenAsync(owner);
             await VerifyAsync(owner, state);
         }
     }, token);
@@ -52,7 +52,7 @@ internal static class CompositionReverseFinalImageFlow
     private static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, CommandRequest request,
         CancellationToken token, out ReadExecutionBudget work)
     {
-        work = new(owner.Database.EvaluationClock, token);
+        work = new(token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), request, work);
     }

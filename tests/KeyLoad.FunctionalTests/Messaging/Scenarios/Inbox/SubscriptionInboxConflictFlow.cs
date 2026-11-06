@@ -17,7 +17,7 @@ internal static class SubscriptionInboxConflictFlow
         {
             MaxWindow = 3
         });
-        var producedAt = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var producedAt = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
                 new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")])]);
@@ -75,7 +75,7 @@ internal static class SubscriptionInboxConflictFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, fixture);
         foreach (var entry in history.Skip(1))
         {
@@ -91,7 +91,7 @@ internal static class SubscriptionInboxConflictFlow
             Token = deliveries[0].Token
         };
         var repairedOperation = Create(db, OperationKind.SubscriptionProcessing, repair, repair.CommandId,
-            QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
+            QueueWholeFlowStorage.Clock(cold, group.Source.Partition).AddSeconds(1));
         var repaired = db.Apply(repairedOperation);
         await SubscriptionInboxConflictAssertions.RepairedAsync(db, cold, group, repair, repaired, history[0].Result, inbox, source, fixture);
         history.Add((repairedOperation, repaired, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, repairedOperation.CommandId)));
@@ -99,7 +99,7 @@ internal static class SubscriptionInboxConflictFlow
         foreach (var index in new[] { 2, 1 })
         {
             var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[index].Token, DeliveryAction.Ack);
-            var operation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
+            var operation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, QueueWholeFlowStorage.Clock(cold, group.Source.Partition).AddSeconds(1));
             var result = db.Apply(operation);
             await SubscriptionCheckpointAuthorityAssertions.ReceiptAsync(result, ack, deliveries[index].Event.Position);
             history.Add((operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, operation.CommandId)));
@@ -127,7 +127,7 @@ internal static class SubscriptionInboxConflictFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, originalOwner);
         foreach (var entry in history.Skip(1))
         {
@@ -148,7 +148,7 @@ internal static class SubscriptionInboxConflictFlow
     private static async Task HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var time = QueueWholeFlowStorage.Clock(store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(store, group.Source.Partition).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
         db.Apply(Create(db, OperationKind.Batch, publish, publish.CommandId, time)).Get<CommitReceipt>();

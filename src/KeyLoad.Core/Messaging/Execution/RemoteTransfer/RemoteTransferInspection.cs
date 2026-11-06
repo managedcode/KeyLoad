@@ -19,7 +19,7 @@ public static class RemoteTransferInspection
     public static QueueTransferInspection? InspectQueueTransfer(this DatabaseEngine engine, string principalId, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.InspectQueueTransferRead(principalId, source, transferId, budget);
     }
 
@@ -53,7 +53,7 @@ public static class RemoteTransferInspection
     public static QueueTransferReceiptInspection? InspectQueueTransferReceipt(this DatabaseEngine engine, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.InspectQueueTransferReceiptRead(principalId, destination, source, transferId, budget);
     }
 

@@ -12,7 +12,7 @@ internal sealed class GraphIncomingSortCancellationTests
     private const int IncomingCount = 8;
 
     [Test]
-    public async Task FullPageSortPreservesCancellationAndHealthyReadFollows()
+    public async Task PreparedIncomingPageObservesCallerCancellationAndHealthyReadFollows()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase(new DatabaseLimits());
         var partition = GraphCrossPartitionTestSupport.Partition(TargetPartitionKey);
@@ -32,20 +32,12 @@ internal sealed class GraphIncomingSortCancellationTests
         GraphIncomingEdgesPage page, EntityRef target)
     {
         using var cancellation = new CancellationTokenSource();
-        var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
-        var budget = CreateBudget(clock, cancellation.Token);
+        var budget = new ReadExecutionBudget(cancellation.Token);
         var builder = CreateBuilder(database, page, target, budget);
-        clock.CancelAfterTimestampCalls(2);
+        await cancellation.CancelAsync();
 
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => builder.Build());
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(clock.CancellationTriggered).IsTrue();
-    }
-
-    private static ReadExecutionBudget CreateBudget(TimeProvider clock, CancellationToken cancellationToken)
-    {
-        var budget = new ReadExecutionBudget(clock, cancellationToken);
-        return budget;
     }
 
     private static GraphIncomingEdgesPageBuilder CreateBuilder(TestDatabase database,

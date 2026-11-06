@@ -23,10 +23,12 @@ internal static class ModelHeadAuthorityCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
-                await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut + cycle * 2L, bytes), failures);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
+                await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, bytes), failures);
                 var database = db.CreateConfiguredDatabase(store);
                 await ServerFailureObserver.ObserveAsync(() => ModelHeadAuthorityFault.RunAsync(fixture, database, store, fault, token), failures);
-                await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut + (cycle + 1L) * 2L, bytes), failures);
+                cut = await NativeStoreAssertions.AdvancedAsync(store, cut);
+                await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, bytes), failures);
             }, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);

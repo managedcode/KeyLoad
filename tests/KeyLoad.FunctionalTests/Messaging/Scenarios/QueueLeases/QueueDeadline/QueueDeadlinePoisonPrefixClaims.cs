@@ -11,7 +11,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
     internal static CommitToken NextToken(DatabaseEngine database, QueueLaneRef lane)
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First));
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(database, lane.Partition) + QueueDeadlinePoisonPrefixProtocol.First));
     }
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, Guid id,
@@ -45,7 +45,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         return result.Get<ReceiveResult>();
     }
 
@@ -60,6 +60,6 @@ internal static class QueueDeadlinePoisonPrefixClaims
         var operation = Operation(database, OperationKind.Receive, request.RequestId, request, subject, time);
         await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation),
             Result<object>.Succeed(original));
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 }

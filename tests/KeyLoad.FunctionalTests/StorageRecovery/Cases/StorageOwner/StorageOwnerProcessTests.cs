@@ -7,8 +7,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal sealed class StorageOwnerProcessTests
 {
-    private const long InitialPosition = 1;
-    private const long UpdatedPosition = 2;
     private const string UpdatedValueText = "owner process update survives every open";
     private const string MissingValueMessage = "The parent store lost its committed value.";
 
@@ -19,35 +17,37 @@ internal sealed class StorageOwnerProcessTests
         var expectedValue = Encoding.UTF8.GetBytes(UpdatedValueText);
         using var store = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         var identity = store.Identity;
+        var position = await NativeStoreAssertions.ReopenedAsync(store, files.Position);
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
 
-        await AssertParentStateAsync(store, files, files.Value, InitialPosition);
+        await AssertParentStateAsync(store, files, files.Value, position);
         var firstDenial = await files.InspectAsync();
         await AssertDeniedAsync(firstDenial);
         await AssertCanonicalBytesAsync(files, identityBytes);
-        await AssertParentStateAsync(store, files, files.Value, InitialPosition);
+        await AssertParentStateAsync(store, files, files.Value, position);
 
-        var commitPosition = store.Commit((transaction, position) =>
+        store.Commit((transaction, _) =>
         {
             transaction.Put(files.Key, expectedValue);
-            return position;
+            return true;
         });
-        await Assert.That(commitPosition).IsEqualTo(UpdatedPosition);
-        await AssertParentStateAsync(store, files, expectedValue, UpdatedPosition);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
+        await AssertParentStateAsync(store, files, expectedValue, position);
 
         var secondDenial = await files.InspectAsync();
         await AssertDeniedAsync(secondDenial);
         await AssertCanonicalBytesAsync(files, identityBytes);
-        await AssertParentStateAsync(store, files, expectedValue, UpdatedPosition);
+        await AssertParentStateAsync(store, files, expectedValue, position);
 
         store.Dispose();
         var healthyChild = await files.InspectAsync();
-        await ExistingStoreInspectionAssertions.SucceededAsync(healthyChild, identity, expectedValue, UpdatedPosition);
+        await ExistingStoreInspectionAssertions.SucceededAsync(healthyChild, identity, expectedValue, position);
         await AssertCanonicalBytesAsync(files, identityBytes);
 
         using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
+        position = await NativeStoreAssertions.ReopenedAsync(reopened, healthyChild.Receipt!.Position);
         await AssertIdentityMatchesAsync(identity, reopened.Identity);
-        await AssertParentStateAsync(reopened, files, expectedValue, UpdatedPosition);
+        await AssertParentStateAsync(reopened, files, expectedValue, position);
         await AssertCanonicalBytesAsync(files, identityBytes);
     }
 

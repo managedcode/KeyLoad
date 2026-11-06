@@ -35,7 +35,7 @@ internal static class CompositionBoundReferenceFlow
         await VerifyAsync(owner, state, token);
         for (var cold = 0; cold < 2; cold++)
         {
-            await A.UnchangedAsync(owner, owner.ReopenAsync);
+            await SafeProjectorOperationImages.ReopenAsync(owner);
             await VerifyAsync(owner, state, token);
         }
     }, token);
@@ -66,7 +66,7 @@ internal static class CompositionBoundReferenceFlow
         ImmutableArray<Mutation> mutations, ImmutableArray<MutationReceipt> expectedMutations, bool derived, ImmutableArray<EntityRef> authorityReferences, CancellationToken token)
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
-        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         var operation = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), request, work);
         var receipt = new CommitReceipt(request.CommandId, owner.NextToken(), expectedMutations, DurabilityProfile.ProcessDurable, 1);

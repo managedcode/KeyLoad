@@ -14,11 +14,12 @@ internal sealed class CapturedReadScopeTests
         using var lease = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, MaximumBytes));
         var originalPosition = fixture.Store.Position;
         Change(fixture.Store);
+        var changedPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, originalPosition);
         using var frozen = Capture(lease);
         await RequireCutAsync(lease.Cut, identity, originalPosition);
         lease.Dispose();
         fixture.Reopen();
-        var changedPosition = originalPosition + 1;
+        changedPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, changedPosition);
         await RequireCurrentAsync(fixture.Store, identity, changedPosition, changed: true, healthy: false);
         await RequireFrozenAsync(frozen);
 
@@ -39,12 +40,14 @@ internal sealed class CapturedReadScopeTests
             await Assert.That(current!.SequenceEqual(ReadCutFixture.Value(NewPoint))).IsTrue();
         }
         CommitHealthy(fixture.Store);
+        changedPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, changedPosition);
         fixture.Reopen();
-        await RequireCurrentAsync(fixture.Store, identity, changedPosition + 1, changed: true, healthy: true);
+        changedPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, changedPosition);
+        await RequireCurrentAsync(fixture.Store, identity, changedPosition, changed: true, healthy: true);
         await RequireFrozenAsync(frozen);
         frozen.Dispose();
         Assert.ThrowsExactly<ObjectDisposedException>(() => frozen.ReadOwnedValue(ReadCutFixture.Key(Point)));
-        await RequireCurrentAsync(fixture.Store, identity, changedPosition + 1, changed: true, healthy: true);
+        await RequireCurrentAsync(fixture.Store, identity, changedPosition, changed: true, healthy: true);
     }
 
     [Test]
@@ -82,9 +85,12 @@ internal sealed class CapturedReadScopeTests
             await Assert.That(settled.Records).IsEqualTo(1);
         }
         fixture.Reopen();
+        position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
         await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: false);
         CommitHealthy(fixture.Store);
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
         fixture.Reopen();
-        await RequireCurrentAsync(fixture.Store, identity, position + 1, changed: false, healthy: true);
+        position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
+        await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: true);
     }
 }

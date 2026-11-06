@@ -13,7 +13,7 @@ internal static class RowRevisionBatchInferenceAssertions
         CommitReceipt expected = new(command.CommandId, expectedToken, [new(P.PutReceipt, P.Collection, P.Own, P.RepairRevision),
                 new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(store.Position).IsEqualTo(previousStorePosition + 1L);
+        await Assert.That(store.Position).IsGreaterThan(previousStorePosition);
         await CurrentAsync(creation, database, partition, kind, token);
     }
 

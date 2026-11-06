@@ -33,7 +33,8 @@ internal static class OutboxDocumentMutationFlow
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, continued.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, reopenedPosition);
             await ProjectionConsumerIdentityAssertions.EffectAsync(owner, state);
             await ProjectionConsumerIdentityAssertions.SourcesAsync(owner, state);
             var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Consumer));
@@ -50,13 +51,15 @@ internal static class OutboxDocumentMutationFlow
         ProjectionConsumerIdentityState state, string[] image, long position, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await ProjectionConsumerIdentityAssertions.SameAsync(cold, image, position);
         await OutboxDocumentMutationAssertions.RefuseAsync(owner, cold, state, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Key, state.Original); return true; });
         var prefix = Convert.ToHexString(state.Key) + ":";
         var repaired = image.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(state.Original) : row).ToArray();
-        await ProjectionConsumerIdentityAssertions.SameAsync(cold, repaired, position + 1L);
+        position = await NativeStoreAssertions.AdvancedAsync(cold, position);
+        await ProjectionConsumerIdentityAssertions.SameAsync(cold, repaired, position);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(owner, state);
         var completed = owner.ApplyEmbedded(state.Complete, token);
         var result = completed.Get<ProjectionBatchResult>();

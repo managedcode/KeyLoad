@@ -27,6 +27,7 @@ internal static class UserAnalyticsHostFlow
         });
         await fixture.RunHostAsync(async host =>
         {
+            cut = cut! with { Position = await NativeStoreAssertions.ReopenedAsync(host.Database.Store, cut!.Position) };
             await UserAnalyticsHostAssertions.CutAsync(host, cut!);
             foreach (var (original, receipt) in cut!.Originals.Zip(cut.Receipts))
             {

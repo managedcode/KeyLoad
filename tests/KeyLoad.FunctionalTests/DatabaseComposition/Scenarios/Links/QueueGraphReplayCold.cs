@@ -20,7 +20,7 @@ internal static class QueueGraphReplayCold
             {
                 await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan()
                     .SequenceEqual(JsonDefaults.Serialize(identity))).IsTrue();
-                await Assert.That(store.Position).IsEqualTo(source.ColdPosition);
+                source.ColdPosition = await NativeStoreAssertions.ReopenedAsync(store, source.ColdPosition);
                 await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(source.ColdImage,
                     global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 var engine = source.Fixture.CreateConfiguredDatabase(store);

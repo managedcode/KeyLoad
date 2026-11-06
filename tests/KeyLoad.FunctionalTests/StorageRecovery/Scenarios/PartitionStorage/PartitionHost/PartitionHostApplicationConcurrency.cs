@@ -7,7 +7,7 @@ internal static class PartitionHostApplicationConcurrency
     internal static async Task<PartitionHost> OpenAsync(PartitionHostApplicationOwner owner, IGrainContext context)
     {
         await Assert.That(owner.Opening is null).IsTrue();
-        Assert.ThrowsExactly<InvalidOperationException>(() => owner.Borrow());
+        Assert.ThrowsExactly<InvalidOperationException>(() => _ = owner.Session.Host);
         var openings = new Task[PartitionHostApplicationProtocol.Callers];
         Parallel.For(PartitionHostApplicationProtocol.FirstCaller, openings.Length, index => openings[index] = owner.OpenAsync(context));
         var original = openings[PartitionHostApplicationProtocol.FailureIndex];
@@ -19,7 +19,7 @@ internal static class PartitionHostApplicationConcurrency
         await Assert.That(original.IsCompletedSuccessfully).IsTrue();
         await Assert.That(ReferenceEquals(owner.Opening, original)).IsTrue();
         var borrowed = new PartitionHost[PartitionHostApplicationProtocol.Callers];
-        Parallel.For(PartitionHostApplicationProtocol.FirstCaller, borrowed.Length, index => borrowed[index] = owner.Borrow());
+        Parallel.For(PartitionHostApplicationProtocol.FirstCaller, borrowed.Length, index => borrowed[index] = owner.Session.Host);
         var host = borrowed[PartitionHostApplicationProtocol.FailureIndex];
         foreach (var candidate in borrowed)
         {
@@ -40,7 +40,7 @@ internal static class PartitionHostApplicationConcurrency
         await original.ConfigureAwait(false);
         await Assert.That(original.IsCompletedSuccessfully).IsTrue();
         await Assert.That(owner.CanReleaseRoot).IsTrue();
-        Assert.ThrowsExactly<ObjectDisposedException>(() => owner.Borrow());
+        Assert.ThrowsExactly<ObjectDisposedException>(() => _ = owner.Session.Host);
         Assert.ThrowsExactly<ObjectDisposedException>(() => owner.OpenAsync(context));
         await Assert.That(ReferenceEquals(original, owner.DisposeAsync().AsTask())).IsTrue();
     }

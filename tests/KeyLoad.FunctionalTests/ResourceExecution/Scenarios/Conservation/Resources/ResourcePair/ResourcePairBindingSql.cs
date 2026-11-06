@@ -19,7 +19,7 @@ internal static class ResourcePairBindingSql
         await ResourceIncarnationAssertions.EqualAsync(new CommandRequest(id, source.Partition, [new InsertTypedRow(Table, TypedJson)]), request);
         var issued = source.Database.CreateCommand(OperationKind.Batch, id, Root,
             source.Database.EvaluationClock.GetUtcNow(), compiled.Payload);
-        var expectedIndex = source.Database.LastApplied + One;
+        var expectedIndex = ExpectedCanonicalCommit.Applied(source.Database, source.Partition) + One;
         var actual = await ResourcePairBindingFlow.ApplyAfterRepairAsync(state, issued, Table, token);
         var expected = ResourcePairBindingAssertions.Receipt(source.Store, source.Partition, id,
             expectedIndex, [new(PutKind, Table, TypedId, FirstRevision)]);

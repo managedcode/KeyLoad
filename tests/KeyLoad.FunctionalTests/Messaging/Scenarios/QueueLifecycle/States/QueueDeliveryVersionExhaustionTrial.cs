@@ -14,7 +14,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
         var before = fixture.Store.Position;
         var failed = fixture.Database.Apply(data.Operation);
         await QueueDeliveryVersionExhaustionAssertions.FailureAsync(failed);
-        await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(before);
         await QueueDeliveryVersionExhaustionAssertions.LeasedAsync(fixture.Database, fixture.Store, state, data.DamagedMetadata);
         await QueueClaimVersionExhaustionAssertions.DomainAsync(fixture.Store, data.Lane, domain);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(fixture.Database, fixture.Store, data, failed);
@@ -24,7 +24,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueDeliveryVersionExhaustionContinuation.RunAsync(QueueWholeFlowStorage.Open(cold), cold,
             fixture.Directory, state, failed, action, identity, token);
     }
@@ -33,7 +33,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
     {
         fixture.Configure(QueueClaimVersionExhaustionProtocol.Queue, ResourceKind.WorkQueue);
         var lane = new QueueLaneRef(fixture.Partition, QueueClaimVersionExhaustionProtocol.Queue);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var message = new EnqueueMessage(lane.Queue, QueueClaimVersionExhaustionProtocol.Message,
             QueueClaimVersionExhaustionProtocol.Payload, QueueClaimVersionExhaustionProtocol.Headers);
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition, [message]);

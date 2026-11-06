@@ -11,6 +11,8 @@ internal static class TextProviderAuditCold
         TextProviderAuditDamage damage, CancellationToken token)
     {
         await ReopenAsync(owner);
+        await TextProviderAuditResults.CurrentAsync(owner, state, token);
+        owner.CloseSearch();
         var manifests = Directory.EnumerateDirectories(owner.ProjectionRoot)
             .Select(path => Path.Combine(path, TextProtocol.ManifestFile)).Where(File.Exists);
         var path = manifests.Single(candidate => TextEnvelopeCodec.Decode<TextManifest>(
@@ -24,9 +26,10 @@ internal static class TextProviderAuditCold
         {
             await File.WriteAllBytesAsync(path, changed, token);
             var execution = TextProviderAuditImages.RuntimeFiles(owner.ProjectionRoot);
-            await RefuseAsync(owner, canonical, execution);
+            await RefuseAsync(owner, canonical, execution, token);
             await ReopenAsync(owner);
-            await RefuseAsync(owner, canonical, execution);
+            canonical = await TextProviderAuditImages.ReopenedAsync(owner, canonical);
+            await RefuseAsync(owner, canonical, execution, token);
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -44,16 +47,15 @@ internal static class TextProviderAuditCold
         TextProviderAuditImages.RequireOriginalRoot(owner);
         var image = TextProviderAuditImages.Capture(owner);
         owner.Reopen(removeProjection: false);
-        await TextProviderAuditImages.SameAsync(owner, image);
+        await TextProviderAuditImages.ReopenedAsync(owner, image);
     }
 
     private static async Task RefuseAsync(TextProtectedRebuildColdOwner owner,
-        (KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) canonical, string[] execution)
+        (KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) canonical, string[] execution, CancellationToken token)
     {
-        var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-        {
-            _ = owner.Search;
-        }) ?? throw new InvalidOperationException(ExpectedCorruptionRefusal);
+        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => owner.Search.SearchAsync(Root,
+            new(owner.Source.Partition, Collection, Field, ControlTerm, Limit: QueryLimit), token))
+            ?? throw new InvalidOperationException(ExpectedCorruptionRefusal);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(error.Message).IsEqualTo(TextProtocol.ProjectionCorrupt);
         await Assert.That(TextProviderAuditImages.RuntimeFiles(owner.ProjectionRoot))

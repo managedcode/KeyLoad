@@ -16,6 +16,7 @@ internal static class SqlBetweenAuthorityCold
         try
         {
             using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution, timeProvider: db.Database.EvaluationClock);
+            cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
             try
             {
                 var database = db.CreateConfiguredDatabase(cold);

@@ -31,7 +31,9 @@ internal static class LocalInboxProcessingHealthyContinuation
                 InitialAttempt, LocalInboxProcessingCrashContract.Generation)], receiveToken);
         var receivePosition = store.Position;
         var received = database.Apply(receiveOperation);
-        await Assert.That(store.Position).IsEqualTo(checked(receivePosition + 1L));
+        await Assert.That(store.Position).IsGreaterThan(receivePosition);
+        await Assert.That(CrashDatabase.AppliedPosition(store, LocalInboxProcessingCrashContract.Partition))
+            .IsEqualTo(receiveToken.Position);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         await LocalInboxProcessingRecoveryImage.ExactAsync(received.Get<ReceiveResult>(), expected);
         var delivery = await Assert.That(received.Get<ReceiveResult>().Deliveries).HasSingleItem();
@@ -44,7 +46,7 @@ internal static class LocalInboxProcessingHealthyContinuation
         var healthyToken = NextToken(database);
         var healthyPosition = store.Position;
         var completed = database.Apply(healthyOperation);
-        await Assert.That(store.Position).IsEqualTo(checked(healthyPosition + 1L));
+        await Assert.That(store.Position).IsGreaterThan(healthyPosition);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         await LocalInboxProcessingRecoveryImage.ExactAsync(completed.Get<CommitReceipt>(), new CommitReceipt(healthy.CommandId, healthyToken, [new(DocumentKind, LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Healthy, HealthyDocumentRevision),
                 new(AckKind, LocalInboxProcessingCrashContract.Output, LocalInboxProcessingCrashContract.Message,

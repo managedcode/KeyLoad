@@ -18,6 +18,7 @@ internal sealed class NonTransactionalPublicationTests
         });
         (await fixture.ConfigureAsync()).Get<ResourceDefinition>();
         var before = fixture.Store.Position;
+        var prefix = NativeStoreAssertions.Applied(fixture.Store, fixture.Partition);
         var id = Guid.NewGuid();
         armed = true;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.BatchAsync(id,
@@ -28,6 +29,8 @@ internal sealed class NonTransactionalPublicationTests
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         fixture.Store.Dispose();
         using var cold = NonTransactionalTableFixture.Open(fixture.Owner.Directory);
+        before = await NativeStoreAssertions.ReopenedAsync(cold, before);
+        await Assert.That(NativeStoreAssertions.Applied(cold, fixture.Partition)).IsEqualTo(prefix);
         await Assert.That(cold.Position).IsEqualTo(before);
         await Assert.That(cold.Read(view => view.ReadOwnedValue(fixture.OutcomeKey(id)))).IsNull();
         var database = fixture.Owner.CreateConfiguredDatabase(cold);

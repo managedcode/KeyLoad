@@ -46,6 +46,7 @@ internal static class RestoreResumedTokenFlow
             for (var cold = 0; cold < ColdOpens; cold++)
             {
                 fixture.ReopenTarget(target);
+                position = await NativeStoreAssertions.ReopenedAsync(fixture.Target!, position);
                 await Assert.That(fixture.Target!.Position).IsEqualTo(position);
                 await Assert.That(EventingArtifactState.FullBytes(fixture.Target))
                     .IsEquivalentTo(image, CollectionOrdering.Matching);

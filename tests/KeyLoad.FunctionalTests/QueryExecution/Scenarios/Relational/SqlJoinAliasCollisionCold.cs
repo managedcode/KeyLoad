@@ -29,7 +29,7 @@ internal static class SqlJoinAliasCollisionCold
                 {
                     await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
                     await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-                    await Assert.That(reopened.Position).IsEqualTo(position);
+                    position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     var owner = database.CreateConfiguredDatabase(reopened);
                     await SqlJoinAliasCollisionFlow.RunAsync(owner, reopened, database.Partition, repaired: true);

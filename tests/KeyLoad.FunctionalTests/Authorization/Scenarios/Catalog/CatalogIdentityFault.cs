@@ -21,14 +21,19 @@ internal static class CatalogIdentityFault
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             Write(db, key, damaged);
-            await CatalogIdentityLifetime.ConserveAsync(db.Store, Replace(image, key, original, damaged), cut + 1L);
+            cut = await NativeStoreAssertions.AdvancedAsync(db.Store, cut);
+            await CatalogIdentityLifetime.ConserveAsync(db.Store, Replace(image, key, original, damaged), cut);
             await CatalogIdentityAssertions.RefusedAsync(db.Database, db.Store, db.Partition, ErrorCode.Corruption,
                 credential ? "The authenticated credential identity is inconsistent." : "The persisted principal identity is inconsistent.",
                 !credential, token);
         }, failures);
         // Restore this exact owned row even if refusal, body, or conservation assertions failed.
         ServerFailureObserver.Observe(() => Write(db, key, original), failures);
-        await ServerFailureObserver.ObserveAsync(() => CatalogIdentityLifetime.ConserveAsync(db.Store, image, cut + 2L), failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            cut = await NativeStoreAssertions.AdvancedAsync(db.Store, cut);
+            await CatalogIdentityLifetime.ConserveAsync(db.Store, image, cut);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

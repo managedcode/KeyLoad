@@ -45,7 +45,9 @@ internal static class AuthorizationTelemetryAssertions
         var clients = spans.Where(static span => span.Source == AuthorizationTelemetryTestProtocol.HttpClientSource).ToArray();
         await Assert.That(servers.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.None or AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
             or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
-            ? AuthorizationTelemetryTestProtocol.RequestCount : AuthorizationTelemetryTestProtocol.HealthyCount);
+            ? AuthorizationTelemetryTestProtocol.RequestCount : AuthorizationTelemetryTestProtocol.HealthyCount)
+            .Because("Suppressed request trace: " + suppressedTrace + "; exported server traces: "
+                + string.Join(",", servers.Select(static span => span.TraceId)));
         await Assert.That(clients.Length).IsEqualTo(state is AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks
             or AuthorizationUnsafeSpanState.ClientEvent or AuthorizationUnsafeSpanState.ClientTaggedLink or AuthorizationUnsafeSpanState.ClientTraceStateLink or AuthorizationUnsafeSpanState.ClientExtraLink or AuthorizationUnsafeSpanState.ClientRemoteLink
             ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount).Because(JsonSerializer.Serialize(new

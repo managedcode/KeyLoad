@@ -50,7 +50,6 @@ internal static class SharedDomainCrashScenario
         var originalOperation = SharedDomainCrashOperations.Create(database, OperationKind.Batch, original.CommandId, original, time);
         await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray(), creations);
         progress.Record(SharedDomainChildProgressPhase.ArmingOriginalBoundary);
-        boundary.Position = store.Position + FirstRevision;
         await boundary.ArmAsync(store);
         _ = database.Apply(originalOperation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

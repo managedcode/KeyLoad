@@ -12,4 +12,8 @@ public sealed record StorageBatchResult(
 {
     internal const int PositionField = 0;
     internal const int AppliedField = 1;
+
+    /// <summary>Persisted effects for the other copies; absent for a replay or single-copy execution.</summary>
+    [Orleans.Id(2)]
+    public StorageReplicaBatch? Replication { get; init; }
 }

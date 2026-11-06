@@ -151,7 +151,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         var record = new DocumentRecord(reference, 1, json, new RowAccess(), Database.EvaluationClock.GetUtcNow());
         Store.Commit((transaction, position) =>
         {
-            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoAppliedIndex);
+            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoAppliedIndex, NoAppliedIndex, null);
             roster.Put(KeySpace.Partition(PartitionRecordFamilies.Document, partition, Collection, id),
                 OrleansSerialization.Serialize(record));
             roster.PersistCandidates();

@@ -20,17 +20,22 @@ internal sealed class GroupCommitTests
     [Test]
     public async Task AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedCommitsAndCursorContinuation()
     {
-        using var fixture = new TestDatabase();
+        var publication = new NativePublicationObservation();
+        using var fixture = new TestDatabase(storeFaultObserver: publication.Observe);
         fixture.Configure(GroupCommitCommands.Collection, ResourceKind.Collection);
         Command<DatabaseCommand>[] operations = [GroupCommitCommands.Put(fixture, First, Created),
             GroupCommitCommands.Put(fixture, Second, Created), GroupCommitCommands.Put(fixture, First, Updated, 1)];
         var token = GroupCommitCommands.Token;
         var prepared = fixture.Database.PrepareStorageOperations(operations, token);
-        var sequence = fixture.Database.LastApplied;
+        var sequence = fixture.ReadCanonicalCut().AppliedPosition;
         var position = fixture.Store.Position;
+        var publications = publication.Count;
         var batch = await fixture.Database.ApplyStorageOperationsAsync(prepared, sequence + NextSequence, token);
         var receipt = batch.Applied[^1].Result.Get<CommitReceipt>();
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + OneCommit);
+        await Assert.That(publication.Count).IsEqualTo(publications + OneCommit);
+        await Assert.That(fixture.Store.Position).IsEqualTo(publication.Position);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(position);
+        var physicalCut = fixture.Store.Position;
         await Assert.That(receipt.Token.Position).IsEqualTo(batch.Position);
         await Assert.That(receipt.Token.Position).IsNotEqualTo(fixture.Store.Position);
         var observation = new QueryReadCutObservationCapture();
@@ -42,14 +47,14 @@ internal sealed class GroupCommitTests
 
         var first = engine.ExecuteAst("root", request, cancellationToken: token);
 
-        await Assert.That(first.CutPosition).IsEqualTo(position + OneCommit);
+        await Assert.That(first.CutPosition).IsEqualTo(physicalCut);
         await Assert.That(first.Rows.Select(row => row.EntityId)).IsEquivalentTo([First]);
         await Assert.That(first.Rows.Single().Json).IsEqualTo(Updated);
-        await Assert.That(observation.Values.Single().ResultCutPosition).IsEqualTo(position + OneCommit);
+        await Assert.That(observation.Values.Single().ResultCutPosition).IsEqualTo(physicalCut);
         await Assert.That(observation.Values.Single().StorePosition).IsEqualTo(fixture.Store.Position);
         await Assert.That(first.Cursor).IsNotNull();
         var following = engine.ExecuteAst("root", request with { Cursor = first.Cursor }, cancellationToken: token);
-        await Assert.That(following.CutPosition).IsEqualTo(position + OneCommit);
+        await Assert.That(following.CutPosition).IsEqualTo(physicalCut);
         await Assert.That(following.Rows.Select(row => row.EntityId)).IsEquivalentTo([Second]);
         await Assert.That(following.Rows.Single().Json).IsEqualTo(Created);
         await Assert.That(following.Cursor).IsNull();
@@ -66,21 +71,26 @@ internal sealed class GroupCommitTests
     [Test]
     public async Task AcRep008ConsecutiveCommandsShareOneCommitWithOrderedSequences()
     {
-        using var fixture = new TestDatabase();
+        var publication = new NativePublicationObservation();
+        using var fixture = new TestDatabase(storeFaultObserver: publication.Observe);
         fixture.Configure(GroupCommitCommands.Collection, ResourceKind.Collection);
         Command<DatabaseCommand>[] operations = [GroupCommitCommands.Put(fixture, First, Created),
             GroupCommitCommands.Put(fixture, Second, Created), GroupCommitCommands.Put(fixture, First, Updated, 1)];
         var token = GroupCommitCommands.Token;
         var prepared = fixture.Database.PrepareStorageOperations(operations, token);
         await Assert.That(prepared.Length).IsEqualTo(operations.Length);
-        var sequence = fixture.Database.LastApplied;
+        var sequence = fixture.ReadCanonicalCut().AppliedPosition;
         var position = fixture.Store.Position;
+        var publications = publication.Count;
 
         var batch = await fixture.Database.ApplyStorageOperationsAsync(prepared, sequence + NextSequence, token);
 
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + OneCommit);
+        await Assert.That(publication.Count).IsEqualTo(publications + OneCommit);
+        await Assert.That(fixture.Store.Position).IsEqualTo(publication.Position);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(position);
+        var physicalCut = fixture.Store.Position;
         await Assert.That(batch.Position).IsEqualTo(sequence + operations.Length);
-        await Assert.That(fixture.Database.LastApplied).IsEqualTo(batch.Position);
+        await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(batch.Position);
         await Assert.That(batch.Applied.Select(applied => applied.Sequence))
             .IsEquivalentTo([sequence + 1, sequence + 2, sequence + 3]);
         foreach (var applied in batch.Applied)
@@ -90,26 +100,28 @@ internal sealed class GroupCommitTests
         await Assert.That(GroupCommitCommands.Read(fixture, First)!.Revision).IsEqualTo(2L);
         await Assert.That(GroupCommitCommands.Read(fixture, First)!.Json).IsEqualTo(Updated);
         await Assert.That(GroupCommitCommands.Read(fixture, Second)!.Revision).IsEqualTo(1L);
-        var committed = fixture.Database.ReadLastCommittedCommands(token);
+        var committed = operations.Select(operation => fixture.Database.ReadStoredCommand(operation, token).Value
+            ?? throw new InvalidOperationException("The original committed command is missing.")).ToArray();
         await Assert.That(committed.Select(command => command.Sequence)).IsEquivalentTo(batch.Applied.Select(applied => applied.Sequence));
         await Assert.That(committed.Select(command => command.Command.CommandId)).IsEquivalentTo(operations.Select(operation => operation.CommandId));
 
-        fixture.Commit(new PutDocument(GroupCommitCommands.Collection, Healthy, Healthy));
-        var single = fixture.Database.ReadLastCommittedCommands(token);
-        await Assert.That(single.Length).IsEqualTo(1);
-        await Assert.That(single[0].Sequence).IsEqualTo(fixture.Database.LastApplied);
+        var healthy = fixture.Commit(new PutDocument(GroupCommitCommands.Collection, Healthy, Healthy));
+        var single = fixture.ReadStoredOutcome(healthy.CommandId);
+        await Assert.That(single.CanonicalSequence).IsEqualTo(fixture.ReadCanonicalCut().AppliedPosition);
+        await Assert.That(single.PreparedCommand.CommandId).IsEqualTo(healthy.CommandId);
     }
 
     [Test]
     public async Task AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence()
     {
-        using var fixture = new TestDatabase();
+        var publication = new NativePublicationObservation();
+        using var fixture = new TestDatabase(storeFaultObserver: publication.Observe);
         fixture.Configure(GroupCommitCommands.Collection, ResourceKind.Collection);
         var operation = GroupCommitCommands.Put(fixture, First, Created);
         var token = GroupCommitCommands.Token;
         var prepared = fixture.Database.PrepareStorageOperations([operation, operation], token);
         await Assert.That(prepared.Length).IsEqualTo(1);
-        var sequence = fixture.Database.LastApplied;
+        var sequence = fixture.ReadCanonicalCut().AppliedPosition;
 
         var batch = await fixture.Database.ApplyStorageOperationsAsync([prepared[0], prepared[0]], sequence + NextSequence, token);
 
@@ -120,26 +132,24 @@ internal sealed class GroupCommitTests
         await Assert.That(GroupCommitCommands.Read(fixture, First)!.Revision).IsEqualTo(1L);
         var retry = fixture.Database.PrepareStorageOperations([operation], token);
         await Assert.That(retry[0].Timestamp).IsEqualTo(prepared[0].Timestamp);
-        var replay = await fixture.Database.ApplyStorageOperationsAsync(retry, fixture.Database.LastApplied + NextSequence, token);
+        var replay = await fixture.Database.ApplyStorageOperationsAsync(retry, fixture.ReadCanonicalCut().AppliedPosition + NextSequence, token);
         await Assert.That(replay.Applied[0].Sequence).IsEqualTo(sequence + NextSequence);
-        await Assert.That(fixture.Database.LastApplied).IsEqualTo(sequence + NextSequence);
+        await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(sequence + NextSequence);
     }
 
     [Test]
-    public async Task AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands()
+    public async Task AcRep008CopyThatMissedTheLastBatchPublishesItsExactRetainedEffects()
     {
         await DatabaseCompositionReplicaCut.RunAsync(GroupCommitCommands.SeedCollection, async (source, replica) =>
         {
             var token = GroupCommitCommands.Token;
             var prepared = source.Database.PrepareStorageOperations([GroupCommitCommands.Put(source, First, Created),
                 GroupCommitCommands.Put(source, Second, Created)], token);
-            var lagging = replica.Database.LastApplied;
-            var batch = await source.Database.ApplyStorageOperationsAsync(prepared, lagging + NextSequence, token);
-            var missing = source.Database.ReadLastCommittedCommands(token).Where(command => command.Sequence > lagging)
-                .Select(command => command.Command).ToArray();
-            await Assert.That(missing.Length).IsEqualTo(prepared.Length);
-
-            var completed = await replica.Database.ApplyStorageOperationsAsync(missing, lagging + NextSequence, token);
+            var lagging = replica.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, source.Partition));
+            var batch = await source.Database.ApplyStorageOperationsAsync(prepared, lagging + NextSequence, token, retainReplication: true);
+            var retained = source.Database.ReadReplicaBatch(source.Partition, token)
+                ?? throw new InvalidOperationException("The original persisted replica effects are missing.");
+            var completed = await replica.Database.ApplyReplicaBatchAsync(retained, token);
 
             await Assert.That(completed.Position).IsEqualTo(batch.Position);
             await Assert.That(completed.Applied.Select(applied => applied.Sequence))
@@ -167,7 +177,7 @@ internal sealed class GroupCommitTests
         {
             await Assert.That(OrleansSerialization.Serialize(operations[index]).AsSpan().SequenceEqual(originals[index])).IsTrue();
         }
-        var batch = await fixture.Database.ApplyStorageOperationsAsync(prepared, fixture.Database.LastApplied + NextSequence, token);
+        var batch = await fixture.Database.ApplyStorageOperationsAsync(prepared, fixture.ReadCanonicalCut().AppliedPosition + NextSequence, token);
 
         await Assert.That(prepared[1].Timestamp).IsGreaterThanOrEqualTo(prepared[0].Timestamp);
         await Assert.That(batch.Applied.Length).IsEqualTo(operations.Length);

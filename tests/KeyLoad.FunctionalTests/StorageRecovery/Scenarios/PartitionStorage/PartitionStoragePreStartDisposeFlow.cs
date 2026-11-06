@@ -75,7 +75,7 @@ internal static class PartitionStoragePreStartDisposeFlow
             node = application.Services.GetRequiredService<OrleansNode>();
             await PartitionStorageStartupWaitAssertions.StartAsync(application, node, startup.Token)
                 .ConfigureAwait(false);
-            identity = owner.Borrow().Database.Store.Identity;
+            identity = owner.Session.Host.Database.Store.Identity;
             if (previous is { } retained)
             {
                 await Assert.That(JsonDefaults.Serialize(identity).AsSpan()

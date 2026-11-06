@@ -1,5 +1,7 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using ManagedCode.Communication;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.FunctionalTests.StorageReplication;
 
@@ -20,11 +22,12 @@ internal static class StorageOwnerDiscoveryScenario
         var bounded = timeout.Token;
         var creation = Guid.NewGuid();
         source.Database.Configure(Collection, ResourceKind.Collection, id: creation);
+        await StorageCoordinatorPlacement.ActivateAsync(cluster, remote: true, bounded);
         var before = source.Database.ReadCanonicalCut().AppliedPosition;
         var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             SubmitAsync(source, observation.CommandId, First, bounded));
         await Assert.That(refused).IsNotNull();
-        await Assert.That(refused!.Code).IsEqualTo(ErrorCode.OwnershipLost);
+        await Assert.That(refused!.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
         await Assert.That(source.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(before);
         observation.Arm();
         var firstId = Guid.NewGuid();
@@ -42,7 +45,12 @@ internal static class StorageOwnerDiscoveryScenario
                 {
                     throw new InvalidOperationException($"Owner-cut hold was not reached; unarmed cuts={observation.UnarmedCutCalls}, armed cuts={observation.CutCalls}, prepared={observation.PreparedCalls}, original={original.Status}.", failure);
                 }
-                await source.Database.Coordinator.ReadBarrierAsync(bounded);
+                var address = source.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
+                await source.Services.GetRequiredService<IGrainFactory>()
+                    .GetGrain<IPartitionCommitGrain>(PartitionCommitGrainIdentity.For(
+                        source.Database.Database.Store.Identity.Incarnation, source.Database.Partition))
+                    .GetReadOwnerAsync(source.Database.Database.Store.Identity.Incarnation,
+                        source.Database.Partition, address, bounded);
                 await Assert.That(observation.CutCalls).IsEqualTo(DiscoveryCalls);
             }
             finally

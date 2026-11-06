@@ -19,6 +19,7 @@ internal static class SafeProjectorOperationMutations
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, mutations);
         var before = owner.Store.Position;
+        var applied = owner.Database.LastApplied;
         var journal = owner.ReadCanonicalCut();
         var domain = Domain(owner, id);
         var command = SafeProjectorOperationSeed.Issue(owner, OperationKind.Batch, id, request,
@@ -29,9 +30,9 @@ internal static class SafeProjectorOperationMutations
         {
             await Assert.That(Domain(owner, id).SequenceEqual(domain, StringComparer.Ordinal)).IsTrue();
             await Assert.That(command.Outcome.CanonicalSequence).IsEqualTo(journal.AppliedPosition + OnePosition);
-            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((command.Outcome.CanonicalSequence, before + OnePosition));
-            await Assert.That(owner.Database.LastApplied).IsEqualTo(command.Outcome.CanonicalSequence);
-            await Assert.That(owner.Store.Position).IsEqualTo(before + OnePosition);
+            await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((command.Outcome.CanonicalSequence, owner.Store.Position));
+            await Assert.That(owner.Database.LastApplied).IsEqualTo(applied + OnePosition);
+            await Assert.That(owner.Store.Position).IsGreaterThan(before);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => StoredRefusalAsync(owner, command, expectedDetail, policyEpoch), failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -53,7 +54,7 @@ internal static class SafeProjectorOperationMutations
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
-        var encodedClock = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))
+        var encodedClock = owner.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Clock(owner.Source.Partition)))
             ?? throw new InvalidOperationException(MissingClock);
         await Assert.That(OrleansSerialization.Deserialize<DateTimeOffset>(encodedClock)).IsEqualTo(new DateTimeOffset(command.Operation.Timestamp));
         var locator = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
@@ -110,9 +111,8 @@ internal static class SafeProjectorOperationMutations
         {
             KeySpace.PartitionOutcome(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
             KeySpace.OutcomeLocator(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
-            KeySpace.ClockBytes,
-            KeySpace.AppliedBytes,
-            KeySpace.LastCommandBytes
+            StorageCommandKeys.Clock(owner.Source.Partition),
+            StorageCommandKeys.Applied(owner.Source.Partition)
         }.Select(key => Convert.ToHexString(key) + Separator).ToArray();
         return TeamRowPolicyAssertions.Image(owner.Store).Where(row =>
             !excluded.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();

@@ -29,7 +29,7 @@ internal static class ResourceLifetimeLedgerSession
             parent = workOwner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
             parent.AttachResultRetention(retention);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, parent.Cancellation);
-            var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
+            var budget = new ReadExecutionBudget(linked.Token);
             await Assert.That(parent.ResultRetention).IsSameReferenceAs(retention);
             await body(workOwner, retention, parent, budget);
         }, failures);

@@ -14,7 +14,7 @@ internal static class QueueStoredCapacityReceipts
         var placement = owner.ReadAtomicPartitionPlacement(QueueEnqueueColdProtocol.Root, partition);
         await Assert.That(placement.Partition).IsEqualTo(partition);
         await Assert.That(placement.Incarnation).IsEqualTo(store.Identity.Incarnation);
-        return new(placement.Incarnation, partition.AtomicPartitionId, checked(owner.LastApplied + QueueEnqueueAuthorityProtocol.First));
+        return new(placement.Incarnation, partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(owner, partition) + QueueEnqueueAuthorityProtocol.First));
     }
 
     internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)

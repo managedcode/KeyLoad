@@ -2,7 +2,6 @@ using System.Globalization;
 using KeyLoad.Client;
 using KeyLoad.Clustering;
 using KeyLoad.Storage.ZoneTree;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.FunctionalTests.Search;
 
@@ -20,14 +19,14 @@ internal sealed class CooperativeExactVectorHostedTests
     public async Task PublicExactSearchLetsTheRequestSchedulerRunBeforeReturningTheOracleWinner()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var clock = new VectorTurnClock();
-        await using var node = new RequestCqrsHostedRuntimeFixture(clock: clock);
+        var observation = new VectorTurnObservation();
+        await using var node = new RequestCqrsHostedRuntimeFixture(observer: observation);
         await node.InitializeAsync(token);
         node.Database.Configure(Collection, ResourceKind.Collection);
         Seed(node.Database);
         using var http = new HttpClient { BaseAddress = node.PublicEndpoint };
         var client = new KeyLoadClient(http, node.AdminKey, UnitClientOptions.Execution());
-        clock.Arm(node.Database.Store, node.Services.GetRequiredService<IGrainContextAccessor>());
+        observation.Arm(node.Database.Store);
         var request = new SearchRequest(node.Database.Partition, Collection, VectorField: Field, Vector: [1, 0],
             Space: Space, Limit: 1);
 
@@ -36,7 +35,7 @@ internal sealed class CooperativeExactVectorHostedTests
         var hit = result.Value!.Single();
         await Assert.That(hit.Document.Reference.Id).IsEqualTo(DocumentId(Rows - 1));
         await Assert.That(hit.Score).IsEqualTo(request.VectorWeight / (request.FusionConstant + 1d));
-        var duringScan = await clock.Turn.WaitAsync(node.Timing.ShutdownTimeout, token);
+        var duringScan = await observation.Turn.WaitAsync(node.Timing.ShutdownTimeout, token);
         await Assert.That(duringScan).IsGreaterThanOrEqualTo((long)ZoneTreeRangeReader.CooperativeSteps);
         await Assert.That(duringScan).IsLessThan(Rows);
     }
@@ -58,7 +57,7 @@ internal sealed class CooperativeExactVectorHostedTests
 
     private static string DocumentId(int row) => row.ToString(IdFormat, CultureInfo.InvariantCulture);
 
-    private sealed class VectorTurnClock : TimeProvider
+    private sealed class VectorTurnObservation : IGrainRequestPhaseObserver
     {
         private readonly TaskCompletionSource<long> turn = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private Observation? armed;
@@ -66,21 +65,46 @@ internal sealed class CooperativeExactVectorHostedTests
 
         internal Task<long> Turn => turn.Task;
 
-        internal void Arm(ZoneTreeStore store, IGrainContextAccessor context)
-            => Volatile.Write(ref armed, new Observation(store, context, store.GetReadDiagnostics().RangeBaselineEntries));
+        internal void Arm(ZoneTreeStore store)
+            => Volatile.Write(ref armed, new Observation(store, store.GetReadDiagnostics().RangeBaselineEntries));
 
-        public override long GetTimestamp()
+        public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
+            IGrainContext context, CancellationToken token)
         {
-            if (Volatile.Read(ref armed) is { } observation && Volatile.Read(ref queued) == 0
-                && observation.Context.GrainContext is { GrainInstance: RequestGrain } grain
-                && observation.Examined > 0 && Interlocked.Exchange(ref queued, 1) == 0)
+            if (phase == GrainRequestPhase.RequestStarted && identity.ReadKind == GrainReadKind.Search
+                && Volatile.Read(ref armed) is { } observation && context.GrainInstance is RequestGrain
+                && Interlocked.Exchange(ref queued, 1) == 0)
             {
-                grain.Scheduler.QueueAction(() => turn.SetResult(observation.Examined));
+                context.Scheduler.QueueAction(() => ObserveTurn(context, observation, token));
             }
-            return TimeProvider.System.GetTimestamp();
+            return ValueTask.CompletedTask;
         }
 
-        private sealed record Observation(ZoneTreeStore Store, IGrainContextAccessor Context, long Baseline)
+        public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)
+        {
+            if (identity.ReadKind == GrainReadKind.Search && queued != 0 && !turn.Task.IsCompleted)
+            {
+                turn.TrySetException(new InvalidOperationException("The exact vector read completed before its observed scheduler turn."));
+            }
+        }
+
+        private void ObserveTurn(IGrainContext context, Observation observation, CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+            {
+                turn.TrySetCanceled(token);
+                return;
+            }
+            var examined = observation.Examined;
+            if (examined >= ZoneTreeRangeReader.CooperativeSteps)
+            {
+                turn.TrySetResult(examined);
+                return;
+            }
+            context.Scheduler.QueueAction(() => ObserveTurn(context, observation, token));
+        }
+
+        private sealed record Observation(ZoneTreeStore Store, long Baseline)
         {
             internal long Examined => Store.GetReadDiagnostics().RangeBaselineEntries - Baseline;
         }

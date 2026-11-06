@@ -45,9 +45,9 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await ReplayColdAsync(restored, cold, state, original, metadata, successes, healthyClaim);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, image, position, identity);
     }
 
     private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> HealthyAsync(DatabaseEngine database,

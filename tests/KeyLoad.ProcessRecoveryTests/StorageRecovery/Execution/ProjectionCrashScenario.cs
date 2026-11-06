@@ -16,7 +16,6 @@ internal static class ProjectionCrashScenario
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
         const int ExpectedRevisionEmptyCount = 0;
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store);
         Configure(database);
@@ -25,7 +24,6 @@ internal static class ProjectionCrashScenario
             [new PutDocument(CrashFixtureValues.Projection, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, ExpectedRevisionEmptyCount)]);
         var operation = CrashDatabase.Operation(database, OperationKind.CommitProjectionBatch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), OrleansSerialization.Serialize(operation));
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         database.Apply(operation).Get<ProjectionBatchResult>();
         await RecoveryProcessPause.WaitForKillAsync(store);

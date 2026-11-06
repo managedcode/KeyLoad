@@ -18,8 +18,7 @@ internal sealed class AnnSeedCutTests
         {
             var identity = database.Store.Identity;
             var head = database.Database.ReadOutboxHead(view, database.Partition);
-            var applied = view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : 0;
+            var applied = StorageOperationApply.ReadCanonicalSequence(view, database.Partition);
             return (identity.NodeId, identity.Incarnation, identity.ReadGeneration, database.Store.Position, applied, head.Tail, head.FirstAvailable);
         });
         var repeated = AnnSeedTestSupport.Capture(database);

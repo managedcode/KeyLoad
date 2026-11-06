@@ -50,6 +50,7 @@ internal static class TestDatabaseConcurrentCloseReopen
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = fixture.CreateConfiguredDatabase(store);
+                    state = state with { LocalPosition = await NativeStoreAssertions.ReopenedAsync(store, state.LocalPosition) };
                     await TestDatabaseConcurrentCloseAssertions.CurrentAsync(owner, store, state);
                     var replay = owner.Apply(state.Original);
                     await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(replay, state.ExpectedReceipt);

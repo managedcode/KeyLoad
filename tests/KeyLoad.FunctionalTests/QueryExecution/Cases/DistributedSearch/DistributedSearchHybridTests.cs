@@ -18,6 +18,8 @@ internal sealed class DistributedSearchHybridTests
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
             await fixture.Source.ReopenAsync();
             await fixture.Destination.ReopenAsync();
+            sourcePosition = await NativeStoreAssertions.ReopenedAsync(fixture.Source.Store, sourcePosition);
+            destinationPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Destination.Store, destinationPosition);
             await DistributedSearchHybridAssertions.RequireAsync(fixture, token);
             await DistributedSearchHybridAssertions.RequireAllAsync(fixture, token);
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);

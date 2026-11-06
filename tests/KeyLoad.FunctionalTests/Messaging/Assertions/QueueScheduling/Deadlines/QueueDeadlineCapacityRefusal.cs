@@ -31,9 +31,9 @@ internal static class QueueDeadlineCapacityRefusal
         await Assert.That(locator!).IsEquivalentTo(KeySpace.PartitionOutcome(state.Lane.Partition,
             state.Attempt.UserId!, state.Attempt.CommandId), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(database.Apply(state.Attempt)).IsEqualTo(refusal);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         await Assert.That(database.ResolveOutcome(state.Attempt)).IsEqualTo(refusal);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         foreach (var item in state.Outcomes)
         {
             token.ThrowIfCancellationRequested();
@@ -49,12 +49,11 @@ internal static class QueueDeadlineCapacityRefusal
         var outcome = Convert.ToHexString(OutcomeStoreOracle.Key(operation)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(lane.Partition, operation.UserId!,
             operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
-        var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
-        var applied = Convert.ToHexString(KeySpace.AppliedBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
-        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var clock = Convert.ToHexString(StorageCommandKeys.Clock(lane.Partition)) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var applied = Convert.ToHexString(StorageCommandKeys.Applied(lane.Partition)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(clock, StringComparison.Ordinal)
-            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(lastCommand, StringComparison.Ordinal)
+            && !row.StartsWith(applied, StringComparison.Ordinal)
             && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();
     }
 }

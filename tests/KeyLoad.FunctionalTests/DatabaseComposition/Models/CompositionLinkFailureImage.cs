@@ -16,7 +16,7 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
         {
             throw new InvalidOperationException("The original failed composition command was already committed.");
         }
-        return new(owner.Store.Position, owner.Database.LastApplied, OrleansSerialization.Serialize(owner.Store.Identity),
+        return new(owner.Store.Position, owner.ReadCanonicalCut().AppliedPosition, OrleansSerialization.Serialize(owner.Store.Identity),
             Effects(owner, operation));
     }
 
@@ -25,8 +25,8 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
     {
         await Assert.That(Effects(owner, operation).SequenceEqual(Rows, StringComparer.Ordinal)).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(Identity)).IsTrue();
-        await Assert.That(owner.Store.Position).IsEqualTo(checked(Position + 1L));
-        await Assert.That(owner.Database.LastApplied).IsEqualTo(checked(Applied + 1L));
+        await Assert.That(owner.Store.Position).IsGreaterThan(Position);
+        await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(checked(Applied + 1L));
         var actual = owner.ReadOutcome(operation);
         await Assert.That(actual.CanonicalSequence).IsEqualTo(checked(Applied + 1L));
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
@@ -38,11 +38,8 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
         var locator = owner.Store.Read(view => view.ReadOwnedValue(
             KeySpace.OutcomeLocator(owner.Source.Partition, operation.UserId!, operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
-        var lastCommand = owner.Store.Read(view => OrleansSerialization.Deserialize<byte[]>(
-            view.ReadOwnedValue(KeySpace.LastCommandBytes)!));
-        await Assert.That(lastCommand.AsSpan().SequenceEqual(key)).IsTrue();
         var clock = owner.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
-            view.ReadOwnedValue(KeySpace.ClockBytes)!));
+            view.ReadOwnedValue(StorageCommandKeys.Clock(owner.Source.Partition))!));
         await Assert.That(clock).IsEqualTo(new DateTimeOffset(operation.Timestamp));
     }
 
@@ -52,9 +49,8 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
         {
             KeySpace.PartitionOutcome(owner.Source.Partition, operation.UserId!, operation.CommandId),
             KeySpace.OutcomeLocator(owner.Source.Partition, operation.UserId!, operation.CommandId),
-            KeySpace.AppliedBytes,
-            KeySpace.LastCommandBytes,
-            KeySpace.ClockBytes
+            StorageCommandKeys.Applied(owner.Source.Partition),
+            StorageCommandKeys.Clock(owner.Source.Partition)
         }.Select(key => Convert.ToHexString(key) + ":").ToArray();
         return CanonicalStoreImage.Bytes(owner.Store)
             .Where(row => !excluded.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();

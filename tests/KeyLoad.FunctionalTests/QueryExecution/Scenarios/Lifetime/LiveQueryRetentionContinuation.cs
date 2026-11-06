@@ -45,6 +45,7 @@ internal static class LiveQueryRetentionContinuation
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution);
+            position = await NativeStoreAssertions.ReopenedAsync(cold, position);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(nodeId);

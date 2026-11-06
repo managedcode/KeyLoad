@@ -10,7 +10,7 @@ internal static class MixedEventingRetentionBackupSeed
         QueueLifecycleProvisioning.Seed(fixture.Source, byteSublimit: false);
         var state = new MixedEventingRetentionBackupState
         {
-            Queue = new(fixture.Source.Partition, QueueWholeFlowStorage.Clock(fixture.Source.Store))
+            Queue = new(fixture.Source.Partition, QueueWholeFlowStorage.Clock(fixture.Source.Store, fixture.Source.Partition))
             {
                 RuntimeSubmit = fixture.Source.SubmitIssued
             }

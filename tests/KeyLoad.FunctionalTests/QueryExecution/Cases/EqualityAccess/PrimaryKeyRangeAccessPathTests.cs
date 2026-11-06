@@ -124,6 +124,7 @@ internal sealed class PrimaryKeyRangeAccessPathTests
         {
             using var store = ZoneTreeExistingStore.Open(new(db.Directory) { Incarnation = identity.Incarnation },
                 identity.NodeId, db.StorageExecution);
+            cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
             var reopened = new QueryEngine(db.CreateConfiguredDatabase(store), UnitExecutionOptions.QueryExecution());
             await Assert.That(reopened.Execute(Root, exact).Rows.Single().EntityId).IsEqualTo("z");
             await Assert.That(reopened.Execute(Root, between).Rows.Single().EntityId).IsEqualTo("zя");

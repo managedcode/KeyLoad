@@ -82,7 +82,7 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
             await Assert.That(page.Head).IsEqualTo(new StreamHead(1, 1, 1));
             await Assert.That(page.HasMore).IsFalse();
             var expected = new EventRecord(new(fixture.Partition, "events", "processed"), 1, 1,
-                new("done", "Completed", "{\"done\":true}"), QueueWholeFlowStorage.Clock(fixture.Store));
+                new("done", "Completed", "{\"done\":true}"), QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
             await Assert.That(JsonSerializer.Serialize(page.Events.Single(), JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
             var output = fixture.Database.InspectMessage("root", lane, "output")!;

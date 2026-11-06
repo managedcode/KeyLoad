@@ -21,7 +21,7 @@ internal static class TextWaitSeed
                 TextBilingualAudit.EnglishId, TextBilingualAudit.EnglishJson)]);
         var operation = database.Database.OwnCommand(database.Database.CreateCommand(OperationKind.Batch, commandId, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
         cancellationToken.ThrowIfCancellationRequested();
-        var expectedPosition = checked(database.Database.LastApplied + 1);
+        var expectedPosition = checked(ExpectedCanonicalCommit.Applied(database.Database, database.Partition) + 1);
         var receipt = database.SubmitIssuedEmbedded(operation, cancellationToken).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(expectedPosition);

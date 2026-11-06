@@ -16,7 +16,7 @@ internal static class QueueOrderedRetryTrial
             ParkedHeadPolicy = parkedHead,
             RetryJitter = QueueRetryJitter.Full
         });
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), parkedHead, QueueOrderedRetryRestoreAuthority.Administrator);
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition), parkedHead, QueueOrderedRetryRestoreAuthority.Administrator);
         await QueueOrderedRetryRestoreAuthority.ProvisionAsync(fixture.Database, state);
         await QueueOrderedRetryInitial.RunAsync(fixture.Database, state, token);
         await QueueOrderedRetryBackupRestore.RunAsync(fixture.Store, state, token);

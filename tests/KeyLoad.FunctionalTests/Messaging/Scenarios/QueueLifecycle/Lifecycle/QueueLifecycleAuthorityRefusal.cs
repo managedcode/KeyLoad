@@ -37,7 +37,7 @@ internal static class QueueLifecycleAuthorityRefusal
                 var refusal = Assert.ThrowsExactly<KeyLoadException>(() => state.SubmitOriginal(database, operation));
                 await Assert.That(refusal.Code).IsEqualTo(ErrorCode.RecoveryRequired);
                 await Assert.That(refusal.Message).IsEqualTo("The queue lifecycle accounting is invalid.");
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, damaged, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, damaged, position, identity);
                 await Assert.That(store.Read(view => view.ReadOwnedValue(
                     KeySpace.PartitionOutcome(state.Partition, operation.UserId!, id)))).IsNull();
             }
@@ -53,7 +53,7 @@ internal static class QueueLifecycleAuthorityRefusal
             var receiptPosition = store.Position;
             await Assert.That(OrleansSerialization.Serialize(state.SubmitOriginal(database, operation)))
                 .IsEquivalentTo(OrleansSerialization.Serialize(repaired), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, receiptImage, receiptPosition, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, receiptImage, receiptPosition, identity);
             await QueueLifecycleImage.SameAsync(store, state.Lane, queue);
             await QueueLifecycleAccountingAssertions.InitialAsync(store, state);
         }

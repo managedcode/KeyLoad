@@ -74,6 +74,7 @@ internal static class PartitionHostApplicationFlow
             var reopened = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
             sessions.Add(reopened);
             var recovered = await PartitionHostApplicationConcurrency.OpenAsync(reopened.Owner, reopened.Context).ConfigureAwait(false);
+            cut = cut with { Position = await NativeStoreAssertions.ReopenedAsync(recovered.Database.Store, cut.Position) };
             await cut.RequireAsync(recovered.Database.Store).ConfigureAwait(false);
             await PartitionHostApplicationLock.ExcludedAsync(fixture.Options.DataDirectory);
             await PartitionHostApplicationConcurrency.CloseAsync(reopened.Owner, reopened.Context).ConfigureAwait(false);

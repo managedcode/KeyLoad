@@ -9,15 +9,11 @@ internal static class CommandWorkAdmission
     internal static (bool HasValue, Command<DatabaseCommand>? Value) Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
         TimeProvider clock, CapabilityWorkLifetime? work, ReadExecutionBudget budget, Command<DatabaseCommand>? originalIntent = null)
     {
-        if (work is null)
-        {
-            return (false, default(Command<DatabaseCommand>?)); // Direct component execution has no hosted resource-lifetime binding.
-        }
         var kind = request.Envelope.CommandKind
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        if (kind == OperationKind.DropTable || CommandResultBinding.IsResourceFreeCommandWork(kind))
+        if (kind == OperationKind.DropTable)
         {
-            work.Bind([]); // Dropping a resource cannot retain its closing lifetime.
+            work?.Bind([]); // Dropping a resource cannot retain its closing lifetime.
             return (false, default(Command<DatabaseCommand>?));
         }
         var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
@@ -27,7 +23,17 @@ internal static class CommandWorkAdmission
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work, budget);
+        if (work is not null)
+        {
+            if (CommandResultBinding.IsResourceFreeCommandWork(kind))
+            {
+                work.Bind([]);
+            }
+            else
+            {
+                database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work, budget);
+            }
+        }
         return (true, ((Command<DatabaseCommand>?)(operation)));
     }
 

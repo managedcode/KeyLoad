@@ -24,14 +24,15 @@ internal sealed class SampleMetadataIntegrityWholeFlowTests
         SampleMetadataIntegrityScenario.Inject(fixture, fault, original);
         await SampleMetadataIntegrityAssertions.Refuse(fixture, fault, refresh, expiry);
         var corrupt = SampleMetadataIntegrityAssertions.Capture(fixture.Store);
-        await Assert.That(corrupt.Position).IsEqualTo(originalCut.Position + 1);
+        await Assert.That(corrupt.Position).IsGreaterThan(originalCut.Position);
         fixture.Reopen();
+        corrupt = corrupt with { Position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, corrupt.Position) };
         await SampleMetadataIntegrityAssertions.Unchanged(fixture, corrupt);
         await SampleMetadataIntegrityAssertions.Refuse(fixture, fault, refresh, expiry);
         SampleMetadataIntegrityScenario.Put(fixture, fault, original);
         await SampleMetadataIntegrityAssertions.Unchanged(fixture, originalCut with
         {
-            Position = originalCut.Position + 2
+            Position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, corrupt.Position)
         });
         var repaired = fixture.Apply(refresh);
         await SampleMetadataIntegrityAssertions.Healthy(fixture, 2, appended: false);
@@ -47,6 +48,7 @@ internal sealed class SampleMetadataIntegrityWholeFlowTests
         await SampleMetadataIntegrityAssertions.Healthy(fixture, 3, appended: true);
         var healthy = SampleMetadataIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
+        healthy = healthy with { Position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, healthy.Position) };
         await SampleMetadataIntegrityAssertions.Unchanged(fixture, healthy);
         await SampleMetadataIntegrityAssertions.Healthy(fixture, 3, appended: true);
         await SampleMetadataIntegrityAssertions.Replay(fixture, fixture.SeedOperation, fixture.SeedReceipt);

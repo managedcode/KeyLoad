@@ -4,13 +4,13 @@ using KeyLoad.Core;
 namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
-    TimeProvider clock, TextResourceOwnership resources, TextOnlineSessions sessions,
+    TextResourceOwnership resources, TextOnlineSessions sessions,
     TextOnlineCatalogOwner catalog, Func<TextOnlineSession, Task> cleanupSession)
 {
     internal async Task<(bool HasValue, OnlineTextCapabilityResult? Value)> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = originalBudget ?? new ReadExecutionBudget(clock, token);
+        var budget = originalBudget ?? new ReadExecutionBudget(token);
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)
         {

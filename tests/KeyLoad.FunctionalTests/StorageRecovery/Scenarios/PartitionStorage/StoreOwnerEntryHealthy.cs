@@ -8,7 +8,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal static class StoreOwnerEntryHealthy
 {
     private const int ColdCycles = 2;
-    private const long CommittedPosition = 1;
     private const string FreshSuffix = ".fresh";
     private const string EmptyOwnerSuffix = ".empty-owner";
 
@@ -20,10 +19,10 @@ internal static class StoreOwnerEntryHealthy
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var result = await files.InspectAsync();
-                await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
+                await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, files.Position);
             }, failures);
         }
-        await ServerFailureObserver.ObserveAsync(() => ReadAsync(files.Options, files.Identity, files, lifetime), failures);
+        await ServerFailureObserver.ObserveAsync(() => ReadAsync(files.Options, files.Identity, files, lifetime, files.Position), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -47,6 +46,7 @@ internal static class StoreOwnerEntryHealthy
             return;
         }
         StoreIdentity? identity = null;
+        long position = 0;
         var store = lifetime.Acquire(() => new(new(directory),
             UnitExecutionOptions.StorageExecution()), failures);
         if (store is not null)
@@ -62,6 +62,7 @@ internal static class StoreOwnerEntryHealthy
                     transaction.Put(files.Key, files.Value);
                     return true;
                 });
+                position = store.Position;
                 var failure = Assert.ThrowsExactly<IOException>(() =>
                 {
                     attemptedOpen = true;
@@ -71,7 +72,7 @@ internal static class StoreOwnerEntryHealthy
                 });
                 await Assert.That(failure).IsNotNull();
                 refused = true;
-                await Assert.That(store.Position).IsEqualTo(CommittedPosition);
+                await Assert.That(store.Position).IsEqualTo(position);
             }, failures);
             if (attempted is not null)
             {
@@ -84,7 +85,7 @@ internal static class StoreOwnerEntryHealthy
             var closed = lifetime.Close(store, failures);
             if (closed && lifetime.CanContinue && identity is not null)
             {
-                await ServerFailureObserver.ObserveAsync(() => ReadAsync(new(directory), identity, files, lifetime), failures);
+                await ServerFailureObserver.ObserveAsync(() => ReadAsync(new(directory), identity, files, lifetime, position), failures);
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -109,7 +110,7 @@ internal static class StoreOwnerEntryHealthy
     }
 
     private static async Task ReadAsync(ZoneTreeStoreOptions options, StoreIdentity expected,
-        ZoneTreeExistingStoreFixture files, StoreOwnerEntryLifetime lifetime)
+        ZoneTreeExistingStoreFixture files, StoreOwnerEntryLifetime lifetime, long position)
     {
         var failures = new List<Exception>();
         var reopened = lifetime.Acquire(() => new(options,
@@ -124,7 +125,7 @@ internal static class StoreOwnerEntryHealthy
                 };
                 await Assert.That(scalarIdentity).IsEqualTo(expected);
                 await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(expected.SigningKey.Span)).IsTrue();
-                await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
+                await NativeStoreAssertions.ReopenedAsync(reopened, position);
                 await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key)))
                     .IsEquivalentTo(files.Value, CollectionOrdering.Matching);
             }, failures);

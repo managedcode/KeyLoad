@@ -35,12 +35,12 @@ internal static class LocalInboxProcessingCrashScenario
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.InputFile,
             database.InspectMessage(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.InputLane,
                 LocalInboxProcessingCrashContract.Message)!);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.PositionFile, store.Position);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.PositionFile,
+            CrashDatabase.AppliedPosition(store, LocalInboxProcessingCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.TargetFile,
             CrashDatabase.NextCommitToken(database, LocalInboxProcessingCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.TailFile,
             database.GetOutboxStatus(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.Partition).Head.Tail);
-        boundary.Position = store.Position + LocalInboxProcessingCrashContract.Generation;
         await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

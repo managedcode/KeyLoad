@@ -3,7 +3,6 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Owns one native snapshot while preparation mutations stay in a discard-only child.</summary>
 internal static class ZoneTreeStorePreparationExecution
 {
-    private const int NextPosition = 1;
     internal const string OutsideTransactionCallback = "Transaction preparation requires its original synchronous compiler callback.";
     private const string Nested = "Store preparation cannot enter an already owned native operation.";
     private const string MissingSnapshot = "Transaction preparation requires its owning native snapshot.";
@@ -16,7 +15,7 @@ internal static class ZoneTreeStorePreparationExecution
             throw new InvalidOperationException(Nested);
         }
         using var operation = new ZoneTreeOperationContext(runtime, runtime.Tree.BeginReadOnlyTransaction(), ownsTransaction: true);
-        var position = checked(runtime.Position + NextPosition);
+        var position = runtime.Position;
         return Fork(runtime, [], [], child => prepare(child, position));
     }
 

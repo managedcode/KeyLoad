@@ -73,7 +73,7 @@ internal static class PartitionStorageFlow
             owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
             node = application.Services.GetRequiredService<OrleansNode>();
             await application.StartAsync(startup.Token).ConfigureAwait(false);
-            var host = owner.Borrow();
+            var host = owner.Session.Host;
             directory = host.DirectoryPath;
             await Assert.That(JsonDefaults.Serialize(host.Database.Store.Identity).AsSpan()
                 .SequenceEqual(JsonDefaults.Serialize(identity))).IsTrue();

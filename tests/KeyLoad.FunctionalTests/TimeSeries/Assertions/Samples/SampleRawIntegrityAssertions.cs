@@ -19,7 +19,7 @@ internal static class SampleRawIntegrityAssertions
             {
                 throw new InvalidOperationException(ImageBound);
             }
-            return JsonSerializer.Serialize(page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(record =>
+            return JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));
 
@@ -29,6 +29,13 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(actual.Position).IsEqualTo(cut.Position);
         await Assert.That(actual.Identity.SequenceEqual(cut.Identity)).IsTrue();
         await Assert.That(actual.Image).IsEqualTo(cut.Image);
+    }
+
+    internal static async Task<SampleRawIntegrityCut> ReopenedAsync(ZoneTreeStore store, SampleRawIntegrityCut cut)
+    {
+        var current = cut with { Position = await NativeStoreAssertions.ReopenedAsync(store, cut.Position) };
+        await UnchangedAsync(store, current);
+        return current;
     }
 
     internal static async Task RefuseAsync(SampleRawIntegrityFixture fixture, Command<DatabaseCommand> expiry)
@@ -67,7 +74,7 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(expectedApplied);
-        await Assert.That(fixture.Owner.LastApplied).IsEqualTo(expectedApplied);
+        await Assert.That(ExpectedCanonicalCommit.Applied(fixture.Owner, fixture.Partition)).IsEqualTo(expectedApplied);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(1);
         var expected = new MutationReceipt(ExpiryKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, 3);
         await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[0]).SequenceEqual(

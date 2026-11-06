@@ -13,7 +13,7 @@ internal static class QueueLeaseAuthorityProcessImage
         {
             throw new InvalidOperationException("The lease authority process image exceeded its original row bound.");
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
     internal static async Task SameAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
@@ -21,6 +21,13 @@ internal static class QueueLeaseAuthorityProcessImage
         await Assert.That(Capture(store).SequenceEqual(image)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+    }
+
+    internal static async Task<long> ReopenedAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
+    {
+        var current = await NativeStoreAssertions.ReopenedAsync(store, position);
+        await SameAsync(store, image, current, identity);
+        return current;
     }
 
     internal static async Task EmptyIndexesAsync(DatabaseEngine database)

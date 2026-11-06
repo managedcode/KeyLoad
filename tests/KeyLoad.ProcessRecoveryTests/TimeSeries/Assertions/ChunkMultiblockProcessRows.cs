@@ -16,7 +16,7 @@ internal static class ChunkMultiblockProcessRows
         var model = new SampleChunkWindowResult(SampleChunkCrashContract.WindowId, SampleChunkCrashContract.From,
             SampleChunkCrashContract.Until, generation, revision, healthy ? ChunkMultiblockCrashProtocol.HealthySequence
                 : prepared && !merge ? ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence
-                : ChunkMultiblockCrashProtocol.PreparedSequence, null, [.. rows], actual.Position);
+                : ChunkMultiblockCrashProtocol.PreparedSequence, null, [.. rows], actual.NativePosition);
         await Assert.That(JsonSerializer.Serialize(actual.Window, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(model, JsonDefaults.Options));
         await Assert.That(JsonSerializer.Serialize(actual.RawRows, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(rows, JsonDefaults.Options));
         await Assert.That(actual.EncodedBlocks.Length).IsEqualTo(prepared ? (merge ? 1 : 0) : !healthy && !merge ? 1 : ChunkMultiblockCrashProtocol.PublishedBlocks);

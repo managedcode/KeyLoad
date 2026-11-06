@@ -41,7 +41,7 @@ public static class AtomicCommandCommit
         {
             cancellationToken.ThrowIfCancellationRequested();
             var now = engine.EvaluationClock.GetUtcNow();
-            if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } encoded)
+            if (view.ReadOwnedValue(StorageCommandKeys.Clock(StorageCommandKeys.PartitionOf(owned))) is { } encoded)
             {
                 var committed = OrleansSerialization.Deserialize<DateTimeOffset>(encoded);
                 now = now < committed ? committed : now;
@@ -62,7 +62,7 @@ public static class AtomicCommandCommit
     {
         ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         operation = engine.OwnCommand(operation);
-        var siloLocal = engine.IsSiloLocalOperation(operation);
+        var siloLocal = engine.IsOwnedSiloLocalOperation(operation);
         cancellationToken.ThrowIfCancellationRequested();
         var committed = engine.Store.Commit((transaction, position) =>
             engine.CompileCommand(transaction, position, operation, canonicalSequence, selectEmbeddedClock, siloLocal, cancellationToken));
@@ -74,7 +74,7 @@ public static class AtomicCommandCommit
     {
         ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         operation = engine.OwnCommand(operation);
-        var siloLocal = engine.IsSiloLocalOperation(operation);
+        var siloLocal = engine.IsOwnedSiloLocalOperation(operation);
         return engine.Store.CommitAsync((transaction, position) =>
             engine.CompileCommand(transaction, position, operation, canonicalSequence, selectEmbeddedClock, siloLocal, cancellationToken),
             cancellationToken);
@@ -90,26 +90,29 @@ public static class AtomicCommandCommit
         {
             admitted = engine.PrepareQueueRetryInView(transaction, admitted);
         }
+        var current = StorageOperationApply.ReadCanonicalSequence(transaction, StorageCommandKeys.PartitionOf(admitted));
         var sequence = siloLocal ? StorageOperationApply.InitialCanonicalSequence
-            : canonicalSequence ?? StorageOperationApply.SelectNextCanonicalSequence(transaction);
-        var result = engine.ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal, cancellationToken);
+            : canonicalSequence ?? StorageOperationApply.SelectNextCanonicalSequence(current);
+        var result = engine.ApplyCommittedCommand(transaction, admitted, position, current, sequence, siloLocal, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        return result;
+        return result.Result;
     }
 
-    internal static StorageOperationResult ApplyCommittedCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, bool siloLocal, CancellationToken cancellationToken)
+    internal static (StorageOperationResult Result, bool Persisted) ApplyCommittedCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, long currentSequence, long replicationIndex, bool siloLocal, CancellationToken cancellationToken,
+        ISet<PartitionRef>? readPartitions = null)
     {
-        var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, position, replicationIndex);
         var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
-        var outcome = engine.ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);
+        var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, position, replicationIndex,
+            currentSequence, partitionScope.Partition, readPartitions);
+        var outcome = engine.ExecuteAndBuildOutcome(rosterTransaction, operation, position, currentSequence, replicationIndex, partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);
         if (replayed || !persistOutcome)
         {
-            return new(outcome.CanonicalSequence, outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */) /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */;
+            return (new StorageOperationResult(outcome.CanonicalSequence, outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */) /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */, false);
         }
 
         if (!siloLocal)
         {
-            StorageOperationApply.RequireNextCanonicalSequence(rosterTransaction, replicationIndex);
+            StorageOperationApply.RequireNextCanonicalSequence(currentSequence, replicationIndex);
         }
 
         outcome = outcome with
@@ -118,10 +121,10 @@ public static class AtomicCommandCommit
         };
         CommandOutcomeApplication.PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
         rosterTransaction.PersistCandidates();
-        return new(outcome.CanonicalSequence, outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */) /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */;
+        return (new StorageOperationResult(outcome.CanonicalSequence, outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */) /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */, true);
     }
 
-    internal static StoredOutcome ExecuteAndBuildOutcome(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, CommandOutcomePartitionScope partitionScope, bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome, CancellationToken cancellationToken)
+    internal static StoredOutcome ExecuteAndBuildOutcome(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, long position, long currentSequence, long replicationIndex, CommandOutcomePartitionScope partitionScope, bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome, CancellationToken cancellationToken)
     {
         replayed = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.UserId!, operation.CommandId, partitionScope);
@@ -144,16 +147,16 @@ public static class AtomicCommandCommit
             if (selection.Outcome is { } previous)
             {
                 replayed = true;
-                return engine.ReplayCommand(transaction, operation, previous, selection, siloLocal);
+                return engine.ReplayCommand(transaction, operation, previous, selection, siloLocal, principal, currentSequence);
             }
 
             if (!siloLocal)
             {
-                StorageOperationApply.RequireNextCanonicalSequence(transaction, replicationIndex);
+                StorageOperationApply.RequireNextCanonicalSequence(currentSequence, replicationIndex);
             }
 
             engine.RequireOriginalEffectAdmission(transaction, principal, operation);
-            ValidateCommandClock(transaction, operation.Timestamp);
+            ValidateCommandClock(transaction, StorageCommandKeys.PartitionOf(operation), operation.Timestamp);
             engine.ValidateQueueRetryDecisions(transaction, principal, operation);
             transferFailure = (engine.CaptureRemoteTransferFailureAuthority(transaction, principal, operation)).Value;
             result = (engine.Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position, placement, cancellationToken) /* KLD0041: The dispatcher places the typed business outcome in the existing native mixed-operation stored-result schema. */);
@@ -177,12 +180,12 @@ public static class AtomicCommandCommit
             result = (ManagedCode.Communication.Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InvalidCommandJsonMessage)) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */);
         }
 
-        return engine.BuildStoredOutcome(operation, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : StorageOperationApply.ReadCanonicalSequence(transaction))) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
+        return engine.BuildStoredOutcome(operation, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : currentSequence)) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
     }
 
-    internal static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)
+    internal static void ValidateCommandClock(AtomicPartitionRosterTransaction view, PartitionRef? partition, DateTimeOffset evaluatedAt)
     {
-        if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < OrleansSerialization.Deserialize<DateTimeOffset>(clock))
+        if (view.ReadOwnedValue(StorageCommandKeys.Clock(partition)) is { } clock && evaluatedAt < OrleansSerialization.Deserialize<DateTimeOffset>(clock))
         {
             throw Errors.Fail(ErrorCode.ClockUncertain, CommittedClockAheadMessage);
         }

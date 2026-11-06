@@ -52,7 +52,6 @@ internal static class RemoteTransferAttemptCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.AcceptFile), JsonDefaults.Serialize(accept));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.FailureFile), failureBytes);
-        boundary.Position = store.Position + RemoteTransferAttemptCrashProtocol.PositionStep;
         await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

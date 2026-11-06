@@ -27,7 +27,7 @@ internal static class RowVisibilityEqualityCold
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
-                await Assert.That(cold.Position).IsEqualTo(cut);
+                cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
                 await Assert.That(CanonicalStoreImage.Bytes(cold).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await RowVisibilityEqualityContinuation.HealthyAsync(db, engine, cold, owner, indexed, parameterized);
                 await RowVisibilityEqualityContinuation.ReplayAsync(database, cold, command, receipt, outcome);

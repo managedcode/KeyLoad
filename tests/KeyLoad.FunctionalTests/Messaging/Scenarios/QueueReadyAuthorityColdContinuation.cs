@@ -47,7 +47,7 @@ internal static class QueueReadyAuthorityColdContinuation
         using var second = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(directory),
             UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, bytes, position, identity);
         foreach (var (command, result) in receipts)
         {
             await global::KeyLoad.FunctionalTests.ResourceExecution.ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
@@ -58,7 +58,7 @@ internal static class QueueReadyAuthorityColdContinuation
         await Assert.That(restored.InspectMessage("root", lane, "input")).IsEqualTo(input);
         await Assert.That(restored.InspectMessage("root", lane, "healthy")).IsEqualTo(new MessageInspection(
             new("healthy", MessageState.Acked, 1, 3, 2, null, null, LeaseVersion: 1), null, null));
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(second, bytes, position, identity);
         var counters = second.Read(view => view.GetRecord<QueueCounters>(
             global::KeyLoad.Core.KeySpace.Partition("queue-counters", lane.Partition, lane.Queue)));
         await Assert.That(counters).IsEqualTo(new QueueCounters(0, 0, 0, 0, 2));

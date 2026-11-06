@@ -41,9 +41,11 @@ internal static class AnnPublishedImageAssertions
                     var row = loaded.Seed.Records[index];
                     await Assert.That(row.DocumentId).IsEqualTo(Ids[index]);
                     await Assert.That(row.Field).IsEqualTo(AnnSeedTestSupport.Field);
-                    await Assert.That(row.Space).IsEqualTo(AnnSeedTestSupport.Space());
+                    await Assert.That(row.Space).IsEqualTo(request.Space);
                     await Assert.That(row.DocumentRevision).IsEqualTo(Revision);
-                    await Assert.That(row.Values).IsEquivalentTo(Values[index], CollectionOrdering.Matching);
+                    var expected = new float[request.Space.Dimension];
+                    Values[index].CopyTo(expected, 0);
+                    await Assert.That(row.Values).IsEquivalentTo(expected, CollectionOrdering.Matching);
                 }
                 _ = actual.AdmitLoaded(loaded.Index, loaded.Manifest, current);
                 await AnnPinnedLifetimeAssertions.AssertAsync(actual, request, current);

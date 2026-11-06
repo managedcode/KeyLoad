@@ -18,7 +18,7 @@ internal static class SubscriptionOldCutSavedFailure
         var position = store.Position;
         var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var outcomeKey = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
-        var next = checked(database.LastApplied + 1);
+        var next = checked(store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, partition)) + 1);
         var outcome = new StoredOutcome(store.Identity.Incarnation, 2, Result<object>.Fail(Errors.Problem(code, detail)), operation)
         {
             ScopeKind = CommandOutcomeScopeKind.Partition,
@@ -28,9 +28,8 @@ internal static class SubscriptionOldCutSavedFailure
 
         expected.Add(Convert.ToHexString(KeySpace.OutcomeLocator(partition, operation.UserId!, operation.CommandId)),
             Convert.ToHexString(outcomeKey));
-        expected[Convert.ToHexString(KeySpace.AppliedBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(next));
-        expected[Convert.ToHexString(KeySpace.LastCommandBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(outcomeKey));
-        expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
+        expected[Convert.ToHexString(StorageCommandKeys.Applied(partition))] = Convert.ToHexString(OrleansSerialization.Serialize(new StoragePartitionPosition(partition, next)));
+        expected[Convert.ToHexString(StorageCommandKeys.Clock(partition))] = Convert.ToHexString(OrleansSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
         var failures = new List<Exception>();
         byte[]? raw = null;
         for (var repeat = 0; repeat < 2; repeat++)
@@ -51,8 +50,14 @@ internal static class SubscriptionOldCutSavedFailure
             }
             var expectedImage = expected.OrderBy(pair => pair.Key, StringComparer.Ordinal)
                 .Select(pair => pair.Key + ":" + pair.Value).ToArray();
-            await ServerFailureObserver.ObserveAsync(() => SubscriptionOldCutAssertions.ConservedAsync(store,
-                expectedImage, position + 1, identity), failures);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                if (repeat == 0)
+                {
+                    position = await NativeStoreAssertions.AdvancedAsync(store, position);
+                }
+                await SubscriptionOldCutAssertions.ConservedAsync(store, expectedImage, position, identity);
+            }, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

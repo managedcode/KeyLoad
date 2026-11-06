@@ -24,6 +24,7 @@ internal static class SqlCreateTableCold
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await Assert.That(store.Identity.NodeId).IsEqualTo(identity.NodeId);

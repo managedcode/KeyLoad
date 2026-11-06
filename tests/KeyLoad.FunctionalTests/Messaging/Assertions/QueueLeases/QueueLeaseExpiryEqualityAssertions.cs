@@ -13,11 +13,18 @@ internal static class QueueLeaseExpiryEqualityAssertions
         await Assert.That(result.Value).IsNull();
     }
 
-    internal static async Task ColdImageAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
+    internal static async Task SameImageAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
     {
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(OrleansSerialization.Serialize(store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
+    }
+
+    internal static async Task<long> ReopenedImageAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
+    {
+        var current = await NativeStoreAssertions.ReopenedAsync(store, position);
+        await SameImageAsync(store, image, current, identity);
+        return current;
     }
 
     internal static async Task DeliveryAsync(Delivery delivery, string id, string payload, string headers)

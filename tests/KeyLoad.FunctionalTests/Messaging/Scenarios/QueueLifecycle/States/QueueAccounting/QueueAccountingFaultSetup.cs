@@ -12,7 +12,7 @@ internal static class QueueAccountingFaultSetup
         fixture.Configure(QueueAccountingFaultProtocol.Queue, ResourceKind.WorkQueue);
         fixture.Configure(QueueAccountingFaultProtocol.Collection, ResourceKind.Collection);
         var lane = new QueueLaneRef(fixture.Partition, QueueAccountingFaultProtocol.Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var expires = kind is QueueAccountingOperation.ReadyExpiry or QueueAccountingOperation.ScheduledExpiry;
         var message = new EnqueueMessage(lane.Queue, QueueAccountingFaultProtocol.Message,
             QueueAccountingFaultProtocol.Payload, QueueAccountingFaultProtocol.Headers,

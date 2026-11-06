@@ -25,6 +25,7 @@ internal static class RowRevisionBatchInferenceCold
             }
             await ServerFailureObserver.ObserveAsync(async () =>
             {
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 var database = db.CreateConfiguredDatabase(store);
                 await Assert.That(store.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(store.Identity.Incarnation).IsEqualTo(identity.Incarnation);

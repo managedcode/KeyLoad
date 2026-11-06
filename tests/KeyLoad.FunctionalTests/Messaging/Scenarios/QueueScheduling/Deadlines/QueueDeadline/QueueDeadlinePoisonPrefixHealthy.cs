@@ -60,14 +60,14 @@ internal static class QueueDeadlinePoisonPrefixHealthy
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         foreach (var item in outcomes)
         {
             token.ThrowIfCancellationRequested();
             await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(item.Operation), item.Result);
             await ReplayResultAssertions.Same<CommitReceipt>(database.ResolveOutcome(item.Operation), item.Result);
         }
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, image, position, identity);
         await QueueDeadlinePoisonPrefixImage.RequireAsync(database, lane, rows, due, QueueDeadlinePoisonPrefixProtocol.FinalReadySequence);
     }
 }

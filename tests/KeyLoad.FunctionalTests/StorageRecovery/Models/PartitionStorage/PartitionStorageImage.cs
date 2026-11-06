@@ -11,7 +11,7 @@ internal sealed record PartitionStorageImage(StoreIdentity Identity, long Positi
         CancellationToken token)
     {
         var rows = new List<KeyValueRecord>();
-        var work = new ReadExecutionBudget(host.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         var scan = view.VisitRange([], view.MaximumRangeRecords, (key, value) =>
         {
             rows.Add(new(key.ToArray(), value.ToArray()));

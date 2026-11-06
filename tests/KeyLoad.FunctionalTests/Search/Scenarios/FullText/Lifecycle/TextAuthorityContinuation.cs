@@ -35,7 +35,7 @@ internal static class TextAuthorityContinuation
         var receipt = database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.Database.LastApplied);
+        await Assert.That(receipt.Token.Position).IsEqualTo(ExpectedCanonicalCommit.Applied(database.Database, database.Partition));
         var expected = new MutationReceipt(PutKind, request.Collection, HealthyId, Revision);
         var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(OrleansSerialization.Serialize(mutation).SequenceEqual(
@@ -65,6 +65,7 @@ internal static class TextAuthorityContinuation
                 original.Dispose();
                 database.Store.Dispose();
                 reopened = OpenStore(database);
+                cut = await NativeStoreAssertions.ReopenedAsync(reopened, cut);
                 await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(reopened.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);

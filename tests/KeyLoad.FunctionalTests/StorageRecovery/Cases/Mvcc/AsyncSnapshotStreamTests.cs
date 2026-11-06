@@ -97,6 +97,7 @@ internal sealed class AsyncSnapshotStreamTests
         {
             using var store = ZoneTreeExistingStore.Open(new(db.Directory) { Incarnation = identity.Incarnation },
                 identity.NodeId, db.StorageExecution);
+            cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
             var engine = db.CreateConfiguredDatabase(store);
             await Assert.That(engine.GetDocument("root", db.ExpectedReference(new(db.Partition, Collection, "a")))!.Json).IsEqualTo(Original);
             await Assert.That(store.Position).IsEqualTo(cut);

@@ -57,14 +57,14 @@ internal static class AtomicTriadStagedWarm
     {
         state.Healthy = AtomicTriadStagedRecipe.Command(state.Partition, false);
         var operation = state.Operation(state.Healthy);
-        var position = state.Owner.LastApplied + AtomicTriadStagedProtocol.InitialRevision;
+        var position = ExpectedCanonicalCommit.Applied(state.Owner, state.Partition) + AtomicTriadStagedProtocol.InitialRevision;
         var committed = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
         state.HealthyCommitted = Errors.Code(committed.Problem).Value is null;
         state.Receipt = new(state.Healthy.CommandId, new(state.Store.Identity.Incarnation, state.Partition.AtomicPartitionId,
             position), AtomicTriadStagedRecipe.Receipts, DurabilityProfile.ProcessDurable, 1);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => AtomicTriadStagedReplay.Retain(state, operation, committed), failures);
-        ServerFailureObserver.Observe(() => state.CommittedAt = QueueWholeFlowStorage.Clock(state.Store), failures);
+        ServerFailureObserver.Observe(() => state.CommittedAt = QueueWholeFlowStorage.Clock(state.Store, state.Partition), failures);
         await ServerFailureObserver.ObserveAsync(() => AtomicTriadStagedOutbox.ReceiptAsync(committed.Get<CommitReceipt>(), state.Receipt), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

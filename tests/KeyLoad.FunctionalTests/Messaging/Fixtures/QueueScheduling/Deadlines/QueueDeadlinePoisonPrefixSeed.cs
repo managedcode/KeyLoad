@@ -34,7 +34,7 @@ internal static class QueueDeadlinePoisonPrefixSeed
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, command.Partition);
         var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
-            command.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First)), command.Mutations.Select(value => new MutationReceipt(QueueDeadlinePoisonPrefixProtocol.EnqueueReceipt, ((EnqueueMessage)value).Queue,
+            command.Partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(database, command.Partition) + QueueDeadlinePoisonPrefixProtocol.First)), command.Mutations.Select(value => new MutationReceipt(QueueDeadlinePoisonPrefixProtocol.EnqueueReceipt, ((EnqueueMessage)value).Queue,
                 ((EnqueueMessage)value).MessageId, QueueDeadlinePoisonPrefixProtocol.First)).ToImmutableArray(), DurabilityProfile.ProcessDurable, 1);
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlinePoisonPrefixProtocol.Root, time, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
         var result = database.Apply(operation);

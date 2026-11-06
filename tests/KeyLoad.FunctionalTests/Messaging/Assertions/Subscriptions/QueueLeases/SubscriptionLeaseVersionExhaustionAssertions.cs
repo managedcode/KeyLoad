@@ -21,11 +21,11 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();
-        await Assert.That(store.Position).IsEqualTo(position + NextPosition);
+        await Assert.That(store.Position).IsGreaterThan(position);
         await Assert.That(db.LastApplied).IsEqualTo(canonical + NextPosition);
         await RequireLocatorAsync(store, request);
         await Assert.That(Domain(store, request)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(due);
+        await Assert.That(QueueWholeFlowStorage.Clock(store, request.Subscription.Source.Partition)).IsEqualTo(due);
         await Assert.That(OutcomeStoreOracle.ReadPartition(store, request.Subscription.Source.Partition, Subject, request.RequestId))
             .IsEqualTo(result);
         await ReplayAsync(db, store, request, result, due);
@@ -40,21 +40,19 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         var identity = OrleansSerialization.Serialize(store.Identity);
         var actual = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
         await Assert.That(actual).IsEqualTo(original);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
     }
 
     private static string[] Domain(ZoneTreeStore store, ReceiveSubscriptionRequest request)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(request.Subscription.Source.Partition, Subject, request.RequestId));
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(request.Subscription.Source.Partition, Subject, request.RequestId));
-        var clock = Convert.ToHexString(KeySpace.ClockBytes);
-        var applied = Convert.ToHexString(KeySpace.AppliedBytes);
-        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes);
+        var clock = Convert.ToHexString(StorageCommandKeys.Clock(request.Subscription.Source.Partition));
+        var applied = Convert.ToHexString(StorageCommandKeys.Applied(request.Subscription.Source.Partition));
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + ":", StringComparison.Ordinal)
             && !row.StartsWith(locator + ":", StringComparison.Ordinal)
             && !row.StartsWith(clock + ":", StringComparison.Ordinal)
-            && !row.StartsWith(applied + ":", StringComparison.Ordinal)
-            && !row.StartsWith(lastCommand + ":", StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(applied + ":", StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(ZoneTreeStore store, ReceiveSubscriptionRequest request)

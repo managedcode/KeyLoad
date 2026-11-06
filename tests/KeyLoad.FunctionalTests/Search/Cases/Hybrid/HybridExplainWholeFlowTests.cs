@@ -37,8 +37,7 @@ internal sealed class HybridExplainWholeFlowTests
     [Test]
     public async Task DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead()
     {
-        var clock = new HybridExplainObservedWorkClock();
-        using var db = HybridExplainWholeFlow.Create(clock);
+        using var db = HybridExplainWholeFlow.Create();
         var engine = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = HybridExplainWholeFlow.Request(db, false);
         var before = HybridExplainWholeFlow.Snapshot(db);
@@ -50,18 +49,15 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(error.Message).IsEqualTo(FieldDenied);
         using var canceled = new CancellationTokenSource();
         var runtimeBeforeCore = db.Store.GetReadDiagnostics();
-        clock.Arm(() => db.Store.GetReadDiagnostics().RangeExaminedBytes > runtimeBeforeCore.RangeExaminedBytes,
-            canceled.Cancel);
+        await using var observed = new ObservedWorkCancellation(db.Store, canceled,
+            static progress => progress.RangeExaminedBytes);
+        await observed.Ready;
         GraphSearchResult? partial = null;
         OperationCanceledException cancellation;
-        try
-        {
-            cancellation = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-                partial = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, canceled.Token))
-                ?? throw new InvalidOperationException("The actual canceled Explain did not fail.");
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+        cancellation = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
+            partial = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, canceled.Token))
+            ?? throw new InvalidOperationException("The actual canceled Explain did not fail.");
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(runtimeBeforeCore.RangeExaminedBytes);
         await Assert.That(cancellation.CancellationToken).IsEqualTo(canceled.Token);
         await Assert.That(partial).IsNull();

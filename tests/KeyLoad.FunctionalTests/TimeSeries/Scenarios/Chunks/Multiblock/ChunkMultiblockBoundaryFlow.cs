@@ -6,7 +6,6 @@ internal static class ChunkMultiblockBoundaryFlow
 {
     private const long CorrectionRevision = 259;
     private const long FinalCorrectionRevision = 261;
-    private const long FaultAndRepairCommits = 2;
 
     internal static async Task RunAsync()
     {
@@ -49,17 +48,16 @@ internal static class ChunkMultiblockBoundaryFlow
         var before = SampleRawIntegrityAssertions.Capture(fixture.Store);
         var fault = await ChunkMultiblockBoundaryDamage.CaptureAsync(fixture);
         var failures = new List<Exception>();
-        var injected = new List<long>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             ChunkMultiblockBoundaryDamage.Inject(fixture, fault);
-            injected.Add(before.Position);
             var damaged = SampleRawIntegrityAssertions.Capture(fixture.Store);
-            await Assert.That(damaged.Position).IsEqualTo(checked(before.Position + 1));
+            await NativeStoreAssertions.AdvancedAsync(fixture.Store, before.Position);
             await ChunkMultiblockBoundaryRefusal.RunAsync(fixture);
             fixture.Reopen();
             var cold = SampleRawIntegrityAssertions.Capture(fixture.Store);
-            await Assert.That(cold.Position).IsEqualTo(damaged.Position);
+            var position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, damaged.Position);
+            await Assert.That(cold.Position).IsEqualTo(position);
             await Assert.That(cold.Image).IsEqualTo(damaged.Image);
             await ChunkMultiblockBoundaryRefusal.RunAsync(fixture);
         }, failures);
@@ -78,13 +76,10 @@ internal static class ChunkMultiblockBoundaryFlow
         {
             var restored = SampleRawIntegrityAssertions.Capture(fixture.Store);
             await Assert.That(restored.Image).IsEqualTo(before.Image);
-            foreach (var position in injected)
-            {
-                await Assert.That(restored.Position).IsEqualTo(checked(position + FaultAndRepairCommits));
-            }
             foreach (var repairCut in repairCuts)
             {
-                await Assert.That(restored.Position).IsEqualTo(checked(repairCut.Position + 1));
+                var position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, repairCut.Position);
+                await Assert.That(restored.Position).IsEqualTo(position);
                 await Assert.That(restored.Identity.SequenceEqual(repairCut.Identity)).IsTrue();
             }
         }, failures);

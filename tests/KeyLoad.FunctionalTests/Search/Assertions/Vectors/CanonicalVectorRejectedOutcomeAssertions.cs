@@ -12,12 +12,13 @@ internal static class CanonicalVectorRejectedOutcomeAssertions
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(dimensionFailure
             ? "The vector dimension or values are invalid." : "The expected revision does not match.");
 
-        await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);
+        var committedPosition = database.Store.Position;
+        await Assert.That(committedPosition).IsGreaterThan(previousPosition);
         var persisted = OutcomeBytes(database, command);
         var replayed = database.Submit(OperationKind.Batch, command, id: command.CommandId);
         await Assert.That(JsonDefaults.Serialize(replayed)).IsEquivalentTo(JsonDefaults.Serialize(rejected), CollectionOrdering.Matching);
         await Assert.That(OutcomeBytes(database, command)).IsEquivalentTo(persisted, CollectionOrdering.Matching);
-        await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);
+        await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
     }
 
     private static byte[] OutcomeBytes(TestDatabase database, CommandRequest command)

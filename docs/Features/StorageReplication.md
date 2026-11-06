@@ -17,15 +17,18 @@ Each silo-local Grain Service owns that silo's ZoneTree files (with ZoneTree's
 write-ahead log), locks and ordered apply gate. Grains call those services through typed Orleans calls;
 moving an activation never moves a file or open storage handle.
 
-The public API enters one ordinary request grain per admitted operation. One commit grain
-per persisted storage incarnation orders canonical commands across logical tenant,
-database and partition identities into batches and requests operations from the required
-silo-local owners. Every queued command joins the next batch. Each owner applies a
-batch as one process-persistent native ZoneTree transaction; disk sync is
-periodic work owned by ZoneTree. Each command keeps its own canonical sequence and the outcome it would
-have alone. Intensive reads and background batches use stateless workers.
-Every operation retains fresh persisted authorization, bounded resources,
-cancellation and joined cleanup.
+The public API enters one ordinary request grain per admitted operation. Each
+atomic partition has its own ordinary command owner and queue; metadata has a
+separate owner. A queue groups already waiting commands into one native
+publication. Local primary work borrows the physical session through DI; remote
+primary work and exact-effect copies use the typed Grain Service. Every borrower
+joins the original physical session before close. The primary prepares once;
+copies atomically publish its decided changes and original stored outcomes.
+Canonical prefixes and business clocks belong to their actual command scope.
+Native physical timestamps identify snapshots, not command counts or comparable
+cuts across copies. See [ADR-146](../ADR/ADR-146-group-commit.md) for the current
+batch, dependency and interrupted-copy contracts. Every operation retains fresh
+persisted authorization, cancellation and joined cleanup.
 
 `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` are independent positive startup
 options. Copies cannot exceed configured or available silos. There is no
@@ -59,7 +62,7 @@ keeps its original result and sequence. A timeout after effects may have started
 is an unknown outcome, resolved using that same command ID.
 
 If an unfinished batch is present on only some copies, the ordinary commit owner
-periodically completes the missing commands from the last batch that the newest
+periodically completes the exact missing effects of the last batch that the newest
 copy retained. `KeyLoad:SynchronizationInterval` is a positive, validated timer
 interval with a five-second default. The timer runs only for isolated storage with
 several configured copies. It shares the existing command drain: background copy
@@ -72,11 +75,14 @@ never hides that condition.
 General restoration of an empty or lagging data copy is not qualified by this
 implementation.
 
-Reads select an available storage owner with the highest observed
-canonical cut, preferring the executing silo when cuts match. The commit grain caches the selected owners and their canonical position per membership version and re-reads silo cuts only after a membership change or a failed copy. A requested minimum
-token must be reached locally before reading, and current persisted credentials,
-resource permissions and projection rules still apply. Observing a cut alone
-does not prove equal data or a distributed snapshot.
+Single-partition reads select an available owner covering the partition prefix
+and fresh metadata authority. Whole-database and potentially cross-partition reads
+select a complete owner covering the observed vector of logical partition cuts.
+Physical copies are not independent query inputs. A requested minimum token must
+be reached before reading, and current persisted policy still applies at the
+actual native data cut. Observing a cut alone does not prove equal data or a
+distributed snapshot. Owner rosters are cached per membership version and
+invalidated after an unsuccessful publication.
 
 A request on a single configured isolated silo with only that local silo active
 in Orleans membership runs beside its local storage owner directly. The published
@@ -88,12 +94,11 @@ batch advances that same set and fences older discoveries; a different cached
 set is invalidated. A concurrent read cannot leave the next command using a
 cached canonical sequence from before the acknowledged batch.
 
-After completing any retained copy gap, batch preparation prefers the commit
-grain's local silo when that silo is already a selected copy at the same canonical
-cut. This avoids sending the full command batch to another silo and back solely
-for preparation. The selected copy set is unchanged, and every selected owner
-still applies the same prepared commands before acknowledgement. An absent or
-lagging local copy cannot replace a required advanced copy.
+After completing a retained copy gap, metadata and data commands select a common
+current physical primary. Native conflicts protect authorization and resource
+changes on that primary. Each partition still owns its separate command drain,
+so waiting for a copy does not order unrelated partitions. Full-copy replication
+does not establish physical partition fan-out or independent write primaries.
 
 ## Requirements and acceptance
 
@@ -106,16 +111,16 @@ lagging local copy cannot replace a required advanced copy.
 | REQ-REP-005: every serving owner enforces current persisted authorization. | AC-REP-005: unauthorized and protected-field SDK/MCP reads refuse before and after restart, with unchanged records and healthy follow-up. | [Authorization](Authorization.md) owns these assertions. |
 | REQ-REP-006: cancellation and shutdown retain ownership of admitted work through joined cleanup. | AC-REP-006: cancellation and shutdown join producers and scoped storage borrowers, preserve acknowledged data and retained outcomes, and permit healthy subsequent requests. | Unit ownership mechanisms and real cluster fault flows remain distinct. |
 | REQ-REP-007: startup validates independent positive silo/copy counts without an artificial maximum. | AC-REP-007: 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are valid counts; zero counts and copies exceeding silos refuse before resources start. | Configuration acceptance does not qualify a topology's runtime or durability. |
-| REQ-REP-008: concurrent canonical commands share one process-persistent native commit per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
+| REQ-REP-008: concurrent canonical commands share one process-persistent native commit per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its exact retained effects. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
 | REQ-REP-009: retained interrupted copy work is completed without requiring a new write. | AC-REP-009: interrupt one actual copy RPC, observe the background repair RPC, keep a read barrier available while repair is held, then verify the original document and sequence on both copies, exact retry and healthy continuation with joined cleanup. | `CopySynchronizationTests.InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair`; local and delivered-source qualification remain separate. |
-| REQ-REP-010: preparation prefers a selected local copy only at the same canonical cut. | AC-REP-010: the actual prepare call targets the coordinator's silo when it is a selected current copy; both copies retain exact data, revision and replayed outcome, and a healthy command follows. A different incarnation, lagging cut or unselected local silo cannot replace an advanced required owner. | `StoragePreparationLocalityTests` separates owner-selection checks from a real two-host command, replay and follow-up. Aspire throughput and delivered-source qualification remain separate. |
+| REQ-REP-010: one primary prepares at a cut covering both partition data and metadata authority. | AC-REP-010: a coordinator beside that primary borrows through DI without a storage RPC; a remote coordinator sends one typed service call. Every copy retains exact data, revision and outcome; replay and healthy follow-up succeed. A lagging or foreign owner cannot replace a required current owner. | `StoragePreparationLocalityTests` separates owner-selection checks from a real two-host command, replay and follow-up. Aspire throughput and delivered-source qualification remain separate. |
 | REQ-REP-011: secondary copy responses omit duplicated outcome payloads while retaining the original copy-agreement checks. | AC-REP-011: a real two-host batch returns one full outcome and one compact acknowledgement with the same persisted decision; exact bodies, revisions, replay and healthy continuation hold. Wrong sequence, decision, prefix or a missing selected outcome return `UnknownWriteOutcome` after the real commit, then an exact retry resolves it without duplicate effects. | `StorageBatchAcknowledgementTests` and `StorageBatchAcknowledgementFailureTests`; local, delivered-source and throughput qualification remain separate. |
 
 ## Source and verification
 
 Runtime revision [`b55245893`](https://github.com/managedcode/KeyLoad/commit/b55245893c93409e41d7ca31edfec967da173045) passed all 33 jobs of [Linux Build and Tests](https://github.com/managedcode/KeyLoad/actions/runs/42122435945), including the compiled inventories, functional operations, process recovery, Aspire lanes and final coverage. Its [Release](https://github.com/managedcode/KeyLoad/actions/runs/42127683554) succeeded. The original one-copy and three-copy documents cells of [Benchmarks run 42128099998](https://github.com/managedcode/KeyLoad/actions/runs/42128099998) passed all six cases each on the unchanged indexed dataset. This does not establish the requested 30,000 documents per second, partitioned concurrent ingestion, endurance or power-loss durability.
 
-- `src/KeyLoad.Clustering/StorageReplication/Grains/DatabaseCommitGrain.cs` owns ordered copy calls; `StorageReplication/Execution/StorageCommitQueue.cs` joins foreground batches and timer-driven completion on that same activation.
+- `src/KeyLoad.Clustering/StorageReplication/Grains/PartitionCommitGrain.cs` owns each partition queue; `DatabaseCommitGrain.cs` owns metadata and shared-file acquisition. `StorageReplication/Execution/StorageCommitQueue.cs` joins foreground batches and timer-driven copy completion per owner.
 - `src/KeyLoad.Clustering/StorageReplication/GrainServices/` owns addressing of silo-local storage services.
 - `src/KeyLoad/StoragePartitions/GrainServices/PartitionStorageGrainService.cs` owns each silo's storage lifetime.
 - `build/KeyLoad.AppHost/TestInfrastructure/` owns topology and fault commands.

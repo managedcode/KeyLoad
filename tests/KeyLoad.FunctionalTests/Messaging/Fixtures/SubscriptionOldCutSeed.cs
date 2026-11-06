@@ -27,7 +27,7 @@ internal static class SubscriptionOldCutSeed
         state.Apply(fixture.Database, OperationKind.SubscriptionDelivery, ack, ack.CommandId).Get<CommitReceipt>();
         var request = state.Processing(state.OriginalClaim.Deliveries[1].Token);
         state.OriginalProcessingOperation = state.Create(fixture.Database, OperationKind.SubscriptionProcessing, request, request.CommandId);
-        var cut = fixture.Database.LastApplied;
+        var cut = ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Partition);
         var result = fixture.Database.Apply(state.OriginalProcessingOperation);
         state.OriginalProcessing = result.Get<SubscriptionProcessingResult>();
         state.Successes.Add(state.OriginalProcessingOperation, result);
@@ -45,7 +45,7 @@ internal static class SubscriptionOldCutSeed
         await SubscriptionOldCutAssertions.SameAsync(claim.Status, new SubscriptionInfo(state.Group, state.Definition,
             1, 1, 0, 3, 3, false, null));
         await Assert.That(claim.Token).IsEqualTo(new CommitToken(fixture.Store.Identity.Incarnation,
-            fixture.Partition.AtomicPartitionId, fixture.Database.LastApplied));
+            fixture.Partition.AtomicPartitionId, ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Partition)));
         await Assert.That(claim.Deliveries.Length).IsEqualTo(3);
         for (var index = 0; index < claim.Deliveries.Length; index++)
         {

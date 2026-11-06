@@ -82,7 +82,6 @@ internal static class AnnSeedCollector
         AnnMaintenanceRequest? pin, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
         const int CaptureCutAbsentCount = 0;
-        const int AppliedValidationBoundary = 0;
 
         var buffer = new AnnSeedBuffer(options.MaxRecords, options.MaxOwnedBytes, options.MaxPeakBytes, options.InitialRecordCapacity,
             options.HashScratchBytes, budget, work);
@@ -106,16 +105,13 @@ internal static class AnnSeedCollector
         }
         database.Authorization.RequireFieldUse(principal, resource, field);
         var head = database.ReadOutboxHead(metadata, partition);
-        var appliedBytes = metadata.ReadOwnedValue(KeySpace.AppliedBytes);
+        var appliedBytes = metadata.ReadOwnedValue(StorageCommandKeys.Applied(partition));
         if (pin is not null && appliedBytes is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);
         }
-        var applied = appliedBytes is null ? CaptureCutAbsentCount : OrleansSerialization.Deserialize<long>(appliedBytes);
-        if (applied < AppliedValidationBoundary)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);
-        }
+        var applied = appliedBytes is null ? CaptureCutAbsentCount
+            : StorageOperationApply.ReadCanonicalSequence(appliedBytes, partition, InvalidAppliedPosition);
         var identity = database.Store.Identity;
         var position = database.Store.Position;
         AnnSeedValidation.ValidateCut(identity, position, applied, head, principal, resource);

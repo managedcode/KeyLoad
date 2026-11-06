@@ -32,7 +32,7 @@ internal static class ProjectionEmptyTailAssertions
     {
         var image = Image(store);
         var position = store.Position;
-        var applied = owner.LastApplied;
+        var applied = ExpectedCanonicalCommit.Applied(owner, partition);
         var key = OutcomeStoreOracle.PartitionKey(partition, Root, rejected.CommandId);
         var locatorKey = KeySpace.OutcomeLocator(partition, Root, rejected.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsNull();
@@ -46,7 +46,7 @@ internal static class ProjectionEmptyTailAssertions
         await Assert.That(after.Count(row => row.StartsWith(locatorPrefix, StringComparison.Ordinal))).IsEqualTo(1);
         var locator = store.Read(view => view.ReadOwnedValue(locatorKey)) ?? throw new InvalidOperationException(MissingEntry);
         await Assert.That(locator.AsSpan().SequenceEqual(key)).IsTrue();
-        var metadata = new[] { KeySpace.AppliedBytes, KeySpace.LastCommandBytes, KeySpace.ClockBytes }
+        var metadata = new[] { StorageCommandKeys.Applied(partition), StorageCommandKeys.Clock(partition) }
             .Select(value => Convert.ToHexString(value) + ":").ToArray();
         var retained = after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)
             && !row.StartsWith(locatorPrefix, StringComparison.Ordinal));
@@ -54,11 +54,11 @@ internal static class ProjectionEmptyTailAssertions
             .IsEquivalentTo(image.Where(row => !metadata.Any(value => row.StartsWith(value, StringComparison.Ordinal))),
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         var stored = store.Read(view => OrleansSerialization.Deserialize<StoredOutcome>(view.ReadOwnedValue(key)!));
-        await Assert.That(stored.CanonicalSequence).IsEqualTo(owner.LastApplied);
+        await Assert.That(stored.CanonicalSequence).IsEqualTo(ExpectedCanonicalCommit.Applied(owner, partition));
         await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(rejected.CommandId);
         await Assert.That(OrleansSerialization.Serialize(stored.PreparedCommand.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(rejected.Value!.Input).AsSpan())).IsTrue();
-        await Assert.That(store.Position).IsEqualTo(position + 1L);
-        await Assert.That(owner.LastApplied).IsEqualTo(applied + 1L);
+        await Assert.That(store.Position).IsGreaterThan(position);
+        await Assert.That(ExpectedCanonicalCommit.Applied(owner, partition)).IsEqualTo(applied + 1L);
         await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.CommandId)!.Value, result);
         return result;
     }

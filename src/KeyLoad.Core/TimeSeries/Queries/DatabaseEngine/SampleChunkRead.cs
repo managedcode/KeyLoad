@@ -12,7 +12,7 @@ public static class SampleChunkRead
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.ReadSampleChunkWindowRead(principalId, request, budget);
     }
 

@@ -10,7 +10,7 @@ internal static class TopicPurgeReceiptAssertions
     private const string PinnedDetail = "The topic purge cut is pinned by a subscription checkpoint.";
     internal static async Task VerifyAsync(IAtomicStore store, Command<DatabaseCommand> operation, Result<object> outcome, long position, bool pinned)
     {
-        await Assert.That(store.Position).IsEqualTo(position);
+        await Assert.That(CrashDatabase.AppliedPosition(store, TopicPurgeCrashContract.Partition)).IsEqualTo(position);
         await Assert.That(Errors.Code(outcome.Problem).Value).IsEqualTo(pinned ? ErrorCode.ResourceExhausted : (ErrorCode?)null);
         var stored = OutcomeStoreOracle.ReadStored(store, operation)!;
         if (pinned)
@@ -33,10 +33,10 @@ internal static class TopicPurgeReceiptAssertions
         await Assert.That(stored.Partition).IsEqualTo(TopicPurgeCrashContract.Partition);
         await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);
-        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
-        await Assert.That(stored.CanonicalSequence).IsGreaterThan(0L);
-        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
-            ?? throw new InvalidOperationException("The canonical applied position is missing.")))).IsEqualTo(stored.CanonicalSequence);
+        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(StorageCommandKeys.Clock(TopicPurgeCrashContract.Partition))!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
+        await Assert.That(stored.CanonicalSequence).IsEqualTo(position);
+        await Assert.That(store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, TopicPurgeCrashContract.Partition)))
+            .IsEqualTo(stored.CanonicalSequence);
     }
     internal static async Task StableReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> expected)
     {

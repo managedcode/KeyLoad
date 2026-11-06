@@ -38,7 +38,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var reopened = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(reopened, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(cold, group);
         await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(reopened, cold, third, thirdResult, token);

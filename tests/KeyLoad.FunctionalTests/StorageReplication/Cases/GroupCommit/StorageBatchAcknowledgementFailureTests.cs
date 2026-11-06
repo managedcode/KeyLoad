@@ -32,6 +32,7 @@ internal sealed class StorageBatchAcknowledgementFailureTests
         var bounded = timeout.Token;
         var creation = Guid.NewGuid();
         source.Database.Configure(Collection, ResourceKind.Collection, id: creation);
+        await StorageCoordinatorPlacement.ActivateAsync(cluster, remote: true, bounded);
         var before = source.Database.ReadCanonicalCut().AppliedPosition;
         var request = new CommandRequest(commandId, source.Database.Partition, [new PutDocument(Collection, Document, Json, 0)]);
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>

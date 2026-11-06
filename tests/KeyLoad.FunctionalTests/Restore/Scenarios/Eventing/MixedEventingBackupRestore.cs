@@ -14,7 +14,7 @@ internal static class MixedEventingBackupRestore
         return (identity, position);
     }
 
-    internal static async Task<long> RestoreAsync(TestDatabase source, (StoreIdentity Identity, long Position) capture,
+    internal static async Task RestoreAsync(TestDatabase source, (StoreIdentity Identity, long Position) capture,
         string backup, string destination, CancellationToken token)
     {
         await Assert.That(capture.Identity.NodeId).IsEqualTo(source.Store.Identity.NodeId);
@@ -23,6 +23,5 @@ internal static class MixedEventingBackupRestore
         await Assert.That(identity.NodeId).IsNotEqualTo(capture.Identity.NodeId);
         await Assert.That(identity.SigningKey.Span.SequenceEqual(capture.Identity.SigningKey.Span)).IsFalse();
         await Assert.That(identity.DispatchPaused).IsTrue();
-        return checked(capture.Position + 1);
     }
 }

@@ -11,6 +11,7 @@ internal static class SafeProjectorOperationCold
         var queryCursor = await SafeProjectorOperationCursor.CaptureAsync(owner,
             SafeProjectorOperationProtocol.FinalMaskedEpoch, HealthyDocumentEpoch,
             SafeProjectorOperationProtocol.HealthySafe, SafeProjectorOperationProtocol.HealthyRevision, false, owner.CallerToken);
+        var queryCut = owner.Store.Position;
         var feed = await SafeProjectorOperationChanges.CurrentAsync(owner, history.State,
             SafeProjectorOperationProtocol.FinalMaskedEpoch, false, owner.CallerToken, history.PublicPatch, history.HealthyPatch);
         for (var cold = 0; cold < ColdOwners; cold++)
@@ -20,6 +21,8 @@ internal static class SafeProjectorOperationCold
             var journal = owner.ReadCanonicalCut();
             var applied = owner.Database.LastApplied;
             await owner.ReopenAsync();
+            position = await NativeStoreAssertions.ReopenedAsync(owner.Store, position);
+            journal.StorePosition = position;
             await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position);
             await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
@@ -30,11 +33,11 @@ internal static class SafeProjectorOperationCold
             await SafeProjectorOperationCursor.CaptureAsync(owner, SafeProjectorOperationProtocol.FinalMaskedEpoch,
                 HealthyDocumentEpoch, SafeProjectorOperationProtocol.HealthySafe,
                 SafeProjectorOperationProtocol.HealthyRevision, false, owner.CallerToken);
-            await SameCursorAsync(owner, queryCursor, feed.Cursor);
+            await SameCursorAsync(owner, queryCursor, feed.Cursor, queryCut);
         }
     }
 
-    private static async Task SameCursorAsync(SafeProjectorOperationDatabase owner, string queryCursor, string feedCursor)
+    private static async Task SameCursorAsync(SafeProjectorOperationDatabase owner, string queryCursor, string feedCursor, long queryCut)
     {
         await SafeProjectorOperationImages.ObserveAsync(owner, async () =>
         {
@@ -45,7 +48,7 @@ internal static class SafeProjectorOperationCold
             await SafeProjectorOperationSeed.EqualAsync(page, new QueryPage(
                 [new(SafeProjectorOperationProtocol.Second, SafeProjectorOperationProtocol.InitialRevision,
                     SafeProjectorOperationProtocol.SecondJson, true, SafeProjectorOperationProtocol.RedactedPaths)],
-                null, owner.Store.Position, FullScan));
+                null, queryCut, FullScan));
         });
         await SafeProjectorOperationColdFeed.ContinueAsync(owner, feedCursor);
     }

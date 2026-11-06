@@ -53,6 +53,7 @@ internal static class MetamorphicReferenceLifetime
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, cut, bytes), failures);
                 var database = db.CreateConfiguredDatabase(store);
                 await ServerFailureObserver.ObserveAsync(() => MetamorphicReferenceOperations.RunAsync(fixture,

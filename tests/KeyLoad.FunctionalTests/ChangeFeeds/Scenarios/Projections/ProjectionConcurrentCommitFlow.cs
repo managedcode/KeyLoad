@@ -34,14 +34,15 @@ internal static class ProjectionConcurrentCommitFlow
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = database.CreateConfiguredDatabase(cold);
-                await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, state.Position);
+                var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, state.Position);
+                await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, reopenedPosition);
                 await ProjectionConcurrentCommitAssertions.DocumentsAsync(owner, state.Source, state.WinnerIsFirst, changed, token);
                 var batch = owner.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(state.Source.Consumer));
                 await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
                     new ProjectionBatch(new(state.Source.Consumer, state.Source.Definition, 3L, false), [], 3L, batch.Token, false));
                 await ProjectionConcurrentCommitFixture.ReplayAsync(owner, cold, state.Source, state.First, state.FirstResult,
                     state.Second, state.SecondResult, state.Filtered, state.Advanced, token);
-                await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, state.Position);
+                await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, reopenedPosition);
                 if (healthy)
                 {
                     await ProjectionConcurrentCommitHealthy.RunAsync(owner, cold, state, token);

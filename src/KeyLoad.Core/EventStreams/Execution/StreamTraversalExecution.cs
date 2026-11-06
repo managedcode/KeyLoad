@@ -14,13 +14,13 @@ public static class StreamTraversalExecution
     public static StreamPage ReadStream(this DatabaseEngine engine, string principalId, ReadStreamRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        return engine.ReadStreamTraversal(principalId, request, new(engine.Clock, cancellationToken));
+        return engine.ReadStreamTraversal(principalId, request, new(cancellationToken));
     }
 
     internal static StreamPage ReadStream(this DatabaseEngine engine, string principalId, ReadStreamRequest request, PhysicalShardRecord configuredOwner, CancellationToken cancellationToken = default)
     {
         engine.VerifyStorageOwner(configuredOwner, cancellationToken);
-        return engine.ReadStreamTraversal(principalId, request, new(engine.Clock, cancellationToken));
+        return engine.ReadStreamTraversal(principalId, request, new(cancellationToken));
     }
 
     internal static StreamPage ReadStreamTraversal(this DatabaseEngine engine, string principalId, ReadStreamRequest request, ReadExecutionBudget budget)
@@ -45,7 +45,7 @@ public static class StreamTraversalExecution
         var stream = request.Stream;
         engine.Authorization.Require(principal, stream.Partition, stream.StreamSet, Capability.EventsRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(bounded, stream.Partition, stream.StreamSet, ResourceKind.StreamSet);
-        var applied = StorageOperationApply.ReadCanonicalSequence(bounded);
+        var applied = StorageOperationApply.ReadCanonicalSequence(bounded, stream.Partition);
         var head = StreamReadExecution.ReadStreamHead(view, stream, budget);
         StreamReadExecution.ValidateStreamHead(head, stream, request.Cursor is null && request.Direction == StreamReadDirection.Forward ? request.AfterRevision : head.FirstAvailableRevision - StreamTraversalProtocol.FirstRevision);
         var cursor = request.Cursor is null ? engine.NewStreamTraversal(principal, resource, request, head, now, applied) : engine.ReadStreamTraversalCursor(request, principal, resource, head, now, applied);

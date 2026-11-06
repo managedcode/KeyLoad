@@ -42,13 +42,13 @@ internal static class QueueLiveInspectionAuthorityTrial
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
+            damaged = await QueuePendingAuthorityHistory.ReopenedAsync(cold, damaged);
             await QueueLiveInspectionAuthorityAssertions.RefuseAsync(owner, cold, state, damaged);
             await QueueLiveInspectionAuthorityAssertions.PositiveAsync(owner, cold, state, positive);
             cold.Commit((tx, _) => { tx.Put(state.FaultKey, state.OriginalBytes); return true; });
             await QueuePendingAuthorityHistory.SameAsync(cold, original with
             {
-                Position = original.Position + 2
+                Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
             });
             await QueueLiveInspectionAuthorityAssertions.LeasedAsync(owner, cold, state);
             processed = owner.Apply(state.Original);
@@ -62,7 +62,7 @@ internal static class QueueLiveInspectionAuthorityTrial
         }
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
-        await QueuePendingAuthorityHistory.SameAsync(second, terminal);
+        terminal = await QueuePendingAuthorityHistory.ReopenedAsync(second, terminal);
         await QueueLiveInspectionAuthorityAssertions.PositiveAsync(reopened, second, state, positive);
         await QueueLeaseAuthorityPostimage.RequireAsync(reopened, second, state, processed, healthySettled: true);
         await QueueLiveInspectionAuthorityAssertions.ReplayAsync(reopened, second, state, processed);

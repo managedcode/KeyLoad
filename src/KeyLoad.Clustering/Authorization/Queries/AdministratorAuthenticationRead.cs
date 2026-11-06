@@ -13,7 +13,7 @@ internal static class AdministratorAuthenticationRead
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        var work = new ReadExecutionBudget(clock, token);
+        var work = new ReadExecutionBudget(token);
         work.AttachResourceLifetimeBinding(binding);
         if (!AdministratorAuthenticationScope.Validate(request.Envelope))
         {

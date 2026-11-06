@@ -27,7 +27,7 @@ internal static class ProjectionDigestReclassification
             }).Get<ResourceDefinition>();
         await ProjectionDigestAssertions.EqualAsync(changed, replacement);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [request]);
-        var before = fixture.Database.LastApplied;
+        var before = NativeStoreAssertions.Applied(fixture.Harness.Store, fixture.Partition);
         var result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
         await ProjectionDigestAssertions.ReceiptAsync(fixture, command, result.Get<CommitReceipt>(), before);
         var expected = new VectorProjectionLineage(fixture.Stream, 1L, "projection-event",

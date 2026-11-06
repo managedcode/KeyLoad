@@ -90,7 +90,7 @@ internal static class QueueGraphIdentityFlow
                 new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                     payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]);
         var operation = await CompileAsync(db.Database, seed, at);
-        var nextPosition = checked(db.Database.LastApplied + 1);
+        var nextPosition = checked(ExpectedCanonicalCommit.Applied(db.Database, db.Partition) + 1);
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
         var expectedReceipt = new CommitReceipt(operation.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
                 nextPosition), [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
@@ -137,8 +137,7 @@ internal static class QueueGraphIdentityFlow
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
         var decoded = ((CommandRequest)compiled.Payload);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
-        var work = new ReadExecutionBudget(engine.EvaluationClock,
-            TestContext.Current!.Execution.CancellationToken);
+        var work = new ReadExecutionBudget(TestContext.Current!.Execution.CancellationToken);
         return engine.CreateCommand(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
             decoded, work);
     }

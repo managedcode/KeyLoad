@@ -131,7 +131,7 @@ internal sealed class TextPhysicalCensusTests
         TextPhysicalCensusPause pause, string path, CancellationToken token)
     {
         pause.Arm();
-        var census = Task.Run(() => projection.CheckPhysical(new ReadExecutionBudget(TimeProvider.System, token)),
+        var census = Task.Run(() => projection.CheckPhysical(new ReadExecutionBudget(token)),
             CancellationToken.None);
         var deletion = Task.CompletedTask;
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

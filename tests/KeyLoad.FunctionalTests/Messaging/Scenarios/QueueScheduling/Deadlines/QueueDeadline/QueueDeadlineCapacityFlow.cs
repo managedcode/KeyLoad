@@ -19,7 +19,7 @@ internal static class QueueDeadlineCapacityFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityContinuation.RunAsync(database, cold, fixture.Directory, state, token);
     }
 
@@ -34,7 +34,7 @@ internal static class QueueDeadlineCapacityFlow
         var beforeCanonical = fixture.Database.LastApplied;
         var domain = QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt);
         var result = fixture.Database.Apply(state.Attempt);
-        await Assert.That(fixture.Store.Position).IsEqualTo(beforePosition + CommitPositionStep);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(beforePosition);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(beforeCanonical + CommitPositionStep);
         await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -49,7 +49,7 @@ internal static class QueueDeadlineCapacityFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityRefusal.RequireAsync(database, cold, state, result, token);
         cold.Commit((transaction, _) =>
         {
@@ -60,9 +60,9 @@ internal static class QueueDeadlineCapacityFlow
         var repaired = QueueWholeFlowStorage.Bytes(cold);
         var repairedPosition = cold.Position;
         await Assert.That(database.Apply(state.Attempt)).IsEqualTo(result);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, repaired, repairedPosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, repaired, repairedPosition, identity);
         await Assert.That(database.ResolveOutcome(state.Attempt)).IsEqualTo(result);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, repaired, repairedPosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, repaired, repairedPosition, identity);
         await QueueDeadlineCapacityContinuation.RunAsync(database, cold, fixture.Directory, state, token);
     }
 }

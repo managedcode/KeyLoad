@@ -21,6 +21,7 @@ internal static class SqlJoinSourceBindingCold
                     {
                         Incarnation = identity.Incarnation
                     }, identity.NodeId, database.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, global::KeyLoad.JsonDefaults.Serialize(identity));

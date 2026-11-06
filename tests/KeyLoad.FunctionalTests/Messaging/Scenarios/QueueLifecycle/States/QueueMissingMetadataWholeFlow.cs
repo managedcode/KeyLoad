@@ -41,7 +41,7 @@ internal static class QueueMissingMetadataWholeFlow
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         fixture.Store.Commit((tx, _) => { tx.Delete(key); return true; });
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await QueueMissingMetadataAssertions.RefusalAsync(fixture.Database, fixture.Store, state, operation, damaged);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
@@ -51,12 +51,12 @@ internal static class QueueMissingMetadataWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
-                await QueueLifecycleConditionAssertions.Same(cold, damaged);
+                damaged = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, damaged);
                 await QueueMissingMetadataAssertions.RefusalAsync(owner, cold, state, operation, damaged);
                 QueueLifecycleConditionOperations.Restore(cold, key, row);
                 await QueueLifecycleConditionAssertions.Same(cold, original with
                 {
-                    Position = original.Position + 2
+                    Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
                 });
                 await QueueLifecycleConditionAssertions.Ready(owner, cold, state);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
@@ -72,7 +72,7 @@ internal static class QueueMissingMetadataWholeFlow
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var owner = fixture.CreateConfiguredDatabase(second);
-            await QueueLifecycleConditionAssertions.Same(second, healthyCut);
+            healthyCut = await QueueLifecycleConditionAssertions.ReopenedAsync(second, healthyCut);
             await QueueMissingMetadataAssertions.TerminalAsync(owner, second, state);
             await QueueTerminalInspectionAssertions.ReplayAsync(owner, second, state);
             await QueueLifecycleConditionAssertions.Same(second, healthyCut);

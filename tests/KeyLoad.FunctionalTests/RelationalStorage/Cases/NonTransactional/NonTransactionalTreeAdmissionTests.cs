@@ -24,6 +24,7 @@ internal sealed class NonTransactionalTreeAdmissionTests
         await Assert.That(Directory.Exists(original)).IsFalse();
         Directory.Move(retained, original);
         using var cold = NonTransactionalTableFixture.Open(fixture.Owner.Directory);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(OrleansSerialization.Serialize(cold.Identity).SequenceEqual(identity)).IsTrue();
         var database = fixture.Owner.CreateConfiguredDatabase(cold);

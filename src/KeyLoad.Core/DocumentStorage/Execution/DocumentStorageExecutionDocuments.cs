@@ -270,7 +270,7 @@ public static class DocumentStorageExecutionDocuments
     public static DocumentRecord[] ReadVisibleDocuments(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, ReadExecutionBudget? budget = null)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        budget ??= new(timeProvider: engine.Clock);
+        budget ??= new();
         var records = new List<DocumentRecord>();
         engine.VisitVisibleDocuments(view, principal, partition, collection, budget, records.Add);
         return records.ToArray();

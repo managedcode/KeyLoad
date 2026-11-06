@@ -89,9 +89,9 @@ internal static partial class TextSeedCollector
         database.Authorization.RequireFieldUse(principal, resource, pin.Field);
         var head = database.ReadOutboxHead(view, partition);
         SearchValidation.RequireTextProjectionHistory(head, consumer.Checkpoint);
-        var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
-        var applied = OrleansSerialization.Deserialize<long>(appliedBytes);
-        if (applied < EmptyPosition || consumer.Checkpoint > head.Tail)
+        var appliedBytes = view.ReadOwnedValue(StorageCommandKeys.Applied(partition)) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+        var applied = StorageOperationApply.ReadCanonicalSequence(appliedBytes, partition, InvalidScope);
+        if (consumer.Checkpoint > head.Tail)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
         }

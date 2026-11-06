@@ -6,8 +6,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class LiveRangeSelectedCancellationFlow
 {
-    private const long HealthyCommitCount = 1;
-
     internal static async Task RunAsync()
     {
         ReadCutFixture? fixture = null;
@@ -26,10 +24,13 @@ internal static class LiveRangeSelectedCancellationFlow
                 }
             }
             CommitHealthy(fixture.Store);
+            position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
             fixture.Reopen();
-            await RequireCurrentAsync(fixture.Store, identity, position + HealthyCommitCount, changed: false, healthy: true);
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
+            await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: true);
             fixture.Reopen();
-            await RequireCurrentAsync(fixture.Store, identity, position + HealthyCommitCount, changed: false, healthy: true);
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
+            await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: true);
         }, failures);
         if (fixture is not null)
         {

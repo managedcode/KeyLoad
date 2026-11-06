@@ -28,6 +28,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
             Array.Fill(value, (byte)0x36);
             var expectedValue = value.ToArray();
             var envelope = OrleansSerialization.Serialize(new[] { new StorageMutation(expectedKey, expectedValue) });
+            long position;
             using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution()))
             {
                 store.Commit((transaction, _) => StageAndMutateInputs(transaction, key, value));
@@ -35,6 +36,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
                 ArrayPool<byte>.Shared.Return(value, clearArray: true);
 
                 await VerifyCallerOwnedResultCannotChangeStoreAsync(store, expectedKey, expectedValue);
+                position = store.Position;
             }
 
             var mutations = OrleansSerialization.Deserialize<StorageMutation[]>(envelope);
@@ -43,7 +45,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
             await Assert.That(mutations[0].Value!.Value.Span.SequenceEqual(expectedValue)).IsTrue();
 
             using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
-            await Assert.That(reopened.Position).IsEqualTo(1L);
+            await NativeStoreAssertions.ReopenedAsync(reopened, position);
             await Assert.That(reopened.Read(view => view.ReadOwnedValue(expectedKey))!.SequenceEqual(expectedValue)).IsTrue();
         }
         finally

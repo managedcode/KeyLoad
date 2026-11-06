@@ -18,7 +18,7 @@ internal static class DistributedSearchHybridFlow
         var destinationRequest = DistributedSearchHybridSeed.Request(QueryFixture.Partition) with { TextMatchMode = mode };
         var source = Capture(fixture.Source, sourceRequest, fixture.SourceOwner, token);
         var destination = Capture(fixture.Destination, destinationRequest, fixture.DestinationOwner, token);
-        var budget = Budget(fixture.Source, token);
+        var budget = new ReadExecutionBudget(token);
         var digest = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(sourceRequest)));
         var epoch = DistributedSearchStatisticsEpoch.Create(digest, [destination, source], UnitExecutionOptions.QueryExecution(), budget);
         var scope = new GlobalBranchScope(ScoreProfile, digest, epoch);
@@ -37,7 +37,7 @@ internal static class DistributedSearchHybridFlow
     private static DistributedTextWitness Capture(DocumentPatchAtomicityOwner owner,
         SearchRequest request, PhysicalShardRecord placement, CancellationToken token)
     {
-        var budget = Budget(owner, token);
+        var budget = new ReadExecutionBudget(token);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader, request,
             placement, QueryFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget);
     }
@@ -46,7 +46,7 @@ internal static class DistributedSearchHybridFlow
         SearchRequest request, DistributedTextWitness witness, DistributedTextStatistics statistics,
         GlobalBranchScope scope, string window, CancellationToken token)
     {
-        var budget = Budget(owner, token);
+        var budget = new ReadExecutionBudget(token);
         return DistributedSearchCandidateExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness, statistics, scope, window,
             UnitExecutionOptions.QueryExecution(), budget);
@@ -56,13 +56,11 @@ internal static class DistributedSearchHybridFlow
         SearchRequest request, DistributedTextWitness witness, ImmutableArray<GlobalBranchCandidate> selected,
         CancellationToken token)
     {
-        var budget = Budget(owner, token);
+        var budget = new ReadExecutionBudget(token);
         return DistributedSearchProjectionExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness,
             [.. selected.Where(candidate => candidate.Reference.Partition == request.Partition)],
             budget).Hits;
     }
 
-    private static ReadExecutionBudget Budget(DocumentPatchAtomicityOwner owner, CancellationToken token)
-        => new(owner.Database.EvaluationClock, token);
 }

@@ -79,7 +79,7 @@ internal static class MixedEventingRetentionBackupInbox
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
         await Assert.That(result.Value).IsNull();
-        await Assert.That(fixture.Target.Position).IsEqualTo(before + 1);
+        before = await NativeStoreAssertions.AdvancedAsync(fixture.Target, before);
         var original = fixture.ReadTargetIssuedOperation(command.CommandId);
         await EventingArtifactState.SameResultAsync(result, fixture.Database.ResolveOutcome(original));
         var rows = EventingArtifactState.FullBytes(fixture.Target);
@@ -87,7 +87,7 @@ internal static class MixedEventingRetentionBackupInbox
         await EventingArtifactState.SameResultAsync(result,
             fixture.Apply(fixture.Database, OperationKind.Batch, command, command.CommandId));
         await Assert.That(fixture.ReadTargetCut()).IsEqualTo(journal);
-        await Assert.That(fixture.Target.Position).IsEqualTo(before + 1);
+        await Assert.That(fixture.Target.Position).IsEqualTo(before);
         await Assert.That(EventingArtifactState.FullBytes(fixture.Target))
             .IsEquivalentTo(rows, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }

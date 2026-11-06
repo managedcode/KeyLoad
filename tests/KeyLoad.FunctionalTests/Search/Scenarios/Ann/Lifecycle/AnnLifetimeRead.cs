@@ -9,7 +9,7 @@ internal static class AnnLifetimeRead
     internal static AnnReadLifetimeMetadata Capture(TestDatabase source)
         => source.Store.Read<AnnReadLifetimeMetadata>(view =>
         {
-            var work = source.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
+            var work = TestDatabase.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
             var bounded = work.CreateView(view);
             var principal = source.Database.Principal(bounded, AnnLifetimeProtocol.Reader, source.Database.EvaluationClock.GetUtcNow());
             var definition = source.Database.Resource(bounded, source.Partition, AnnSeedTestSupport.Collection, ResourceKind.Collection);
@@ -30,7 +30,7 @@ internal static class AnnLifetimeRead
     internal static Task<AnnSearchPage> SearchAsync(TestDatabase source, TestDatabase target,
         AnnMaintenanceTestRuntime runtime, ApproximateSearchRequest request)
         => AnnPublicWholeFlow.Engine(target, runtime).ApproximateSearchAsync(AnnLifetimeProtocol.Reader,
-            request, target.CreateReadWork(TestContext.Current!.Execution.CancellationToken), Capture(source),
+            request, TestDatabase.CreateReadWork(TestContext.Current!.Execution.CancellationToken), Capture(source),
             TestContext.Current!.Execution.CancellationToken);
 
     internal static async Task WaitAsync(TestDatabase source, TestDatabase target, AnnMaintenanceTestRuntime runtime,
@@ -38,7 +38,7 @@ internal static class AnnLifetimeRead
     {
         var result = await AnnPublicWholeFlow.Engine(target, runtime).WaitForAnnIndexAsync(AnnLifetimeProtocol.Reader,
             new(target.Partition, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(),
-                pin.Consumer, pin.IndexGeneration, receipt.Token), target.CreateReadWork(TestContext.Current!.Execution.CancellationToken),
+                pin.Consumer, pin.IndexGeneration, receipt.Token), TestDatabase.CreateReadWork(TestContext.Current!.Execution.CancellationToken),
             Capture(source), TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.SchemaVersion).IsEqualTo(AnnLifetimeProtocol.TargetSchema);
         await Assert.That(result.PolicyEpoch).IsEqualTo(AnnLifetimeProtocol.TargetEpoch);

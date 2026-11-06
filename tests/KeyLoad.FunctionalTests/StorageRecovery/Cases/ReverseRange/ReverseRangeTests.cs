@@ -63,8 +63,7 @@ internal sealed class ReverseRangeTests
         await Assert.That(allFf.Select(Convert.ToHexString)).IsEquivalentTo(
             new[] { "FFFFFF", "FFFF00", "FFFF" }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(empty.Select(Convert.ToHexString)).IsEquivalentTo(
-            new[] { "FFFFFF", "FFFF00", "FFFF", "FFFE", "102100", "1021", "1020FF", "102000", "1020", "101F",
-                Convert.ToHexString(StoreFileFixture.PositionKey) },
+            new[] { "FFFFFF", "FFFF00", "FFFF", "FFFE", "102100", "1021", "1020FF", "102000", "1020", "101F" },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 

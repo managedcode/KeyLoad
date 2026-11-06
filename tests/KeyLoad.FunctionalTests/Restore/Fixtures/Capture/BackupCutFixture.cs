@@ -10,6 +10,7 @@ internal sealed class BackupCutFixture : IDisposable
     internal const string StoredKey = "metadata/key";
     internal const string StoredValue = "metadata-value";
     internal const long InitialAuthorityValue = 1L;
+    internal static readonly DateTimeOffset InitialClock = new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private const string RootPrefix = "keyload-execution-backup-cut-";
     private const string SourceDirectoryName = "source";
     private const string BackupDirectoryName = "backup";
@@ -44,12 +45,12 @@ internal sealed class BackupCutFixture : IDisposable
             store.Commit((tx, _) =>
             {
                 tx.PutRecord(StoredKeyBytes, StoredValue);
-                tx.PutRecord(KeySpace.Applied.ToArray(), InitialAuthorityValue);
+                tx.PutRecord(StorageCommandKeys.Applied(null), new StoragePartitionPosition(null, InitialAuthorityValue));
                 return true;
             });
             store.Commit((tx, _) =>
             {
-                tx.PutRecord(KeySpace.Clock.ToArray(), InitialAuthorityValue);
+                tx.PutRecord(StorageCommandKeys.Clock(null), InitialClock);
                 return true;
             });
             fixture.Position = await store.CreateBackupAsync(fixture.Backup, token);

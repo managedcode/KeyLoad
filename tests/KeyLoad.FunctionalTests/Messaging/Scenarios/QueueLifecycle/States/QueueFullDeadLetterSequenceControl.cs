@@ -11,7 +11,7 @@ internal static class QueueFullDeadLetterSequenceControl
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
         var lane = new QueueLaneRef(fixture.Partition, QueueLifecycleTestProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store))
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition))
         {
             RuntimeSubmit = recorder.Apply
         };
@@ -37,7 +37,7 @@ internal static class QueueFullDeadLetterSequenceControl
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueFullDeadLetterControlAssertions.PendingAsync(database, state);
         var counters = QueueLifecycleControlCold.Read(database, state.Lane);
         QueueLifecycleControlCold.Write(database, state.Lane, counters with

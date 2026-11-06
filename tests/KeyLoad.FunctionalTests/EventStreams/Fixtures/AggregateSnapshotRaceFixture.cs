@@ -66,7 +66,7 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
         var seed = new CommandRequest(Guid.NewGuid(), Harness.Partition, [new AppendEvents(StreamSet, StreamId,
             [Data("first", 1), Data("second", 2), Data("third", 3)], ExpectedStreamRevision.NoStream)]);
         SeedOperation = Database.CreateCommand(OperationKind.Batch, seed.CommandId, "root", Epoch, JsonSerializer.Serialize(seed, JsonDefaults.Options));
-        SeedPosition = Database.LastApplied + 1;
+        SeedPosition = ExpectedCanonicalCommit.Applied(Database, Harness.Partition) + 1;
         SeedResult = Database.Apply(SeedOperation);
         SeedRaw = Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", seed.CommandId)))
             ?? throw new InvalidOperationException("The literal seed outcome is absent.");

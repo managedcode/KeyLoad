@@ -13,16 +13,16 @@ internal static class DistributedSearchStatisticsFlow
     internal static DistributedTextWitness Capture(DocumentPatchAtomicityOwner owner,
         PartitionRef partition, PhysicalShardRecord placement, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader,
             Request(partition), placement, QueryFixture.Tenant,
             UnitExecutionOptions.QueryExecution(), budget);
     }
 
-    internal static DistributedTextStatistics Combine(DocumentPatchAtomicityOwner source,
+    internal static DistributedTextStatistics Combine(
         DistributedTextWitness first, DistributedTextWitness second, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(source.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         return DistributedTextStatisticsMerge.Combine([first.Statistics, second.Statistics],
             UnitExecutionOptions.QueryExecution(), budget);
     }
@@ -30,7 +30,7 @@ internal static class DistributedSearchStatisticsFlow
     internal static RankedDocument[] Rank(DocumentPatchAtomicityOwner owner, DistributedTextWitness witness,
         DistributedTextStatistics statistics, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         using var admission = owner.Database.AdmitQuery(token);
         return owner.Database.WithPartitionQueryFenceView(QueryFixture.Reader, witness.Partition,
             QueryFixture.Collection, (view, principal, resource, digest) =>

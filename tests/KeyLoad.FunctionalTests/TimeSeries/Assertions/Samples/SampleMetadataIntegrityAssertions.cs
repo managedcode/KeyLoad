@@ -16,7 +16,7 @@ internal static class SampleMetadataIntegrityAssertions
             {
                 throw new InvalidOperationException("The complete metadata fixture image exceeds its bound.");
             }
-            return JsonSerializer.Serialize(page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(record =>
+            return JsonSerializer.Serialize(page.Records.Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));
     internal static async Task Unchanged(SampleMetadataIntegrityFixture fixture, SampleMetadataIntegrityCut cut)

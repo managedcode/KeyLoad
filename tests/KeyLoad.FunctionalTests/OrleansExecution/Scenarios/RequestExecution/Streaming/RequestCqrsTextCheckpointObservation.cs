@@ -13,7 +13,7 @@ internal static class RequestCqrsTextCheckpointObservation
     {
         var database = fixture.Database;
         var before = QueueWholeFlowStorage.Bytes(database.Store);
-        var budget = new ReadExecutionBudget(fixture.Clock, token);
+        var budget = new ReadExecutionBudget(token);
         var options = UnitTextOptions.Execution();
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, request, budget, options)
@@ -24,8 +24,7 @@ internal static class RequestCqrsTextCheckpointObservation
             command.CommandId, TextMaintenanceTestValues.Principal, default, command);
         var outcome = database.Database.ResolveOutcome(issued);
         var actual = outcome.Value as ProjectionBatchResult;
-        var applied = database.Store.Read(view => OrleansSerialization.Deserialize<long>(
-            view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException()));
+        var applied = database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, database.Partition));
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).AsSpan().SequenceEqual(before)).IsTrue();
         await Console.Error.WriteLineAsync($"{ObservationPrefix} hasOutcome={actual is not null} error={Errors.Code(outcome.Problem).Value} checkpoint={actual?.Checkpoint} applied={applied} ackPosition={actual?.Receipt.Token.Position}").ConfigureAwait(false);
     }

@@ -69,7 +69,7 @@ internal sealed class TextMatchModeWholeFlowTests
 
     private static async Task RequireCorpusStatisticsAsync(TestDatabase database, SearchRequest request, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(database.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         var observed = database.Database.WithQueryView(Reader, request.Partition, request.Collection, Capability.Query,
             (view, principal, _) =>
             {

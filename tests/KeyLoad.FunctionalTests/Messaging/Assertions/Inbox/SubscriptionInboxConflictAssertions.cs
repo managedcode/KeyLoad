@@ -54,7 +54,8 @@ internal static class SubscriptionInboxConflictAssertions
         var position = store.Position;
         var failure = db.Apply(operation);
         await FailureAsync(failure);
-        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
+        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position);
         await PreservedAsync(db, store, group, inbox, source, originalOwner);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
         {
@@ -124,7 +125,7 @@ internal static class SubscriptionInboxConflictAssertions
         }
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
         await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
     }
 
     internal static async Task FencedOriginalProcessingAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
@@ -142,7 +143,7 @@ internal static class SubscriptionInboxConflictAssertions
         await Assert.That(retained.AsSpan().SequenceEqual(original.Saved)).IsTrue();
         await ReplayResultAssertions.Same<SubscriptionProcessingResult>(
             OrleansSerialization.Deserialize<StoredOutcome>(retained).Result, original.Result);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
     }
 
     private static async Task FailureAsync(Result<object> result)

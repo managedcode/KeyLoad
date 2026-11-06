@@ -85,7 +85,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         TextIncrementalAdmission.Request(request, database.Store.Identity.NodeId);
         if (request.Kind == TextMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(clock, shutdown.Token);
+            using var release = new MaintenanceSessionWork(shutdown.Token);
             using var stage = release.EnterStage(binding, token);
             var budget = release.Budget;
             TextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
@@ -96,7 +96,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         }
         if (request.Kind == TextMaintenanceCapabilityKind.Begin)
         {
-            return TextIncrementalBegin.Run(database, root, principal, request, configured, clock,
+            return TextIncrementalBegin.Run(database, root, principal, request, configured,
                 shutdown, sessions, faultObserver, resources, generations.RetainGeneration, binding, token);
         }
         var retained = sessions.Require(request.SessionId);

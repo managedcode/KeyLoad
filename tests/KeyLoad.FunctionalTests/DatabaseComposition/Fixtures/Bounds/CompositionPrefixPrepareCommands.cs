@@ -10,7 +10,7 @@ internal static class CompositionPrefixPrepareCommands
         ImmutableArray<Mutation> mutations, string principal = D.Root, DateTimeOffset? evaluatedAt = null)
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
-        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.Token);
+        var work = new ReadExecutionBudget(owner.Token);
         var original = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, principal,
             evaluatedAt ?? owner.Database.EvaluationClock.GetUtcNow(), request, work);
         var decoded = ((CommandRequest)(original).Value!.Input);

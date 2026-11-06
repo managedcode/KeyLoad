@@ -9,18 +9,21 @@ internal sealed class QueryAdapterValidationTests
 {
 
     [Test]
-    public async Task AcMp003SqlCancellationInterruptsAnUnterminatedLongLiteralBeforeSyntaxFailure()
+    public async Task AcMp003CancelledSqlRefusesAnUnterminatedLongLiteralBeforeSyntaxFailureAndHealthyQueryFollows()
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         using var cancellation = new CancellationTokenSource();
+        await cancellation.CancelAsync();
         var sql = "SELECT * FROM orders WHERE status = '" + new string('x', 8_192);
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
 
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute("root",
-            new(db.Partition, sql), new CancelDuringSqlLexingTimeProvider(cancellation), cancellation.Token));
+            new(db.Partition, sql), cancellationToken: cancellation.Token));
 
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        var healthy = engine.Execute("root", new(db.Partition, "SELECT TOP (1) * FROM orders", AllowFullScan: true));
+        await Assert.That(healthy.Rows).IsEmpty();
     }
 
     [Test]
@@ -102,21 +105,4 @@ internal sealed class QueryAdapterValidationTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.CursorExpired);
     }
 
-    private sealed class CancelDuringSqlLexingTimeProvider(CancellationTokenSource cancellation) : TimeProvider
-    {
-        private const int CancelOnTimestampCall = 4;
-        private int timestampCalls;
-
-        public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-
-        public override long GetTimestamp()
-        {
-            if (Interlocked.Increment(ref timestampCalls) == CancelOnTimestampCall)
-            {
-                cancellation.Cancel();
-            }
-
-            return 0;
-        }
-    }
 }

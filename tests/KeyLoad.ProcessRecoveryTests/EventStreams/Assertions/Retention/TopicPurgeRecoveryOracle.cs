@@ -13,7 +13,7 @@ internal static class TopicPurgeRecoveryOracle
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
         var operation = await ReadAsync<Command<DatabaseCommand>>(root, TopicPurgeCrashContract.OperationFile, cancellationToken);
-        var seedPosition = await ReadAsync<long>(root, TopicPurgeCrashContract.PositionFile, cancellationToken);
+        var seedPosition = await ReadAsync<long>(root, TopicPurgeCrashContract.SequenceFile, cancellationToken);
         var pinned = await ReadAsync<bool>(root, TopicPurgeCrashContract.PinnedFile, cancellationToken);
         var cursor = await ReadAsync<string>(root, TopicPurgeCrashContract.CursorFile, cancellationToken);
         var protectedBytes = await ReadAsync<string[]>(root, TopicPurgeCrashContract.ProtectedFile, cancellationToken);
@@ -23,7 +23,7 @@ internal static class TopicPurgeRecoveryOracle
         {
             var database = Open(store);
             var recovered = OutcomeStoreOracle.Read(store, operation);
-            await Assert.That(store.Position).IsEqualTo(seedPosition + (recovered is null ? 0 : 1));
+            await Assert.That(CrashDatabase.AppliedPosition(store, TopicPurgeCrashContract.Partition)).IsEqualTo(seedPosition + (recovered is null ? 0 : 1));
             if (stage == CommitStage.WriteAheadLogSynced)
             {
                 await Assert.That(recovered).IsNotNull();
@@ -53,7 +53,7 @@ internal static class TopicPurgeRecoveryOracle
         }
         using var finalStore = NewStore(root);
         var finalDatabase = Open(finalStore);
-        await Assert.That(finalStore.Position).IsEqualTo(finalPosition);
+        await Assert.That(finalStore.Position).IsGreaterThanOrEqualTo(finalPosition);
         await EventAppendStateAssertions.SameBytesAsync(finalBytes, finalStore);
         await TopicPurgeContinuation.FinalAsync(finalDatabase, pinned);
         var settled = EventAppendStateAssertions.Bytes(finalStore);

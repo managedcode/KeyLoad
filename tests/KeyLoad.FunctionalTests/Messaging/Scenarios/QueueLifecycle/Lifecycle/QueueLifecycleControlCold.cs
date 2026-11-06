@@ -30,7 +30,7 @@ internal static class QueueLifecycleControlCold
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await terminal(recorder.Database);
         await QueueLifecycleHistoryAssertions.ReplayAsync(recorder, lane, token);
         await terminal(recorder.Database);

@@ -22,9 +22,9 @@ internal static class RecurringSagaSchemaCold
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-                await Assert.That(owner.Store.Position).IsEqualTo(position);
+                position = await NativeStoreAssertions.ReopenedAsync(owner.Store, position);
                 await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(cut);
+                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((cut.AppliedPosition, position));
                 await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
             }, failures);
             await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaCanonical.CurrentAsync(owner, state), failures);

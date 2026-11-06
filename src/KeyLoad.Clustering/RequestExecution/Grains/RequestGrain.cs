@@ -10,7 +10,7 @@ namespace KeyLoad.Clustering;
 /// Cancellation and stream messages address that request's activation.</remarks>
 [PreferLocalPlacement]
 public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient storage, ILocalDatabaseRuntime runtime,
-    ILocalSiloDetails local, ILogger<RequestGrain> diagnostics, TimeProvider clock,
+    ILocalSiloDetails local, ILogger<RequestGrain> diagnostics,
     Func<RequestWorkOwner> borrowWorkOwner, IServiceProvider services)
     : Grain, IRequestGrain
 {
@@ -20,8 +20,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
         try
         {
             var request = DecodeRequest(envelope);
-            if (request.Envelope.ReadKind is GrainReadKind.Document or GrainReadKind.Query or GrainReadKind.AstQuery
-                || request.Envelope.CommandKind == OperationKind.Batch)
+            if (!ConnectionParentExecution.Handles(request.Envelope.CommandKind))
             {
                 return await ExecuteUnaryAsync(request, cancellationToken);
             }
@@ -121,7 +120,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
                     ((IGrainBase)this).GrainContext, token);
             }
             stage = GrainFailureStage.CapabilityExecution;
-            var owner = await storage.RequestOwnerAsync(request.Envelope.Incarnation, token);
+            var owner = await storage.RequestOwnerAsync(request, token);
             var reply = await ExecuteLeafAsync(request, envelope, owner, purpose.WorkBinding,
                 token);
             if (writer is not null && ConnectionParentExecution.Handles(request.Envelope.CommandKind) && reply.Error is null)
@@ -144,7 +143,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
     private Task<GrainOperationReply> ExecuteLeafAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         SiloAddress owner, RequestWorkLease binding, CancellationToken token)
         => request.Envelope.CommandKind is not null && !ConnectionParentExecution.Handles(request.Envelope.CommandKind)
-            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, RunOnOwnerAsync, owner, codec, clock, binding, token)
+            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, RunOnOwnerAsync, owner, codec, binding, token)
             : RunOnOwnerAsync(owner, envelope, null, token);
 
     /// <summary>Runs one leaf beside its storage owner: here when this silo owns it, otherwise on the owner's silo.</summary>

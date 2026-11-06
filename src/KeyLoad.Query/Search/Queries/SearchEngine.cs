@@ -14,7 +14,7 @@ public sealed partial class SearchEngine
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request WaitForIndexRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await TextProjectionAdmission.ExecuteAsync(() => TextIndexWaitExecution.Execute(database, textProjection,

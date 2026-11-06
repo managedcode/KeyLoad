@@ -7,7 +7,6 @@ internal static class QueueOrderedIncrementCapacityFlow
 {
     private const int MaximumAttempts = 2;
     private const int StoredMessages = 3;
-    private const int FaultFailureRepairCommits = 3;
 
     internal static async Task RunAsync(QueueLifecycleCeilingFault fault, CancellationToken token)
     {
@@ -24,7 +23,7 @@ internal static class QueueOrderedIncrementCapacityFlow
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue, QueueOrderedRetryRestoreAuthority.Administrator)
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition), QueueParkedHeadPolicy.Continue, QueueOrderedRetryRestoreAuthority.Administrator)
         {
             BeforeApply = recorder.Observe
         };
@@ -33,16 +32,15 @@ internal static class QueueOrderedIncrementCapacityFlow
         recorder.Capture(state.Outcomes);
         await recorder.AssertAsync(token);
         var image = QueueOrderedRetryImage.Capture(fixture.Store, lane);
-        var position = fixture.Store.Position;
         var rows = QueueLifecycleCeilingInjection.Inject(fixture.Store, lane, QueueOrderedRetryProtocol.First, fault);
         var failed = await QueueLifecycleCeilingFailureAssertions.FailAsync(fixture.Database, rows,
             state.Principal, state.Time, token);
-        await ColdAsync(fixture, state, recorder, rows, failed, image, position, fault, token);
+        await ColdAsync(fixture, state, recorder, rows, failed, image, fault, token);
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueOrderedRetryState state,
         QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
-        string[] original, long originalPosition, QueueLifecycleCeilingFault fault, CancellationToken token)
+        string[] original, QueueLifecycleCeilingFault fault, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
@@ -51,11 +49,11 @@ internal static class QueueOrderedIncrementCapacityFlow
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed, state.Principal, state.Time, token);
         QueueLifecycleCeilingInjection.Repair(cold, rows);
         await QueueOrderedRetryImage.SameAsync(cold, state.Lane, original);
-        await Assert.That(cold.Position).IsEqualTo(originalPosition + FaultFailureRepairCommits);
+        position = await NativeStoreAssertions.AdvancedAsync(cold, position);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed, state.Principal, state.Time, token);
         if (QueueLifecycleCeilingInjection.IsCancel(fault))
         {
@@ -83,7 +81,7 @@ internal static class QueueOrderedIncrementCapacityFlow
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await TerminalAsync(recorder.Database, state, fault);
         await QueueLifecycleHistoryAssertions.ReplayAsync(recorder, state.Lane, token);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(recorder.Database, rows, failed, state.Principal, state.Time, token);

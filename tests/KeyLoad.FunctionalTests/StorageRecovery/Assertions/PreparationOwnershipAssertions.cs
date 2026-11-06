@@ -42,14 +42,17 @@ internal static class PreparationOwnershipAssertions
 
     internal static async Task HealthyAsync(O owner)
     {
-        var next = checked(owner.Store.Position + 1);
+        var before = owner.Store.Position;
+        var publications = owner.Publication.Count;
         var actual = owner.Store.Commit((transaction, position) =>
         {
             transaction.Put(O.ParentKey, O.ParentValue);
             return position;
         });
-        await Assert.That(actual).IsEqualTo(next);
-        await Assert.That(owner.Store.Position).IsEqualTo(next);
+        await Assert.That(actual).IsGreaterThan(before);
+        await Assert.That(owner.Publication.Count).IsEqualTo(publications + 1);
+        await Assert.That(owner.Store.Position).IsEqualTo(owner.Publication.Position);
+        await Assert.That(owner.Store.Position).IsGreaterThanOrEqualTo(actual);
         await BytesAsync(O.ParentValue, owner.Store.Read(view => view.ReadOwnedValue(O.ParentKey)));
         await BytesAsync(O.SeedValue, owner.Store.Read(view => view.ReadOwnedValue(O.SeedKey)));
         await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(O.ChildKey))).IsNull();

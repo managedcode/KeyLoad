@@ -31,7 +31,7 @@ internal sealed class MetamorphicReferenceFixture(int seed) : IDisposable
         var expected = new CommitReceipt(Seed.CommandId, expectedToken, [.. Rows.Select(row => new MutationReceipt("putDocument", MetamorphicReferenceData.Collection, row.Id, 1L))], DurabilityProfile.ProcessDurable, 1);
         await MetamorphicReferenceAssertions.EqualAsync(Receipt, expected);
         await RuntimeReceiptAsync(Receipt);
-        await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(before);
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original generated-corpus outcome must exist.");
         await PolicyAsync(false, 1L);

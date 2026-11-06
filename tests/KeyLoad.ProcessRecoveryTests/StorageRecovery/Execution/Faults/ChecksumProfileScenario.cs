@@ -78,7 +78,7 @@ internal static class ChecksumProfileScenario
 
     private static async Task ContinueAsync(string root, ZoneTreeStore store, int append)
     {
-        await ChecksumProfileEvidence.RequireAsync(root, store);
+        _ = await ChecksumProfileEvidence.RequireReopenedAsync(root, store);
         var previous = append - ChecksumProfileProtocol.OneAppend;
         ChecksumProfileCorpus.Require(store, previous);
         var database = Open(store);
@@ -91,10 +91,10 @@ internal static class ChecksumProfileScenario
 
     private static async Task ColdAsync(string root, ZoneTreeStore store)
     {
-        await ChecksumProfileEvidence.RequireAsync(root, store);
+        var opened = await ChecksumProfileEvidence.RequireReopenedAsync(root, store);
         ChecksumProfileCorpus.Require(store, ChecksumProfileProtocol.TwoAppends);
         await RequireModelsAsync(root, Open(store), store, ChecksumProfileProtocol.TwoAppends, replay: false);
-        await ChecksumProfileEvidence.RequireAsync(root, store);
+        ChecksumProfileEvidence.Require(store, opened);
     }
 
     private static async Task RequireModelsAsync(string root, DatabaseEngine database, ZoneTreeStore store,

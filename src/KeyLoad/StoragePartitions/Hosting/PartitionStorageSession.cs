@@ -1,7 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using ManagedCode.Communication;
-using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Server;
 
@@ -15,6 +13,8 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     private RequestWorkOwner? work;
     private AsyncServiceScope? scope;
     private PartitionStorageRequestExecution? requests;
+    internal PartitionStorageBatchExecution Batches => batches ?? throw new InvalidOperationException(ServicesUnavailable);
+    private PartitionStorageBatchExecution? batches;
     private UserAnalyticsRuntime? analytics;
     private readonly Lock lifecycle = new();
     private Task? closing;
@@ -37,6 +37,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
         }
         host = await PartitionHost.OpenAsync(options, authorization, clock, logger, grains, ownership);
         work = new();
+        batches = new(host.Database, work, grains);
         if (scopeFactory is not null)
         {
             scope = scopeFactory.CreateAsyncScope();
@@ -61,12 +62,11 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     {
         cancellationToken.ThrowIfCancellationRequested();
         return Host.Database.Store.Read(view => new SiloStorageCut(Host.Database.Store.Identity.Incarnation,
-            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : default(long)));
+            StorageOperationApply.ReadCanonicalSequence(view, null))
+        {
+            Partitions = StorageReplicaExecution.ReadPartitionPositions(view, cancellationToken)
+        });
     }
-
-    public Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Host.Coordinator.SubmitVerifiedAsync<TResult>(operation, cancellationToken);
 
     public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
         IGrainContext owner, CancellationToken cancellationToken)

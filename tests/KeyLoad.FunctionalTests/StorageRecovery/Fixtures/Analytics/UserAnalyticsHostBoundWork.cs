@@ -126,7 +126,7 @@ internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
         RequestWorkLease lease, bool cancelBefore, CancellationToken token)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
-        var work = new ReadExecutionBudget(host.Database.EvaluationClock, cancellation.Token);
+        var work = new ReadExecutionBudget(cancellation.Token);
         using var admission = host.Database.AdmitQuery(cancellation.Token);
         var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
             request, work, lease);

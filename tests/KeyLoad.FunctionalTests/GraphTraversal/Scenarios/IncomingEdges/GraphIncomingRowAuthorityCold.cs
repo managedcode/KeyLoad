@@ -26,7 +26,7 @@ internal static class GraphIncomingRowAuthorityCold
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
-                await Assert.That(cold.Position).IsEqualTo(cut);
+                cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
                 await Assert.That(CanonicalStoreImage.Bytes(cold)).IsEquivalentTo(image);
                 await GraphIncomingRowAuthorityAssertions.HealthyAsync(engine, cold, source, target, reader, repairedTarget);
                 await ReplayAsync(engine, cold, repairs);

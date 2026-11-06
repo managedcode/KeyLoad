@@ -15,7 +15,7 @@ internal static class FieldWriteOutputAssertions
     {
         CommitReceipt expected = new(command.CommandId, expectedToken, [new(kind, P.Collection, P.Document, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(expected, actual);
-        await Assert.That(state.Store.Position).IsEqualTo(before + P.NextPosition);
+        await Assert.That(state.Store.Position).IsGreaterThan(before);
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }
 

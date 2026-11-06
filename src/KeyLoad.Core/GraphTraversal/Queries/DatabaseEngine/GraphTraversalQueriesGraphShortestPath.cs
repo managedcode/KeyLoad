@@ -9,15 +9,14 @@ public static class GraphTraversalQueriesGraphShortestPath
     /// <summary>Finds one bounded shortest directed path inside the current authorized read cut.</summary>
     /// <param name = "principalId">Identifies the persisted caller principal.</param>
     /// <param name = "request">Defines the graph path and finite traversal limits.</param>
-    /// <param name = "timeProvider">Provides the operation clock used for the deadline.</param>
     /// <param name = "cancellationToken">Cancels parsing, storage work and result projection.</param>
     /// <returns>The ordered shortest path, or the privacy-preserving no-path result.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static GraphShortestPathResult ShortestPath(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
+    public static GraphShortestPathResult ShortestPath(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.ShortestPath(principalId, request, budget);
     }
 

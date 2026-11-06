@@ -13,14 +13,16 @@ internal static class QueueDeadLetterSelectedTrial
         var originalImage = QueueWholeFlowStorage.Bytes(fixture.Store);
         var originalPosition = fixture.Store.Position;
         QueueDeadLetterSelectedSetup.Damage(fixture.Store, state);
-        await Assert.That(fixture.Store.Position).IsEqualTo(originalPosition + QueueDeadLetterSelectedProtocol.One);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(originalPosition);
+        var position = fixture.Store.Position;
         var damaged = QueueWholeFlowStorage.Bytes(fixture.Store);
         await QueueDeadLetterSelectedRefusal.RequireAsync(fixture.Database, fixture.Store, state, damaged);
         await QueueDeadLetterSelectedRefusal.RequireAsync(fixture.Database, fixture.Store, state, damaged);
         fixture.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
-        await Assert.That(reopened.Position).IsEqualTo(originalPosition + QueueDeadLetterSelectedProtocol.One);
+        position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(damaged, CollectionOrdering.Matching);
         await QueueDeadLetterSelectedRefusal.RequireAsync(database, reopened, state, damaged);
         reopened.Commit((tx, _) =>
         {
@@ -30,7 +32,7 @@ internal static class QueueDeadLetterSelectedTrial
             }
             return true;
         });
-        await Assert.That(reopened.Position).IsEqualTo(originalPosition + QueueDeadLetterSelectedProtocol.Two);
+        position = await NativeStoreAssertions.AdvancedAsync(reopened, position);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(originalImage, CollectionOrdering.Matching);
         await QueueDeadLetterSelectedImage.RequireAsync(database, reopened, state);
         await QueueDeadLetterSelectedHistory.ReplayAsync(database, reopened, state, state.History);

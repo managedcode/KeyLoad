@@ -9,26 +9,27 @@ internal static class ChunkMultiblockReadInterruptionTrial
         ChunkMultiblockReadByteRecipe recipe, bool healthy)
     {
         using var cancellation = new CancellationTokenSource();
-        var clock = new SampleRollupWorkClock();
-        var budget = new ReadExecutionBudget(clock, cancellation.Token);
-        var start = fixture.Store.GetReadDiagnostics().PointExaminedBytes;
-        clock.Arm(() => fixture.Store.GetReadDiagnostics().PointExaminedBytes - start >= recipe.FirstBytes, cancellation.Cancel);
-        var failures = new List<Exception>();
-        try
+        var budget = new ReadExecutionBudget(cancellation.Token);
+        var before = fixture.Store.GetReadDiagnostics().PointExaminedBytes;
+        var triggered = false;
+        void Observe()
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
+            if (!triggered && fixture.Store.GetReadDiagnostics().PointExaminedBytes - before >= recipe.FirstBytes)
             {
-                await ChunkMultiblockReadInterruptionFaults.CancellationAsync(fixture, budget, cancellation.Token);
-                await Assert.That(clock.Triggered).IsTrue();
-            }, failures);
+                triggered = true;
+                cancellation.Cancel();
+            }
         }
-        finally
-        {
-            clock.Disarm();
-        }
+        var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var rows = ChunkMultiblockReadBudgetCalls.Read(fixture, ChunkMultiblockReadBudgetCalls.Budget(fixture));
+            await ChunkMultiblockReadInterruptionFaults.CancellationAsync(fixture, budget, Observe, cancellation.Token);
+            await Assert.That(triggered).IsTrue();
+            await Assert.That(fixture.Store.GetReadDiagnostics().PointExaminedBytes - before).IsGreaterThanOrEqualTo(recipe.FirstBytes);
+        }, failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var rows = ChunkMultiblockReadBudgetCalls.Read(fixture, new ReadExecutionBudget());
             await Assert.That(JsonSerializer.Serialize(rows, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(ChunkMultiblockBoundaryData.Expected(healthy), JsonDefaults.Options));
         }, failures);

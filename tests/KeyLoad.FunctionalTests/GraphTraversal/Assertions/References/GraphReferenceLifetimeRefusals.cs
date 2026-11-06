@@ -53,7 +53,7 @@ internal static class GraphReferenceLifetimeRefusals
             PartitionStoreProtocol.AdministratorId, payload, token);
         await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
         await Assert.That(reply.Result).IsNull();
-        await Assert.That(profile.Source.Store.Position).IsEqualTo(position + 1);
+        await Assert.That(profile.Source.Store.Position).IsGreaterThan(position);
         await Assert.That(profile.Source.Database.LastApplied).IsEqualTo(canonical + 1);
         await Assert.That(CommandDomain(profile, command.CommandId).SequenceEqual(image)).IsTrue();
         var outcome = profile.Source.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
@@ -61,18 +61,20 @@ internal static class GraphReferenceLifetimeRefusals
         await Assert.That(outcome).IsNotNull();
         await Assert.That(Errors.Code(outcome!.Result.Problem).Value).IsEqualTo(ErrorCode.OwnershipLost);
         var committed = QueueWholeFlowStorage.Bytes(profile.Source.Store);
+        var committedPosition = profile.Source.Store.Position;
         var replay = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, payload, token);
         await Assert.That(replay.Error).IsEqualTo(reply.Error);
         await Assert.That(replay.Result).IsNull();
-        await SameAsync(profile, committed, position + 1);
+        await SameAsync(profile, committed, committedPosition);
     }
 
     private static string[] CommandDomain(DropRuntimeProfile profile, Guid id)
     {
         byte[][] journal = [KeySpace.PartitionOutcome(DropRuntimeProtocol.Partition, PartitionStoreProtocol.AdministratorId, id),
             KeySpace.OutcomeLocator(DropRuntimeProtocol.Partition, PartitionStoreProtocol.AdministratorId, id),
-            KeySpace.Clock.ToArray(), KeySpace.AppliedBytes, KeySpace.LastCommandBytes];
+            StorageCommandKeys.Clock(DropRuntimeProtocol.Partition), StorageCommandKeys.Applied(DropRuntimeProtocol.Partition),
+            StorageCommandKeys.ReplicaBatch(DropRuntimeProtocol.Partition)];
         var prefixes = journal.Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(profile.Source.Store)
             .Where(row => !prefixes.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();

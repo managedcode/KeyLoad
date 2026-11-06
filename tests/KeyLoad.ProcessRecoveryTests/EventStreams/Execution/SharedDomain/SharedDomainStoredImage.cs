@@ -22,7 +22,7 @@ internal static class SharedDomainStoredImage
         {
             throw new InvalidOperationException(ImageLimit);
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).ToArray();
+        return page.Records.ToArray();
     });
 
     internal static string[] Format(IEnumerable<KeyValueRecord> records, PartitionRef? partition = null)

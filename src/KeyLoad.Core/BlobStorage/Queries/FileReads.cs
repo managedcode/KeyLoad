@@ -9,7 +9,7 @@ public static class FileReads
 {
     internal static FileMetadataState ReadFileMetadataBound(this DatabaseEngine engine, string principalId, FileMetadataQuery request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(cancellationToken);
         work.AttachResourceLifetimeBinding(binding);
         using var admission = engine.AdmitQuery(cancellationToken);
         var result = engine.Store.Read(raw => engine.ReadFileMetadata(work.CreateView(raw), principalId, request));

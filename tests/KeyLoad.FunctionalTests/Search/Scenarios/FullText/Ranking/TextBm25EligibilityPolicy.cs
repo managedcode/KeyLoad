@@ -56,7 +56,7 @@ internal static class TextBm25EligibilityPolicy
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, fresh, result, entry);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen();
-        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        await before.RequireReopenedAsync(owner);
         await TextBm25EligibilityPages.RequireAsync(flow, true, true, true);
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, fresh, result, entry);
     }

@@ -60,7 +60,7 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await SubscriptionLeaseVersionExhaustionAssertions.ReplayAsync(db, cold, request, failed, due);
         cold.Commit((tx, _) =>
         {

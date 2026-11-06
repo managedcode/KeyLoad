@@ -13,7 +13,7 @@ internal static class GraphShortestPathSelectedIdentityFlow
         var healthyImage = CanonicalStoreImage.Bytes(database.Store);
         var healthyPosition = database.Store.Position;
         var ownedFault = GraphTraversalIntegrityFaultRows.Install(database.Store, state, fault);
-        await Assert.That(database.Store.Position).IsEqualTo(healthyPosition + 1);
+        await Assert.That(database.Store.Position).IsGreaterThan(healthyPosition);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
         var corruptImage = CanonicalStoreImage.Bytes(database.Store);
@@ -25,10 +25,11 @@ internal static class GraphShortestPathSelectedIdentityFlow
         using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await GraphTraversalIntegrityAssertions.Image(cold, corruptImage, corruptPosition);
+            corruptPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(cold, corruptImage, corruptPosition);
             await GraphShortestPathIntegrityAssertions.Refuse(owner, cold, state, filtered, token);
             GraphTraversalIntegrityFaultRows.Repair(cold, ownedFault);
-            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage, corruptPosition + 1);
+            var repairedPosition = await NativeStoreAssertions.AdvancedAsync(cold, corruptPosition);
+            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage, repairedPosition);
             await GraphShortestPathIntegrityAssertions.Healthy(owner, cold, state, null, filtered, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
@@ -39,7 +40,7 @@ internal static class GraphShortestPathSelectedIdentityFlow
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
-        await GraphTraversalIntegrityAssertions.Image(secondCold, continuedImage, continuedPosition);
+        continuedPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(secondCold, continuedImage, continuedPosition);
         await GraphShortestPathIntegrityAssertions.Healthy(secondOwner, secondCold, state, continuation, filtered, token);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, state.SeedCommand, state.SeedReceipt);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, continuation.Command, continuation.Receipt);

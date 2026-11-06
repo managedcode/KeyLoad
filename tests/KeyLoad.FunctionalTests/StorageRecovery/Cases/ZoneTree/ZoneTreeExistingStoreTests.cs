@@ -123,7 +123,6 @@ internal sealed class ZoneTreeExistingStoreTests
 
     private static string ReplaceVariant(string json, string replacement)
         => json.Replace(NormalVariantJson, replacement, StringComparison.Ordinal);
-    private const long CommittedPosition = 1;
 
     [Test]
     public async Task AcSg009002OriginalIdentityDataPositionAndDoubleDisposePermitNormalReopen()
@@ -131,10 +130,10 @@ internal sealed class ZoneTreeExistingStoreTests
         using var files = new ZoneTreeExistingStoreFixture();
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
         var result = await files.InspectAsync();
-        await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
+        await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, files.Position);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
-        await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
+        await NativeStoreAssertions.ReopenedAsync(reopened, files.Position);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
 }

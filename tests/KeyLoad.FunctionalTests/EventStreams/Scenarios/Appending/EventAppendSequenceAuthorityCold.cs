@@ -31,7 +31,7 @@ internal static class EventAppendSequenceAuthorityCold
             var database = fixture.Database.CreateConfiguredDatabase(store);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await Assert.That(store.Position).IsEqualTo(position);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await Assert.That(QueueWholeFlowStorage.Bytes(store))
                     .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 await EventAppendSequenceAuthorityAssertions.PageAsync(database, fixture.Stream, fixture.Now, token);

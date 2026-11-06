@@ -19,7 +19,7 @@ internal static class SubscriptionLeaseAuthorityFlow
             MaxWindow = 3
         });
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 30);
         var operation = Create(fixture.Database, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         var original = fixture.Database.Apply(operation);
@@ -33,7 +33,6 @@ internal static class SubscriptionLeaseAuthorityFlow
             ?? throw new InvalidOperationException("The genuine leased subscription slot is absent.");
         var row = OrleansSerialization.Deserialize<GroupDelivery>(saved);
         var originalBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var originalPosition = fixture.Store.Position;
         fixture.Store.Commit((tx, _) =>
         {
             SubscriptionDeliveryAuthorityFaults.Stage(tx, key, row, fault);
@@ -47,7 +46,7 @@ internal static class SubscriptionLeaseAuthorityFlow
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, bytes, position, identity);
         await SubscriptionLeaseAuthorityAssertions.RefusalAsync(db, first, operation, original, attempt);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
         first.Commit((tx, _) =>
@@ -55,7 +54,8 @@ internal static class SubscriptionLeaseAuthorityFlow
             tx.Put(key, saved);
             return true;
         });
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
+        position = await NativeStoreAssertions.AdvancedAsync(first, position);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(first, originalBytes, position, identity);
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         await CompleteAsync(db, first, fixture.Directory, group, action, row, key, attempt,
             command, operation, original, time, source, token);
@@ -126,11 +126,11 @@ internal static class SubscriptionLeaseAuthorityFlow
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, second, group.Source, source);
         await SubscriptionLeaseAuthorityAssertions.SettledAsync(db, second, group, claim, original, receipts, reclaimed, reclaimResult);
         await SubscriptionReceiveSlotAuthorityAssertions.HealthyAsync(db, second, group,
-            QueueWholeFlowStorage.Clock(second).AddSeconds(1), token);
+            QueueWholeFlowStorage.Clock(second, group.Source.Partition).AddSeconds(1), token);
     }
 
     private static async Task AckAsync(DatabaseEngine db, SubscriptionRef group, string leaseToken, DateTimeOffset time,

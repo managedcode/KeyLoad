@@ -1,8 +1,6 @@
 using KeyLoad.FunctionalTests.Messaging;
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Server.Search;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.Search;
@@ -14,23 +12,20 @@ internal static class TextSelectedCancellationAssertions
     private const double Score = 1d / 61d;
 
     internal static async Task VerifyAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
-        TextIndexMaintenanceRequest maintenance, QueryObservedWorkClock clock, CancellationToken token)
+        TextIndexMaintenanceRequest maintenance, CancellationToken token)
     {
         _ = await TextMaintenancePhaseFlow.FinishAsync(database, runtime, maintenance, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var projection = new TextSelectedProjection(TextBilingualAudit.Open(database), runtime.Owner, runtime.Owner);
             await ServerFailureObserver.ObserveAsync(
-                () => DuringAsync(database, runtime, maintenance, new(database.Database,
-                    UnitExecutionOptions.QueryExecution(), projection), clock, token), failures);
+                () => DuringAsync(database, runtime, maintenance, runtime.Search, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task DuringAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
-        TextIndexMaintenanceRequest maintenance, SearchEngine search, QueryObservedWorkClock clock,
-        CancellationToken token)
+        TextIndexMaintenanceRequest maintenance, SearchEngine search, CancellationToken token)
     {
         var selection = new TextIndexSelection(maintenance.Consumer, maintenance.IndexGeneration);
         var request = TextBilingualAudit.Request(database.Partition, "hello") with
@@ -41,16 +36,12 @@ internal static class TextSelectedCancellationAssertions
         var position = database.Store.Position;
         var originalReads = runtime.Owner.SelectedPostingReads(selection);
         using var original = CancellationTokenSource.CreateLinkedTokenSource(token);
-        clock.Arm(() => runtime.Owner.SelectedPostingReads(selection) > originalReads, original.Cancel);
+        using var observation = global::KeyLoad.Query.Search.TextPostingObservation.Enter(async _ => await original.CancelAsync());
         RankedDocument[]? partial = null;
-        try
-        {
-            var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-                partial = await search.SearchAsync(Root, request, original.Token)) ?? throw new InvalidOperationException();
-            await Assert.That(error.CancellationToken).IsEqualTo(original.Token);
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+        var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
+            partial = await search.SearchAsync(Root, request, original.Token)) ?? throw new InvalidOperationException();
+        await Assert.That(error.CancellationToken).IsEqualTo(original.Token);
+        observation.Dispose();
         await Assert.That(runtime.Owner.SelectedPostingReads(selection)).IsGreaterThan(originalReads);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);

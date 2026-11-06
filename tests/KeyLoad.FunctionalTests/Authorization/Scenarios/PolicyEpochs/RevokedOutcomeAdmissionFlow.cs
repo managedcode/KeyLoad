@@ -62,9 +62,10 @@ internal static class RevokedOutcomeAdmissionFlow
     private static async Task CreateFreshAsync(RevokedOutcomeAdmissionFixture fixture)
     {
         fixture.Fresh = fixture.Next();
-        fixture.FreshPosition = fixture.Store.Position + 1;
+        var before = fixture.Store.Position;
         fixture.FreshToken = ExpectedCanonicalCommit.Next(fixture.Database, fixture.Harness.Partition);
         var freshResult = fixture.Database.Apply(fixture.Operation(fixture.Fresh));
+        fixture.FreshPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, before);
         fixture.FreshResult = freshResult;
         fixture.FreshOutcome = fixture.ReadOutcome(fixture.Fresh.CommandId);
         await RevokedOutcomeAdmissionValues.ReceiptAsync(fixture, fixture.Fresh, freshResult, fixture.FreshPosition, true);

@@ -15,7 +15,7 @@ internal static class RetainedAppendIdentityModel
             records = [.. records, new(stream, 3, 4, RetainedAppendIdentityFixture.Data("following"), RetainedAppendIdentityFixture.Epoch)];
         }
         await RetainedAppendIdentityAssertions.SameAsync(database.ReadStream("root", new ReadStreamRequest(stream)),
-            new StreamPage(stream, new(records.Length, 1, 1), [.. records], database.LastApplied, false, null, database.LastApplied));
+            new StreamPage(stream, new(records.Length, 1, 1), [.. records], ExpectedCanonicalCommit.Applied(database, stream.Partition), false, null, ExpectedCanonicalCommit.Applied(database, stream.Partition)));
         var foreign = stream with
         {
             StreamId = RetainedAppendIdentityFixture.Foreign
@@ -23,7 +23,7 @@ internal static class RetainedAppendIdentityModel
         await RetainedAppendIdentityAssertions.SameAsync(database.ReadStream("root", new ReadStreamRequest(foreign)),
             new StreamPage(foreign, new(1, 1, 1), [new(foreign, 1, 2,
                 RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate), RetainedAppendIdentityFixture.Epoch)],
-                database.LastApplied, false, null, database.LastApplied));
+                ExpectedCanonicalCommit.Applied(database, stream.Partition), false, null, ExpectedCanonicalCommit.Applied(database, stream.Partition)));
         foreach (var id in healthy ? new[] { "repaired", "healthy" } : new[] { "repaired" })
         {
             await RetainedAppendIdentityAssertions.SameAsync(database.GetDocument("root", new(stream.Partition,

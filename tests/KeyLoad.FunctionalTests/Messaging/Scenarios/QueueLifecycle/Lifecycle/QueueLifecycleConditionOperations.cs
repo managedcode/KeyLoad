@@ -12,7 +12,7 @@ internal static class QueueLifecycleConditionOperations
     internal static QueueLifecycleTestState Seed(TestDatabase fixture)
     {
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
         state.Batch(fixture.Database, QueueLifecycleHealthy.Enqueue(Source)).Get<CommitReceipt>();
         return state;
     }

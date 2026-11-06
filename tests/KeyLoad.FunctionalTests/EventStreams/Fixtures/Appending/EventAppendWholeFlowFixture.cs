@@ -73,7 +73,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         await Assert.That(page.Stream).IsEqualTo(Stream);
         await Assert.That(page.Head).IsEqualTo(new StreamHead(expected.Length, 1, 1));
         await Assert.That(page.HasMore).IsFalse();
-        await Assert.That(page.CutPosition).IsEqualTo(Database.Database.LastApplied);
+        await Assert.That(page.CutPosition).IsEqualTo(ExpectedCanonicalCommit.Applied(Database.Database, Database.Partition));
         var records = expected.Select((data, index) => new EventRecord(Stream, index + 1L,
             index + 1L, data, Now));
         await Assert.That(page.Events.Select(value => JsonSerializer.Serialize(value, JsonDefaults.Options)))

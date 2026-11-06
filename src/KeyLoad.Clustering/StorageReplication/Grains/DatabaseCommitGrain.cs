@@ -23,17 +23,30 @@ public sealed partial class DatabaseCommitGrain(SiloDatabaseClient storage, IClu
 
     /// <inheritdoc />
     public Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => UsesSharedVolume ? Shared.ApplyAsync<TResult>(operation, cancellationToken) : Commands.Submit<TResult>(operation, cancellationToken);
+        => Commands.Submit<TResult>(operation, cancellationToken);
 
     /// <inheritdoc />
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
-        => UsesSharedVolume ? Task.FromResult(Shared.ReadCut(cancellationToken)) : Copies.ReadCutAsync(cancellationToken);
+        => UsesSharedVolume ? Task.FromResult(Shared.ReadCut(cancellationToken)) : Copies.ReadDatabaseCutAsync(cancellationToken);
 
     /// <inheritdoc />
     public Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return UsesSharedVolume ? Task.FromResult(Shared.Address)
-            : Copies.GetReadOwnerAsync(preferredSilo, cancellationToken);
+            : Copies.GetDatabaseReadOwnerAsync(preferredSilo, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<SiloAddress> GetMetadataOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
+        => UsesSharedVolume ? Task.FromResult(Shared.Address)
+            : Copies.GetReadOwnerAsync(preferredSilo, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<SiloAddress> GetWriteOwnerAsync(CancellationToken cancellationToken)
+        => UsesSharedVolume ? Task.FromResult(Shared.Address) : Copies.GetPrimaryOwnerAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task WaitForCopiedAsync(long position, CancellationToken cancellationToken)
+        => Copies.WaitForCopiedAsync(position, cancellationToken);
 }

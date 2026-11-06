@@ -25,7 +25,7 @@ public static class ResourceExecutionExecution
                 var selection = CommandOutcomeKeyResolver.Select(view, normalized.UserId!, normalized.CommandId, scope);
                 var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, CommandOutcomeOperations.MissingDurableOutcomeMessage);
                 engine.ValidateStoredSubmissionIdentity(view, normalized, selection, outcome);
-                return engine.ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
+                return engine.ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection, verifiedPrincipal: principal) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
             }
             catch (KeyLoadException refusal) when (CqrsRuntimeFailures.FindFatal(refusal) is null && refusal.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated or ErrorCode.TokenInvalidated or ErrorCode.StaleLease or ErrorCode.LeaseExpired or ErrorCode.Conflict)
             {

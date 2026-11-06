@@ -21,7 +21,8 @@ internal static class AnnSeedTestSupport
         string id = "seed-space", string model = Model, string version = Version)
         => new(id, dimension, metric, model, version);
 
-    internal static TestDatabase Create(int count = 3, DatabaseLimits? limits = null, TimeProvider? timeProvider = null)
+    internal static TestDatabase Create(int count = 3, DatabaseLimits? limits = null, TimeProvider? timeProvider = null,
+        int dimensions = Dimension)
     {
         var database = new TestDatabase(limits, timeProvider: timeProvider);
         try
@@ -35,9 +36,13 @@ internal static class AnnSeedTestSupport
                 for (var index = start; index < end; index++)
                 {
                     var id = Id(index);
+                    var values = new float[dimensions];
+                    values[0] = (float)index + 0.25f;
+                    values[1] = 1f;
+                    values[2] = -0.5f;
                     mutations.Add(new PutDocument(Collection, id, "{}", Access: new(Owner)));
                     mutations.Add(new PutVector(Collection, id, Field,
-                        ImmutableArray.Create((float)index + 0.25f, 1f, -0.5f), Space(), 1));
+                        ImmutableArray.Create(values), Space(dimension: dimensions), 1));
                 }
                 database.Commit([.. mutations]);
             }

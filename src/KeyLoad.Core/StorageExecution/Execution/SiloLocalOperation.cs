@@ -2,6 +2,14 @@ using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
+
+internal enum DatabaseCommandStorageScope
+{
+    Canonical,
+    SiloLocal,
+    ProjectionConsumer
+}
+
 /// <summary>Executes SiloLocalOperation operations against the caller's database context.</summary>
 public static class SiloLocalOperation
 {
@@ -20,14 +28,23 @@ public static class SiloLocalOperation
     /// <summary>Classifies a command already independently owned by this execution boundary.</summary>
     internal static bool IsOwnedSiloLocalOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation)
     {
-        return operation.Value!.Kind switch
+        return ScopeOf(operation.Value!.Kind) switch
         {
-            OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase => true,
-            OperationKind.ConfigureProjectionConsumer => IsSiloLocalConsumer(OperationProtocol.Payload<ConfigureProjectionConsumerRequest>(operation).Definition),
-            OperationKind.CommitProjectionBatch or OperationKind.ReleaseProjectionConsumer => engine.Store.Read(view => engine.IsSiloLocalProjection(view, operation)),
+            DatabaseCommandStorageScope.SiloLocal => true,
+            DatabaseCommandStorageScope.ProjectionConsumer => operation.Value.Kind == OperationKind.ConfigureProjectionConsumer
+                ? IsSiloLocalConsumer(OperationProtocol.Payload<ConfigureProjectionConsumerRequest>(operation).Definition)
+                : engine.Store.Read(view => engine.IsSiloLocalProjection(view, operation)),
             _ => false
         };
     }
+
+    internal static DatabaseCommandStorageScope ScopeOf(OperationKind kind) => kind switch
+    {
+        OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase => DatabaseCommandStorageScope.SiloLocal,
+        OperationKind.ConfigureProjectionConsumer or OperationKind.CommitProjectionBatch
+            or OperationKind.ReleaseProjectionConsumer => DatabaseCommandStorageScope.ProjectionConsumer,
+        _ => DatabaseCommandStorageScope.Canonical
+    };
 
     internal static bool IsSiloLocalProjection(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation)
     {

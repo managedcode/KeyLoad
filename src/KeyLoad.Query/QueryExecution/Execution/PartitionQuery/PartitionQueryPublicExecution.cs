@@ -8,15 +8,13 @@ internal static class PartitionQueryPublicExecution
     private const string InvalidOwner = "The server physical owner identity is invalid.";
 
     internal static PartitionQueryPage Execute(QueryEngine engine, string principalId,
-        PartitionQueryRequest request, PhysicalShardRecord expectedOwner,
-        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
+        PartitionQueryRequest request, PhysicalShardRecord expectedOwner, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         ValidateOwner(expectedOwner);
         var owner = engine.PartitionQueryOwner;
-        var budget = new ReadExecutionBudget(timeProvider ?? owner.EvaluationClock,
-            cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

@@ -22,7 +22,7 @@ internal static class ResourceLifetimeLedgerChild
         {
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, lease.Cancellation);
             await Assert.That(lease.ResultRetention).IsSameReferenceAs(retention);
-            var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
+            var budget = new ReadExecutionBudget(linked.Token);
             result = new QueryEngine(owner.Database, UnitExecutionOptions.QueryExecution()).ExecuteBound(
                 P.Reader, ResourceLifetimeLedgerData.Request(owner, resource), budget,
                 owner.Database.EvaluationClock, lease, linked.Token);

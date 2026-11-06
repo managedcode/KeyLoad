@@ -29,7 +29,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
                 var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Apply(operation));
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
                 await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
             }
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
                 KeySpace.PartitionOutcome(subscription.Source.Partition, "root", freshClaim.CommandId)))).IsNull();
@@ -68,7 +68,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
             await ReplayResultAssertions.Same<CommitReceipt>(replay, receipt.Result);
             await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
                 .SequenceEqual(OrleansSerialization.Serialize(receipt.Result))).IsTrue();
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         }
         await SettledClaimAsync(db, store, group, claim, original);
         if (reclaimed is not null)
@@ -95,6 +95,6 @@ internal static class SubscriptionLeaseAuthorityAssertions
 
         await Assert.That(replay.Value).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 }

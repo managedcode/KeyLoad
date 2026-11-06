@@ -32,7 +32,8 @@ internal static class OutboxHeadAuthorityFlow
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await OutboxHeadAuthorityAssertions.SameAsync(cold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, continued.Position);
+            await OutboxHeadAuthorityAssertions.SameAsync(cold, continued.Image, reopenedPosition);
             await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state, true);
             var entry = cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 3L)))
                 ?? throw new InvalidOperationException(OutboxHeadAuthorityFixture.MissingRow);
@@ -49,13 +50,14 @@ internal static class OutboxHeadAuthorityFlow
         OutboxHeadAuthorityState state, int fault, string[] image, long position, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await OutboxHeadAuthorityAssertions.SameAsync(cold, image, position);
         await OutboxHeadAuthorityAssertions.RefuseAsync(owner, cold, state, fault, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Key, state.Original); return true; });
         var prefix = Convert.ToHexString(state.Key) + ":";
         var repaired = image.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(state.Original) : row).ToArray();
-        await OutboxHeadAuthorityAssertions.SameAsync(cold, repaired, position + 1L);
+        await OutboxHeadAuthorityAssertions.SameAsync(cold, repaired, await NativeStoreAssertions.AdvancedAsync(cold, position));
         await OutboxHeadAuthorityAssertions.ExactAsync(owner.GetOutboxStatus(OutboxHeadAuthorityFixture.Root, state.Partition).Head,
             new OutboxHead(2L, 1L, 2L, state.StoredBytes));
         var purged = owner.ApplyEmbedded(state.Purge, token);

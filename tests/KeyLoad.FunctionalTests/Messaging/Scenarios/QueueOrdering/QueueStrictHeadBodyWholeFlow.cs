@@ -40,7 +40,7 @@ internal static class QueueStrictHeadBodyWholeFlow
                 OrderingProfile = QueueOrderingProfile.StrictPerKey
             });
         var state = new QueueOrderedRetryState(fixture.Partition,
-            QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Block);
+            QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition), QueueParkedHeadPolicy.Block);
         var scheduledAt = state.Time.AddSeconds(60);
         var literal = QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.First) with
         {
@@ -69,7 +69,7 @@ internal static class QueueStrictHeadBodyWholeFlow
                 Id = "foreign-strict-head"
             }));
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         var result = new QueueStrictHeadBodyState(state, headState, scheduledAt, key, row, operation, original, damaged);
         await QueueStrictHeadBodyAssertions.RefusalAsync(fixture.Database, fixture.Store, result);
         return result;

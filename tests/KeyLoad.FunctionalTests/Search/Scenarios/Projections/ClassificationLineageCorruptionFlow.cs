@@ -6,8 +6,6 @@ namespace KeyLoad.FunctionalTests.Search;
 internal static class ClassificationLineageCorruptionFlow
 {
     private const long InvalidEventRevision = 0;
-    private const long SingleStorageCommit = 1;
-    private const long FaultAndRepairCommits = 2;
     private const string CorruptLineage = "The stored vector projection lineage is corrupt.";
     private const string RuntimeDirectoryCore = "classification-corruption-execution-text";
 
@@ -48,7 +46,7 @@ internal static class ClassificationLineageCorruptionFlow
         var before = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var position = fixture.Harness.Store.Position;
         WriteOwnedRow(fixture, key, damaged);
-        var faultPosition = checked(position + SingleStorageCommit);
+        var faultPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, position);
         var expectedFault = ReplaceOwnedRow(before, key, original, damaged);
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, expectedFault, faultPosition);
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.SearchAsync)
@@ -57,9 +55,10 @@ internal static class ClassificationLineageCorruptionFlow
         await Assert.That(error.Message).IsEqualTo(CorruptLineage);
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, expectedFault, faultPosition);
         WriteOwnedRow(fixture, key, original);
-        var repairedPosition = checked(position + FaultAndRepairCommits);
+        var repairedPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, faultPosition);
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, before, repairedPosition);
         fixture.Harness.Reopen();
+        repairedPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Harness.Store, repairedPosition);
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, before, repairedPosition);
         await HealthyAsync(fixture);
         await ClassificationLineageWholeAssertions.RetainedAsync(fixture, vector, original);

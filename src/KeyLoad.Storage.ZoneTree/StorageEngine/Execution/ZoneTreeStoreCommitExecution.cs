@@ -1,4 +1,5 @@
 using ZoneTree;
+using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -13,11 +14,13 @@ internal static class ZoneTreeStoreCommitExecution
         long position = 0;
         var mutations = 0;
         var compiling = false;
+        ITransaction<Memory<byte>, Memory<byte>>? published = null;
         T result;
         try
         {
             result = runtime.Tree.Execute(transaction =>
         {
+            published = transaction;
             compiling = true;
             using var operation = new ZoneTreeOperationContext(runtime, transaction, ownsTransaction: false);
             var compiled = ZoneTreeCommitCompilation.Compile(runtime, compile);
@@ -42,7 +45,7 @@ internal static class ZoneTreeStoreCommitExecution
         }
         if (mutations > 0)
         {
-            ZoneTreeCommitPublication.Committed(runtime, position, mutations);
+            ZoneTreeCommitPublication.Committed(runtime, published!.CommitTimestamp, mutations);
         }
         return result;
     }
@@ -74,7 +77,7 @@ internal static class ZoneTreeStoreCommitExecution
             ZoneTreeCommitPublication.Stage(runtime, transaction, compiled.Changes, compiled.Position);
             if (ZoneTreeCommitPublication.TryCommit(runtime, transaction))
             {
-                ZoneTreeCommitPublication.Committed(runtime, compiled.Position, compiled.Changes.Length);
+                ZoneTreeCommitPublication.Committed(runtime, transaction.CommitTimestamp, compiled.Changes.Length);
                 return compiled.Result;
             }
         }

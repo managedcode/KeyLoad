@@ -54,7 +54,6 @@ internal static class SampleRetentionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store);
         Seed(database);
@@ -63,7 +62,6 @@ internal static class SampleRetentionCrashScenario
             [new ExpireSamples(SeriesSet, SeriesId, Cutoff, FirstPageDeletes)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, ExpiryCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
-        boundary.Position = checked(store.Position + PositionStep);
         await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

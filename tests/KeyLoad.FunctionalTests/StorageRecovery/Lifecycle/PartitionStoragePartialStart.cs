@@ -58,7 +58,7 @@ internal sealed class PartitionStoragePartialStart(PartitionHostApplicationOwner
         Opening = owner.Opening ?? throw new InvalidOperationException(MissingOpening);
         PublicationWait = owner.WaitForOpenAsync(token);
         await PublicationWait.ConfigureAwait(false);
-        var host = owner.Borrow();
+        var host = owner.Session.Host;
         host.Database.Store.Read(view =>
         {
             Before = PartitionStorageImage.Capture(host, view, token);

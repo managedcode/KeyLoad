@@ -31,7 +31,7 @@ internal static class QueueRedriveUnusedSequenceControl
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), policy, QueueOrderedRetryRestoreAuthority.Administrator)
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition), policy, QueueOrderedRetryRestoreAuthority.Administrator)
         {
             BeforeApply = recorder.Observe
         };
@@ -76,7 +76,7 @@ internal static class QueueRedriveUnusedSequenceControl
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueRedriveUnusedSequenceAssertions.ExhaustedCountersAsync(database, state, block);
         var counters = QueueLifecycleControlCold.Read(database, state.Lane);
         QueueLifecycleControlCold.Write(database, state.Lane, block

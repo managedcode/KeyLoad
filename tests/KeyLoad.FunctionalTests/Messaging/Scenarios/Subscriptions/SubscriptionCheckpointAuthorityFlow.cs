@@ -47,11 +47,11 @@ internal static class SubscriptionCheckpointAuthorityFlow
         fixture.Store.Dispose();
         using var firstCold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(firstCold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(firstCold, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(firstCold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.CorruptionAsync(db, firstCold, second, token);
         var statusFailure = Assert.ThrowsExactly<KeyLoadException>(() => db.GetSubscription("root", group));
         await Assert.That(statusFailure.Code).IsEqualTo(ErrorCode.Corruption);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(firstCold, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(firstCold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, firstCold, group.Source, source);
         await ContinueAsync(db, firstCold, fixture.Directory, group, second, first, firstResult,
             third, thirdResult, request, original, saved, key, identity, source, token);
@@ -77,7 +77,7 @@ internal static class SubscriptionCheckpointAuthorityFlow
         store.Dispose();
         using var secondCold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(secondCold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(secondCold, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(secondCold, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(cold, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(secondCold, group);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(cold, secondCold, group.Source, source);

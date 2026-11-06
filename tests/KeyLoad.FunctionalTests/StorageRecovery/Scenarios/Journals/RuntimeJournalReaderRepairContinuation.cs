@@ -6,7 +6,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class RuntimeJournalReaderRepairContinuation
 {
-    private const long FollowupCommitCount = 1;
 
     internal static async Task RequireAsync(RuntimeJournalReaderFixture fixture, StoreIdentity originalIdentity,
         long originalPosition, byte[] originalBytes, CancellationToken cancellationToken)
@@ -18,21 +17,21 @@ internal static class RuntimeJournalReaderRepairContinuation
         using (var repaired = fixture.Open(fixture.CanonicalPath))
         {
             await RequireAuthorityAsync(originalIdentity, repaired.Identity).ConfigureAwait(false);
-            await Assert.That(repaired.Position).IsEqualTo(originalPosition);
+            originalPosition = await NativeStoreAssertions.ReopenedAsync(repaired, originalPosition);
             await RequireOriginalAsync(repaired).ConfigureAwait(false);
             await Assert.That(RuntimeJournalReaderFixture.Read(repaired, RuntimeJournalReaderFixture.FollowupKey)).IsNull();
             RuntimeJournalReaderFixture.WriteRuntimeRecord(repaired, RuntimeJournalReaderFixture.FollowupKey,
                 RuntimeJournalReaderFixture.FollowupValue);
-            await Assert.That(repaired.Position).IsEqualTo(originalPosition + FollowupCommitCount);
+            originalPosition = await NativeStoreAssertions.AdvancedAsync(repaired, originalPosition);
         }
         using var reopened = fixture.Open(fixture.CanonicalPath);
         await RequireAuthorityAsync(originalIdentity, reopened.Identity).ConfigureAwait(false);
-        await Assert.That(reopened.Position).IsEqualTo(originalPosition + FollowupCommitCount);
+        originalPosition = await NativeStoreAssertions.ReopenedAsync(reopened, originalPosition);
         await RequireOriginalAsync(reopened).ConfigureAwait(false);
         await Assert.That(RuntimeJournalReaderFixture.Read(reopened, RuntimeJournalReaderFixture.FollowupKey))
             .IsEquivalentTo(RuntimeJournalReaderFixture.FollowupValue, CollectionOrdering.Matching);
         await RuntimeJournalReaderRepairBackupContinuation.RequireAsync(fixture, reopened,
-            originalIdentity, originalPosition + FollowupCommitCount, cancellationToken).ConfigureAwait(false);
+            originalIdentity, originalPosition, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task RequireOriginalAsync(ZoneTreeStore store)

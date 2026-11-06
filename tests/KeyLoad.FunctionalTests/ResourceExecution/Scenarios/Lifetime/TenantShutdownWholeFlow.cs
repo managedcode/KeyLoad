@@ -33,7 +33,7 @@ internal static class TenantShutdownWholeFlow
         var result = fixture.SubmitIssuedEmbedded(original, token);
         var committed = await TenantAdmissionAssertions.CommittedAsync(fixture, original);
         var expectedToken = new CommitToken(fixture.Store.Identity.Incarnation,
-            fixture.Partition.AtomicPartitionId, fixture.Database.LastApplied);
+            fixture.Partition.AtomicPartitionId, ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Partition));
         await TenantAdmissionAssertions.ReceiptAsync(result, committed, "a1", expectedToken);
         await TenantAdmissionAssertions.RecordAsync(fixture, fixture.Database, committed, fixture.Partition, "a1");
         var results = new List<Result<object>> { result };

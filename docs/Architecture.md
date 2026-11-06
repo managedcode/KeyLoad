@@ -9,6 +9,13 @@ implementation contracts. This document is a navigation map, not a replacement
 specification or a readiness claim: the diagrams show ownership and contracts,
 not proof that every target is implemented or qualified.
 
+The current [storage execution contract](Features/StorageReplication.md) uses one
+ordinary command owner per atomic partition and a separate metadata owner. Local
+primary publication borrows the physical session through DI; typed Grain Services
+apply remote primary work and exact-effect copies. Native snapshots and scoped
+canonical prefixes have distinct meanings. The [execution review](implementation/document-keyvalue-performance-review.md)
+records the current source changes and outstanding runtime/release evidence.
+
 ## Product
 
 KeyLoad is **one database for AI agents**. Documents, typed tables, graphs, blobs,

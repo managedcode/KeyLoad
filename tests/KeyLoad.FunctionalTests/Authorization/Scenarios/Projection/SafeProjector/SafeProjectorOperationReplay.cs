@@ -53,7 +53,7 @@ internal static class SafeProjectorOperationReplay
         var actual = owner.ReadOutcome(expected.Operation);
         await SafeProjectorOperationSeed.EqualAsync(actual, expected.Outcome);
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(expected.Operation.CommandId);
-        await Assert.That(actual.CanonicalSequence).IsEqualTo(expected.ExpectedToken.Position);
+        await Assert.That(actual.CanonicalSequence).IsEqualTo(expected.ExpectedCanonicalSequence);
     }
 
     private static async Task StoredAsync(SafeProjectorOperationDatabase owner, SafeProjectorOperationCommand command)

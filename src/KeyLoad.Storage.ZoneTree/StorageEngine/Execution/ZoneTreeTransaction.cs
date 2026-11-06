@@ -18,6 +18,8 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime)
 
     public void BeginAction() => staging.BeginAction();
 
+    public StorageMutation[] CaptureWrites() => PrepareChanges();
+
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {
         if (!preparationContextOpen || Environment.CurrentManagedThreadId != preparationThread)

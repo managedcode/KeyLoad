@@ -8,8 +8,6 @@ internal static class SqlInnerJoinRetainedIdentityFlow
     private const string RightId = "c2";
     private const string Foreign = "foreign";
     private const int ColdCuts = 2;
-    private const long FaultCommit = 1;
-    private const long RepairCommit = 2;
 
     internal static async Task RunAsync(TestDatabase database, CommandRequest seed, CommitReceipt receipt)
     {
@@ -73,22 +71,24 @@ internal static class SqlInnerJoinRetainedIdentityFlow
             await Assert.That(before.Single(row => row.StartsWith(prefix, StringComparison.Ordinal))).IsEqualTo(original);
             damaged = before.Select(row => row == original ? prefix + Convert.ToHexString(fault.Damaged) : row).ToArray();
             store.Commit((transaction, _) => { transaction.Put(fault.Key, fault.Damaged); return true; });
+            position = await NativeStoreAssertions.AdvancedAsync(store, position);
             committed = true;
             await SqlInnerJoinRetainedIdentityPages.RefuseAsync(database.CreateConfiguredDatabase(store), store,
-                database.Partition, damaged, checked(position + FaultCommit), identity, fault.LeftFault);
+                database.Partition, damaged, position, identity, fault.LeftFault);
         }, failures);
         if (!committed)
         {
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             return;
         }
-        await DirtyAsync(database, fault, damaged, checked(position + FaultCommit), identity, failures);
-        await InOwnerAsync(database, store =>
+        await DirtyAsync(database, fault, damaged, position, identity, failures);
+        await InOwnerAsync(database, async store =>
         {
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             store.Commit((transaction, _) => { transaction.Put(fault.Key, fault.Original); return true; });
-            return Task.CompletedTask;
+            position = await NativeStoreAssertions.AdvancedAsync(store, position);
         }, failures);
-        await HealthyColdAsync(database, seed, receipt, before, checked(position + RepairCommit), identity, failures);
+        await HealthyColdAsync(database, seed, receipt, before, position, identity, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -97,9 +97,12 @@ internal static class SqlInnerJoinRetainedIdentityFlow
     {
         for (var cut = 0; cut < ColdCuts; cut++)
         {
-            await InOwnerAsync(database, store => SqlInnerJoinRetainedIdentityPages.RefuseAsync(
-                database.CreateConfiguredDatabase(store), store, database.Partition,
-                damaged, position, identity, fault.LeftFault), failures);
+            await InOwnerAsync(database, async store =>
+            {
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
+                await SqlInnerJoinRetainedIdentityPages.RefuseAsync(database.CreateConfiguredDatabase(store), store,
+                    database.Partition, damaged, position, identity, fault.LeftFault);
+            }, failures);
         }
     }
 
@@ -110,6 +113,7 @@ internal static class SqlInnerJoinRetainedIdentityFlow
         {
             await InOwnerAsync(database, async store =>
             {
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await SqlInnerJoinRetainedIdentityPages.UnchangedAsync(store, before, position, identity);
                 await SqlInnerJoinRetainedIdentityPages.HealthyAsync(database.CreateConfiguredDatabase(store),
                     store, database.Partition, seed, receipt);

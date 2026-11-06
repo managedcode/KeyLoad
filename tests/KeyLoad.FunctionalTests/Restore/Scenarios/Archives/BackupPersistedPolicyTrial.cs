@@ -26,7 +26,7 @@ internal static class BackupPersistedPolicyTrial
         var sourceIdentity = fixture.Source.Store.Identity;
         var sourceOutcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
             fixture.Partition, BackupPersistedPolicySeed.Root, original.Operation.CommandId);
-        var originalApplied = fixture.Source.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+        var originalApplied = fixture.Source.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(fixture.Partition)))
             ?? throw new InvalidOperationException("The original canonical backup cut is missing.");
         var backupCut = await fixture.CreateBackupAsync();
         await Assert.That(backupCut).IsEqualTo(source.Position);
@@ -39,7 +39,7 @@ internal static class BackupPersistedPolicyTrial
         await Assert.That(fixture.TargetStore.Identity.NodeId).IsNotEqualTo(sourceIdentity.NodeId);
         await Assert.That(fixture.TargetStore.Identity.Incarnation).IsNotEqualTo(sourceIdentity.Incarnation);
         await Assert.That(fixture.TargetStore.Identity.DispatchPaused).IsTrue();
-        await Assert.That(fixture.TargetStore.Position).IsEqualTo(source.Position + 1L);
+        await Assert.That(fixture.TargetStore.Position).IsGreaterThan(0);
         await Assert.That(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore, fixture.Partition,
             BackupPersistedPolicySeed.Root, original.Operation.CommandId).AsSpan().SequenceEqual(sourceOutcome)).IsTrue();
         var restoredIdentity = fixture.TargetStore.Identity;
@@ -50,6 +50,7 @@ internal static class BackupPersistedPolicyTrial
         fixture.CloseRestored();
         database = fixture.OpenRestored();
         await BackupPersistedPolicyAssertions.SameAsync(restoredIdentity, fixture.TargetStore.Identity);
+        denied.Position = await NativeStoreAssertions.ReopenedAsync(fixture.TargetStore, denied.Position);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.TargetStore, denied);
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         await RepairAndColdAsync(fixture, database, token);
@@ -78,6 +79,7 @@ internal static class BackupPersistedPolicyTrial
         fixture.CloseRestored();
         database = fixture.OpenRestored();
         await BackupPersistedPolicyAssertions.SameAsync(restoredIdentity, fixture.TargetStore.Identity);
+        final.Position = await NativeStoreAssertions.ReopenedAsync(fixture.TargetStore, final.Position);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.TargetStore, final);
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, true, token);
         await HealthyDocumentAsync(fixture, database, token);
@@ -112,11 +114,11 @@ internal static class BackupPersistedPolicyTrial
 
         await Assert.That(originalToken.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
         await Assert.That(originalToken.Position).IsGreaterThan(0L);
-        var currentApplied = database.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes));
+        var currentApplied = database.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(fixture.Partition)));
         await Assert.That(currentApplied).IsNotNull();
         await Assert.That(currentApplied!.AsSpan().SequenceEqual(originalApplied)).IsTrue();
-        await Assert.That(database.LastApplied).IsEqualTo(OrleansSerialization.Deserialize<long>(originalApplied));
-        await Assert.That(originalToken.Position).IsLessThanOrEqualTo(database.LastApplied);
+        await Assert.That(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition))).IsEqualTo(OrleansSerialization.Deserialize<StoragePartitionPosition>(originalApplied).Position);
+        await Assert.That(originalToken.Position).IsLessThanOrEqualTo(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition)));
         var reference = fixture.Source.ExpectedReference(new(fixture.Partition,
             BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId));
         var refusedToken = Assert.ThrowsExactly<KeyLoadException>(() => database.GetDocument(
@@ -124,7 +126,7 @@ internal static class BackupPersistedPolicyTrial
         await Assert.That(refusedToken.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(refusedToken.Message).IsEqualTo(EarlierMinimumToken);
         var freshToken = new CommitToken(restoredIncarnation, fixture.Partition.AtomicPartitionId,
-            OrleansSerialization.Deserialize<long>(originalApplied));
+            OrleansSerialization.Deserialize<StoragePartitionPosition>(originalApplied).Position);
         await BackupPersistedPolicyAssertions.SameAsync(new DocumentResult(reference, 1L,
             BackupPersistedPolicySeed.Json, false, []), database.GetDocument(BackupPersistedPolicySeed.Reader,
                 reference, freshToken, token));

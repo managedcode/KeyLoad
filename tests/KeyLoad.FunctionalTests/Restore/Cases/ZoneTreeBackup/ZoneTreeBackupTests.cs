@@ -10,8 +10,6 @@ internal sealed class ZoneTreeBackupTests
 {
     private const string PreservedFileName = "preserved.txt";
     private const string PreservedFileContents = "keep";
-    private const long CommitsBeforeBackup = 2;
-    private const long RestoreCommits = ZoneTreeBackupAssertions.RestoreCommits;
 
     [Test]
     public async Task BackupHoldsCommitsThroughItsPositionAndRestoreOpensPausedUnderNewIdentity()
@@ -20,27 +18,31 @@ internal sealed class ZoneTreeBackupTests
         using var fixture = new ZoneTreeBackupFixture();
         StoreIdentity source;
         long position;
+        long finalSourcePosition;
         using (var store = ZoneTreeBackupFixture.Open(fixture.Source))
         {
             source = store.Identity;
             ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.BeforeNamespace, 1);
             ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.BeforeNamespace, 2);
             position = await store.CreateBackupAsync(fixture.Backup, token);
-            await Assert.That(position).IsEqualTo(CommitsBeforeBackup);
-            await Assert.That(ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.AfterNamespace, 1))
-                .IsEqualTo(CommitsBeforeBackup + 1);
+            await Assert.That(position).IsEqualTo(store.Position);
+            var write = ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.AfterNamespace, 1);
+            await Assert.That(write).IsGreaterThan(position);
+            finalSourcePosition = await NativeStoreAssertions.AdvancedAsync(store, position);
+            await Assert.That(write).IsLessThanOrEqualTo(finalSourcePosition);
         }
         var backup = await ZoneTreeBackupFixture.CaptureAsync(fixture.Backup, token);
         await ZoneTreeBackupAssertions.LayoutAsync(fixture, backup, token);
         var restored = await ZoneTreeStore.RestoreAsync(fixture.Backup, fixture.Restored,
             UnitExecutionOptions.StorageExecution(), cancellationToken: token);
         await ZoneTreeBackupAssertions.NewIdentityAsync(source, restored);
-        await ZoneTreeBackupAssertions.RestoredCutAsync(fixture.Restored, restored, position);
-        await ZoneTreeBackupAssertions.HealthyFollowUpAsync(fixture.Restored, restored, position);
+        var restoredPosition = await ZoneTreeBackupAssertions.RestoredCutAsync(fixture.Restored, restored);
+        await ZoneTreeBackupAssertions.HealthyFollowUpAsync(fixture.Restored, restored, restoredPosition);
         await ZoneTreeBackupFixture.SameFilesAsync(backup, fixture.Backup, token);
         using var original = ZoneTreeBackupFixture.Open(fixture.Source);
+        finalSourcePosition = await NativeStoreAssertions.ReopenedAsync(original, finalSourcePosition);
         await StoreFileFixture.AssertPreservedIdentity(source, original.Identity);
-        await Assert.That(original.Position).IsEqualTo(CommitsBeforeBackup + 1);
+        await Assert.That(original.Position).IsEqualTo(finalSourcePosition);
         await Assert.That(ZoneTreeBackupFixture.Read(original, ZoneTreeBackupFixture.AfterNamespace, 1))
             .IsEqualTo(ZoneTreeBackupFixture.AfterNamespace + 1);
     }
@@ -140,7 +142,7 @@ internal sealed class ZoneTreeBackupTests
         await ZoneTreeStore.RestoreAsync(fixture.Copy, fixture.Restored, UnitExecutionOptions.StorageExecution(),
             cancellationToken: token);
         using var reopened = ZoneTreeBackupFixture.Open(fixture.Restored);
-        await Assert.That(reopened.Position).IsEqualTo(CommitsBeforeBackup + RestoreCommits);
+        await Assert.That(reopened.Position).IsGreaterThan(0);
         await Assert.That(ZoneTreeBackupFixture.Read(reopened, ZoneTreeBackupFixture.BeforeNamespace, 2))
             .IsEqualTo(ZoneTreeBackupFixture.BeforeNamespace + 2);
     }

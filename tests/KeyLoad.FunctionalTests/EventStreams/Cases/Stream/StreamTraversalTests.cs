@@ -12,6 +12,7 @@ internal sealed class StreamTraversalTests
         await StreamTraversalAssertions.PageAsync(forward, [StreamTraversalTestProtocol.First, StreamTraversalTestProtocol.Second], StreamTraversalTestProtocol.Third, true);
         await StreamTraversalAssertions.PageAsync(reverse, [StreamTraversalTestProtocol.Third, StreamTraversalTestProtocol.Second], StreamTraversalTestProtocol.Third, true);
         fixture.Reopen(new());
+        before.Position = await NativeStoreAssertions.ReopenedAsync(fixture.Database.Store, before.Position);
         var lastForward = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.Second, cursor: forward.Cursor));
         var lastReverse = fixture.Traverse(fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.Second, cursor: reverse.Cursor));
         await StreamTraversalAssertions.PageAsync(lastForward, [StreamTraversalTestProtocol.Third], StreamTraversalTestProtocol.Third, false);

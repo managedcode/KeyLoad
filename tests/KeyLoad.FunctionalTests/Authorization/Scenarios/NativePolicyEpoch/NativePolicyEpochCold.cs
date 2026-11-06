@@ -15,6 +15,7 @@ internal static class NativePolicyEpochCold
         {
             state.Owner.Close();
             state.Owner.Open(first: false);
+            position = await NativeStoreAssertions.ReopenedAsync(state.Store, position);
             var current = state.Store.Identity;
             await Assert.That(current.NodeId).IsEqualTo(identity.NodeId);
             await Assert.That(current.Incarnation).IsEqualTo(identity.Incarnation);

@@ -1,4 +1,6 @@
 using KeyLoad.Clustering;
+using KeyLoad.Query;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
 using KeyLoad.Server.Search;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +11,9 @@ namespace KeyLoad.FunctionalTests.Search;
 internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
 {
     private readonly ServiceProvider services;
+    private readonly ITextProjection projection;
+    private readonly TextOnlineMaintenanceService online;
+    internal SearchEngine Search { get; }
     internal TextIncrementalMaintenanceService Owner
     {
         get;
@@ -26,9 +31,11 @@ internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
         try
         {
             var options = services.GetRequiredService<ServerRuntimeOptions>();
-            var resources = new TextResourceOwnership(options.RuntimeText);
-            Owner = new(database, directory, database.Store.Identity.NodeId,
-                options, phaseClock ?? database.EvaluationClock, resources: resources);
+            var actual = TextHostSearch.Open(database, directory, options, phaseClock ?? database.EvaluationClock);
+            Owner = actual.Explicit;
+            online = actual.Online;
+            projection = actual.Projection;
+            Search = new(database, options.Core.QueryExecution, projection);
         }
         catch (Exception primary)
         {
@@ -50,19 +57,22 @@ internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
     }
     public async ValueTask DisposeAsync()
     {
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => online.DisposeAsync().AsTask(), failures);
+        await ServerFailureObserver.ObserveAsync(() => Owner.DisposeAsync().AsTask(), failures);
+        ServerFailureObserver.Observe(projection.Dispose, failures);
         try
         {
-            await Owner.DisposeAsync().ConfigureAwait(false);
+            await services.DisposeAsync();
         }
-        catch (Exception primary)
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
         {
-            try
-            {
-                await services.DisposeAsync().ConfigureAwait(false);
-            }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
-            throw;
+            failures.Add(cleanup);
         }
-        await services.DisposeAsync().ConfigureAwait(false);
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
+        {
+            failures.Add(cleanup);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
     }
 }

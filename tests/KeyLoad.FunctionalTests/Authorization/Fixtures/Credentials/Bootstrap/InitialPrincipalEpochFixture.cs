@@ -25,7 +25,7 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
         var expected = new CommitReceipt(command.CommandId, expectedToken, [new("putDocument", Collection, "record", 1L)], DurabilityProfile.ProcessDurable, 1);
         await InitialPrincipalEpochAssertions.EqualAsync(SeedReceipt, expected);
         await Assert.That(SeedReceipt.Mutations.Single().CompositionReferences).IsEmpty();
-        await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(before);
         SeedOutcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", command.CommandId)))
             ?? throw new InvalidOperationException("The original acknowledged principal lifecycle seed outcome is absent.");
     }

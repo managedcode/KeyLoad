@@ -30,7 +30,7 @@ internal static class DocumentPatchAtomicityTrial
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var failedState = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
-        await failedState.RequireAsync(DocumentPatchAtomicityState.Read(owner));
+        await failedState.RequireReopenedAsync(DocumentPatchAtomicityState.Read(owner));
         await DocumentPatchAtomicityAssertions.DocumentsAsync(owner, fault, healthy: false);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var repair = Create(owner, new PutDocument(Collection, Second,
@@ -49,7 +49,7 @@ internal static class DocumentPatchAtomicityTrial
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var healthyState = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
-        await healthyState.RequireAsync(DocumentPatchAtomicityState.Read(owner));
+        healthyState = await healthyState.RequireReopenedAsync(DocumentPatchAtomicityState.Read(owner));
         await DocumentPatchAtomicityAssertions.HealthyAsync(owner, fault, healthyEntry, healthy, originalTail + 3L);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         await healthyState.RequireAsync(DocumentPatchAtomicityState.Read(owner));

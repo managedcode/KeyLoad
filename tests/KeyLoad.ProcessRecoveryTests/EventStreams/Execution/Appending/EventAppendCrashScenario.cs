@@ -6,7 +6,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 
 internal static class EventAppendCrashScenario
 {
-    private const int PositionStep = 1;
+
     private const string CollectionCommand = "4d10a82c-bc9a-49d3-b8db-4d0150e325ea";
     private const string StreamCommand = "8184f9f0-2bbf-4b16-9860-f0d509826a53";
     private const string QueueCommand = "81c785fd-22ec-4676-87fa-01f93b9b1f9a";
@@ -26,12 +26,11 @@ internal static class EventAppendCrashScenario
                 [EventAppendCrashContract.Event(EventAppendCrashContract.SeedId)], ExpectedStreamRevision.NoStream)]);
         database.Apply(database.CreateCommand(OperationKind.Batch, seed.CommandId, CrashFixtureValues.Principal, new DateTimeOffset(operation.Timestamp), seed)).Get<CommitReceipt>();
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.OperationFile, operation);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedPositionFile, store.Position);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedSequenceFile, CrashDatabase.AppliedPosition(store, EventAppendCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.TargetFile,
             CrashDatabase.NextCommitToken(database, EventAppendCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedTailFile,
             database.GetOutboxStatus(EventAppendCrashContract.Principal, EventAppendCrashContract.Partition).Head.Tail);
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

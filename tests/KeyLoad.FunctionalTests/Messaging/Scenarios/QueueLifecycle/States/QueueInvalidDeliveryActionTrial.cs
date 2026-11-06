@@ -61,7 +61,7 @@ internal static class QueueInvalidDeliveryActionTrial
             [new("database", Queue, Capability.QueueConsume | Capability.QueueAck | Capability.QueueRenew),
                 new("database", Collection, Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
         fixture.Commit(new EnqueueMessage(Queue, Input, "{\"input\":1}"));
-        var now = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var now = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var lane = new QueueLaneRef(fixture.Partition, Queue);
         var id = Guid.NewGuid();
         var claimed = fixture.Submit(OperationKind.Receive, new ReceiveRequest(id, lane),

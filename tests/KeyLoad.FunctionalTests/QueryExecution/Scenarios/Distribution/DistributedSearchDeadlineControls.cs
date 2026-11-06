@@ -47,6 +47,8 @@ internal static class DistributedSearchDeadlineControls
         await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
         await fixture.Source.ReopenAsync();
         await fixture.Destination.ReopenAsync();
+        sourcePosition = await NativeStoreAssertions.ReopenedAsync(fixture.Source.Store, sourcePosition);
+        destinationPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Destination.Store, destinationPosition);
         await DistributedSearchStatisticsAssertions.HealthyAsync(fixture, token);
         await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
     }

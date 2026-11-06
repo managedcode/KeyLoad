@@ -48,6 +48,13 @@ internal static class GraphTraversalIntegrityAssertions
         await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
     }
 
+    internal static async Task<long> ReopenedImage(ZoneTreeStore store, string[] image, long position)
+    {
+        var current = await NativeStoreAssertions.ReopenedAsync(store, position);
+        await Image(store, image, current);
+        return current;
+    }
+
     private static global::KeyLoad.GraphTraversal Read(DatabaseEngine owner, GraphTraversalIntegrityState state,
         bool filtered, CancellationToken cancellationToken)
         => owner.Traverse(GraphTraversalIntegrityFixture.Root, state.HealthyEdge.From.Partition,

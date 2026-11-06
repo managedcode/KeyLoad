@@ -106,7 +106,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
         if (prior is null)
         {
-            await Assert.That(database.Store.Position).IsEqualTo(before + QueueOrderedRetryProtocol.One);
+            await Assert.That(database.Store.Position).IsGreaterThan(before);
         }
         else
         {

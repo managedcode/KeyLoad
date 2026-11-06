@@ -24,7 +24,7 @@ internal static class AnnWaitExecution
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Read(database, projection, principalId, request, budget));
@@ -69,12 +69,8 @@ internal static class AnnWaitExecution
             JsonData.Identifier(request.Consumer.Name);
             var authority = new BudgetedReadView(view, budget);
             database.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WrongToken);
-            var raw = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, Corrupt);
-            var applied = OrleansSerialization.Deserialize<long>(raw);
-            if (applied < InitialPosition)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, Corrupt);
-            }
+            var raw = authority.ReadOwnedValue(StorageCommandKeys.Applied(request.Partition)) ?? throw Errors.Fail(ErrorCode.Corruption, Corrupt);
+            var applied = StorageOperationApply.ReadCanonicalSequence(raw, request.Partition, Corrupt);
             if (request.MinimumToken.Position > applied)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, Future);

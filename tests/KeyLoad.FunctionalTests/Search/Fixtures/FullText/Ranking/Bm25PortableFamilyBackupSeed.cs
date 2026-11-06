@@ -54,7 +54,7 @@ internal static class Bm25PortableFamilyBackupSeed
     {
         var operation = Bm25CorpusCapture.Create(source.Database, Root, subject,
             new(source.Partition, Collection, Field, "needle"), Guid.NewGuid(), expectedGeneration,
-            source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
+            TestDatabase.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
         var receipt = source.SubmitIssued(operation).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(source.ReadStoredOutcome(operation.CommandId).PreparedCommand.Value!.Kind)

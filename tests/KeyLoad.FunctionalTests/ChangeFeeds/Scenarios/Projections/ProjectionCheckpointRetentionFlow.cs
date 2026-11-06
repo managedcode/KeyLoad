@@ -31,10 +31,11 @@ internal static class ProjectionCheckpointRetentionFlow
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, continued.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, reopenedPosition);
             await ProjectionCheckpointRetentionHealthy.AssertAsync(owner, cold, continued, token);
             await ProjectionCheckpointRetentionSettlement.ReplayAsync(owner, cold, continued, token);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, continued.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, continued.Image, reopenedPosition);
             return continued;
         });
     }

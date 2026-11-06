@@ -17,7 +17,7 @@ internal static class ChunkMultiblockCrashScenario
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[ChunkMultiblockCrashProtocol.StageArgument]),
-                int.Parse(args[ChunkMultiblockCrashProtocol.MutationArgument], CultureInfo.InvariantCulture), false);
+                int.Parse(args[ChunkMultiblockCrashProtocol.MutationArgument], CultureInfo.InvariantCulture));
             using var store = new ZoneTreeStore(new(args[ChunkMultiblockCrashProtocol.DirectoryArgument])
             {
                 FaultObserver = boundary.Observe
@@ -65,7 +65,6 @@ internal static class ChunkMultiblockCrashScenario
         var original = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), OrleansSerialization.Serialize(original)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
-        boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(database.Store);

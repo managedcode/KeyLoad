@@ -21,7 +21,7 @@ internal static class QueueGraphIdentityCold
             {
                 await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan()
                     .SequenceEqual(JsonDefaults.Serialize(identity))).IsTrue();
-                await Assert.That(store.Position).IsEqualTo(state.ColdPosition);
+                state.ColdPosition = await NativeStoreAssertions.ReopenedAsync(store, state.ColdPosition);
                 await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(state.ColdImage,
                     global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 var engine = state.Fixture.CreateConfiguredDatabase(store);

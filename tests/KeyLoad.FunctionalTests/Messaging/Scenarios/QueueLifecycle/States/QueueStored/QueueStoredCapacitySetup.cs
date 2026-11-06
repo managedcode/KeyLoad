@@ -25,7 +25,7 @@ internal static class QueueStoredCapacitySetup
             [new(QueueEnqueueColdProtocol.PutKind, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document, QueueEnqueueAuthorityProtocol.First),
                 new(QueueEnqueueColdProtocol.EnqueueKind, QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Ready, QueueEnqueueAuthorityProtocol.First),
                 new(QueueEnqueueColdProtocol.EnqueueKind, QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Scheduled, QueueEnqueueAuthorityProtocol.First)]);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var lane = new QueueLaneRef(fixture.Partition, QueueEnqueueColdProtocol.Queue);
         var enqueue = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument, QueueEnqueueColdProtocol.HealthyJson),

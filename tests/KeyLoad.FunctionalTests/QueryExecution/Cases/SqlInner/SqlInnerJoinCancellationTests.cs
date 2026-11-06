@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.FunctionalTests.QueryExecution;
 
@@ -43,12 +42,14 @@ internal sealed class SqlInnerJoinCancellationTests
         var identity = Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity));
         var baseline = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        var clock = new CancelAfterRangeProgressTimeProvider(database, baseline, cancellation);
-        var query = Task.Run(() => engine.Execute("root", request, clock, cancellation.Token));
-        var failure = await Assert.ThrowsAsync<OperationCanceledException>(() => query);
+        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
+            static snapshot => snapshot.RangeExaminedBytes);
+        await observed.Ready;
+        var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
+            engine.Execute("root", request, cancellationToken: cancellation.Token));
 
-        await Assert.That(clock.CancellationRequestedAfterProgress).IsTrue();
-        await Assert.That(clock.ObservedRangeBytes).IsGreaterThan(baseline.RangeExaminedBytes);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
+        await Assert.That(observed.ObservedProgress).IsGreaterThan(baseline.RangeExaminedBytes);
         var cancellationFailure = failure ?? throw new InvalidOperationException();
         await Assert.That(cancellationFailure.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(database.Store.Position).IsEqualTo(position);
@@ -89,30 +90,6 @@ internal sealed class SqlInnerJoinCancellationTests
             await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(ExpectedProjectionFieldCount);
             await Assert.That(json.RootElement.GetProperty(OrderIdField).GetString()).IsEqualTo(expectedId);
             await Assert.That(json.RootElement.GetProperty(NameField).GetString()).IsEqualTo(CustomerName);
-        }
-    }
-
-    private sealed class CancelAfterRangeProgressTimeProvider(TestDatabase database,
-        ZoneTreeReadSnapshot baseline, CancellationTokenSource cancellation) : TimeProvider
-    {
-        private long timestamp;
-        private long observedRangeBytes;
-        private int cancellationRequested;
-
-        internal bool CancellationRequestedAfterProgress => Volatile.Read(ref cancellationRequested) != 0;
-        internal long ObservedRangeBytes => Interlocked.Read(ref observedRangeBytes);
-        public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-
-        public override long GetTimestamp()
-        {
-            var rangeBytes = database.Store.GetReadDiagnostics().RangeExaminedBytes;
-            if (rangeBytes > baseline.RangeExaminedBytes
-                && Interlocked.CompareExchange(ref cancellationRequested, 1, 0) == 0)
-            {
-                Interlocked.Exchange(ref observedRangeBytes, rangeBytes);
-                cancellation.Cancel();
-            }
-            return Interlocked.Increment(ref timestamp);
         }
     }
 

@@ -18,14 +18,14 @@ internal static class EventProjectionProcessRecoveryAssertions
         var before = await EventProjectionRecoveryStoreOracle.ReadBeforeOutboxHeadAsync(root, cancellationToken);
         var beforeHead = before.Head;
         var beforePositionBytes = await File.ReadAllBytesAsync(Path.Combine(root,
-            EventProjectionCrashScenario.PositionFile), cancellationToken);
+            EventProjectionCrashScenario.SequenceFile), cancellationToken);
         var beforePosition = OrleansSerialization.Deserialize<long>(beforePositionBytes);
         var expectedToken = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.TargetTokenFile), cancellationToken));
         var cut = EventProjectionRecoveryStoreOracle.CaptureCut(store, operation, projection, beforeHead.Tail);
         var committed = cut.Vector is not null;
         await EventProjectionRecoveryStoreOracle.AssertCutAsync(cut, committed, beforeHead, before.Bytes,
-            beforePosition, store.Position, stage);
+            beforePosition, CrashDatabase.AppliedPosition(store, EventProjectionCrashScenario.Partition), stage);
         await EventProjectionRecoveryStoreOracle.AssertSeedBytesAsync(root, store, includeDocuments: true,
             cancellationToken);
         await EventProjectionRecoveryQueryOracle.AssertSearchAsync(database, committed, cancellationToken);

@@ -77,15 +77,16 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(McpOwnedDiagnosticAssertions.VectorMismatch);
 
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, rejected.Problem?.Detail!, McpOwnedDiagnosticAssertions.VectorMismatch);
-        await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
+        var committedPosition = database.Store.Position;
+        await Assert.That(committedPosition).IsGreaterThan(position);
         await Assert.That(await RefusalModelAsync(database, rejectedCommand, checked(canonical + CommitAdvance),
-                checked(position + CommitAdvance)))
+                committedPosition))
             .IsEquivalentTo(model, CollectionOrdering.Matching);
         var retained = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
-        await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
+        await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
         var healthyCommand = ConfiguredVectorProfileFlow.Command(database, projection, wrongModel: false);
         var healthy = database.Submit(OperationKind.Batch, healthyCommand, id: healthyCommand.CommandId).Get<CommitReceipt>();
         await McpOwnedDiagnosticAssertions.VectorReceiptAsync(healthy, healthyCommand, projection);
@@ -101,7 +102,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
     {
         await Assert.That(database.Database.LastApplied).IsEqualTo(expectedCanonicalPosition);
         await Assert.That(database.Store.Position).IsEqualTo(expectedPhysicalPosition);
-        var appliedRecord = Convert.ToHexString(KeySpace.AppliedBytes) + RecordSeparator;
+        var appliedRecord = Convert.ToHexString(StorageCommandKeys.Applied(database.Partition)) + RecordSeparator;
         return ConfiguredVectorProfileFlow.ModelBytes(database, command)
             .Where(row => !row.StartsWith(appliedRecord, StringComparison.Ordinal)).ToArray();
     }

@@ -29,7 +29,7 @@ internal static class QueueEmptyReceiveReplayWholeFlow
     private static async Task CompleteAsync(TestDatabase fixture, List<Exception> failures, CancellationToken token)
     {
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
         await EmptyAsync(fixture.Database, fixture.Store, state);
         state.Batch(fixture.Database, QueueLifecycleHealthy.Enqueue(QueueLifecycleConditionOperations.Source)).Get<CommitReceipt>();
         await QueueLifecycleConditionAssertions.Ready(fixture.Database, fixture.Store, state);
@@ -43,7 +43,7 @@ internal static class QueueEmptyReceiveReplayWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
-                await QueueLifecycleConditionAssertions.Same(cold, ready);
+                ready = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, ready);
                 await QueueLifecycleConditionAssertions.Ready(owner, cold, state);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
                 await FinishAsync(owner, cold, state);
@@ -58,7 +58,7 @@ internal static class QueueEmptyReceiveReplayWholeFlow
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var owner = fixture.CreateConfiguredDatabase(second);
-            await QueueLifecycleConditionAssertions.Same(second, healthyCut);
+            healthyCut = await QueueLifecycleConditionAssertions.ReopenedAsync(second, healthyCut);
             await QueueTerminalInspectionAssertions.TerminalAsync(owner, second, state,
                 QueueTerminalInspectionAssertions.Expected(MessageState.Acked, state), healthy: true);
             await QueueTerminalInspectionAssertions.ReplayAsync(owner, second, state);

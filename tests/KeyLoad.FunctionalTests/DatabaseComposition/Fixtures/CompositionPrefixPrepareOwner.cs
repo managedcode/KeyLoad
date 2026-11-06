@@ -69,8 +69,7 @@ internal sealed class CompositionPrefixPrepareOwner
     }
 
     internal (long AppliedPosition, long StorePosition) Cut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, Source.Partition), Store.Position));
 
     internal Command<DatabaseCommand> Retained(Command<DatabaseCommand> original) => (originalJoined
         ? OutcomeStoreOracle.ReadStored(Store, original) ?? throw new InvalidOperationException("The exact stored command is missing.") : Source.ReadStoredOutcome(original)).PreparedCommand;

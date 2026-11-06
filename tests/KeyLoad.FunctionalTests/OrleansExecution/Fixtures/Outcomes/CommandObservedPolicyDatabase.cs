@@ -14,7 +14,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
     internal ICommitCoordinator Coordinator => source().Database.Coordinator;
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => source().Database.ReadCanonicalCut();
+        => (NativeStoreAssertions.Applied(Store, Partition), Store.Position);
 
     internal StoredOutcome ReadStoredOutcome(Guid commandId)
         => OutcomeStoreOracle.ReadStored(Database, commandId, TestContext.Current!.Execution.CancellationToken);

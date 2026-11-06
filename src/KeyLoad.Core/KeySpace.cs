@@ -12,24 +12,8 @@ public static class KeySpace
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
     private const string ScopedOutcomeLocatorSpace = "outcome-locator";
-    private const string SystemSpace = "system";
-    private const string AppliedName = "last-applied";
-    private const string ClockName = "clock";
-    private const string LastCommandName = "last-command";
-    private const string LastBatchName = "last-batch";
 
     internal static byte[] ResourcePrefix(string tenant, string database) => KeyCodec.Encode(CatalogSpace, tenant, database);
-
-    internal static byte[] AppliedBytes { get; } = KeyCodec.Encode(SystemSpace, AppliedName);
-    internal static byte[] ClockBytes { get; } = KeyCodec.Encode(SystemSpace, ClockName);
-    internal static byte[] LastCommandBytes { get; } = KeyCodec.Encode(SystemSpace, LastCommandName);
-    internal static byte[] LastBatchBytes { get; } = KeyCodec.Encode(SystemSpace, LastBatchName);
-
-    /// <summary>Gets the read-only canonical apply-watermark key.</summary>
-    public static ReadOnlyMemory<byte> Applied => AppliedBytes;
-
-    /// <summary>Gets the read-only canonical committed-business-clock key.</summary>
-    public static ReadOnlyMemory<byte> Clock => ClockBytes;
 
     /// <summary>Creates an owned key within one atomic partition.</summary>
     /// <param name="space">Named feature key space.</param>

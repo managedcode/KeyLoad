@@ -46,7 +46,6 @@ internal static class SagaTimeoutCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store, tenantId: Partition.TenantId);
         var lane = new QueueLaneRef(Partition, Queue);
@@ -59,7 +58,6 @@ internal static class SagaTimeoutCrashScenario
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
         var operation = CreateExpiryOperation(database, lane);
         await SaveOperationAsync(directory, tail, operation);
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);

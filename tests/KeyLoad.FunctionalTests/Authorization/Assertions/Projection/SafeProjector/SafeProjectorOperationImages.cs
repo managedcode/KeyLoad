@@ -4,6 +4,19 @@ namespace KeyLoad.FunctionalTests.Authorization;
 
 internal static class SafeProjectorOperationImages
 {
+    internal static async Task ReopenAsync(SafeProjectorOperationDatabase owner)
+    {
+        var rows = TeamRowPolicyAssertions.Image(owner.Store);
+        var cut = owner.Store.Position;
+        var applied = owner.Database.LastApplied;
+        var journal = owner.ReadCanonicalCut();
+        await owner.ReopenAsync();
+        cut = await NativeStoreAssertions.ReopenedAsync(owner.Store, cut);
+        await TeamRowPolicyAssertions.UnchangedAsync(owner.Store, rows, cut);
+        await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((journal.AppliedPosition, cut));
+    }
+
     internal static async Task ObserveAsync(SafeProjectorOperationDatabase owner, Func<Task> operation)
     {
         var rows = TeamRowPolicyAssertions.Image(owner.Store);

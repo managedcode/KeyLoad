@@ -1,7 +1,5 @@
-using System.Collections.Immutable;
 using KeyLoad.Core.CommandOutcomes.Execution;
 using KeyLoad.Core.CommandOutcomes.Identity;
-using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -9,7 +7,6 @@ namespace KeyLoad.Core;
 public static class StoredCommandRead
 {
     internal const string StoredCommandScopeInvalid = "The retained command does not match its committed canonical outcome.";
-    internal const string LastCommandScopeInvalid = "The last canonical outcome does not match the committed apply watermark.";
     /// <summary>Reads the exact original command for a freshly authorized retry of the same identity and content.</summary>
     /// <param name = "operation">Server-bound retry with the same stable command identity.</param>
     /// <param name = "cancellationToken">Bounds the synchronous retained lookup.</param>
@@ -46,7 +43,7 @@ public static class StoredCommandRead
             }
 
             engine.ValidateStoredSubmissionIdentity(view, original, selected, outcome);
-            _ = (engine.ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */);
+            _ = (engine.ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected, verifiedPrincipal: principal) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */);
             StorageOperationApply.RequireStoredCanonicalSequence(view, outcome, siloLocal: false);
             var retained = engine.OwnCommand(outcome.PreparedCommand);
             if (retained.CommandId != original.CommandId || retained.UserId != original.UserId || retained.Value!.Kind != original.Value!.Kind)
@@ -59,59 +56,4 @@ public static class StoredCommandRead
         });
     }
 
-    /// <summary>Reads the commands of the last canonical commit here so a later writer can complete a copy that missed it.</summary>
-    /// <param name = "engine">The shared database execution context.</param>
-    /// <param name = "cancellationToken">Bounds the synchronous retained lookup.</param>
-    /// <returns>The owned commands of the last commit in sequence order, ending at the committed sequence; one command
-    /// when that commit persisted one outcome, and none when no canonical command recorded its outcome key.</returns>
-    public static ImmutableArray<StoredCommand> ReadLastCommittedCommands(this DatabaseEngine engine, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        return engine.Store.Read(view =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var applied = StorageOperationApply.ReadCanonicalSequence(view);
-            if (applied == StorageOperationApply.InitialCanonicalSequence
-                || view.GetRecord<byte[]>(KeySpace.LastCommandBytes) is not { } outcomeKey)
-            {
-                return [];
-            }
-
-            var commands = view.GetRecord<byte[][]>(KeySpace.LastBatchBytes) is { } batch
-                ? engine.ReadLastBatch(view, batch, outcomeKey, applied) : [];
-            cancellationToken.ThrowIfCancellationRequested();
-            return commands.IsEmpty ? [engine.ReadCommitted(view, outcomeKey, applied)] : commands;
-        });
-    }
-
-    /// <summary>Reads the retained batch only when it is the last commit: its final outcome is the last command.</summary>
-    private static ImmutableArray<StoredCommand> ReadLastBatch(this DatabaseEngine engine, IKeyValueView view,
-        byte[][] outcomeKeys, byte[] lastOutcomeKey, long applied)
-    {
-        if (outcomeKeys.Length == 0 || !outcomeKeys[^1].AsSpan().SequenceEqual(lastOutcomeKey))
-        {
-            return [];
-        }
-
-        var commands = ImmutableArray.CreateBuilder<StoredCommand>(outcomeKeys.Length);
-        var sequence = applied - outcomeKeys.Length;
-        foreach (var outcomeKey in outcomeKeys)
-        {
-            commands.Add(engine.ReadCommitted(view, outcomeKey, ++sequence));
-        }
-
-        return commands.MoveToImmutable();
-    }
-
-    private static StoredCommand ReadCommitted(this DatabaseEngine engine, IKeyValueView view, byte[] outcomeKey, long sequence)
-    {
-        var outcome = view.GetRecord<StoredOutcome>(outcomeKey)
-            ?? throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
-        if (outcome.CanonicalSequence != sequence)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
-        }
-
-        return new StoredCommand(sequence, engine.OwnCommand(outcome.PreparedCommand));
-    }
 }

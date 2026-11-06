@@ -24,6 +24,7 @@ internal sealed class TextPublicationPersistenceTests
         database.JoinOwnedResources();
         using var cold = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = identity.Incarnation },
             identity.NodeId, database.StorageExecution);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await HealthyAsync(database.CreateConfiguredDatabase(cold), database.Partition, root, identity.NodeId, token);
         await Assert.That(cold.Position).IsEqualTo(position);
     }

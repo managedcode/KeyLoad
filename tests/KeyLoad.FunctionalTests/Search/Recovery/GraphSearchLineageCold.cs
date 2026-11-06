@@ -20,6 +20,7 @@ internal static class GraphSearchLineageCold
             {
                 state.Store = store;
                 state.Owner = state.Harness.CreateConfiguredDatabase(store);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await GraphLabelUseOperations.ConserveAsync(store, image, position, OrleansSerialization.Serialize(identity));
                 await GraphSearchLineageValues.HealthyAsync(state);
                 await GraphSearchLineageValues.ReplayAsync(state);

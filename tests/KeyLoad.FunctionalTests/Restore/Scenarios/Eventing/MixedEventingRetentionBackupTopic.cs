@@ -45,8 +45,8 @@ internal static class MixedEventingRetentionBackupTopic
         var originalPurge = owner.ReadStoredOutcome(state.Purge.CommandId);
         await Assert.That(originalPurge.CanonicalSequence).IsEqualTo(checked(journalBefore.AppliedPosition + OriginalApplyStep));
         await Assert.That(state.PurgeReceipt.Token.Position).IsEqualTo(originalPurge.CanonicalSequence);
-        await Assert.That(owner.Database.LastApplied).IsEqualTo(originalPurge.CanonicalSequence);
-        await Assert.That(owner.Store.Position).IsEqualTo(checked(physicalBefore + OriginalApplyStep));
+        await Assert.That(NativeStoreAssertions.Applied(owner.Store, owner.Partition)).IsEqualTo(originalPurge.CanonicalSequence);
+        await Assert.That(owner.Store.Position).IsGreaterThan(physicalBefore);
         await RequireAsync(owner.Database, state);
         var rows = QueueWholeFlowStorage.Bytes(owner.Store);
         var cut = owner.Store.Position;

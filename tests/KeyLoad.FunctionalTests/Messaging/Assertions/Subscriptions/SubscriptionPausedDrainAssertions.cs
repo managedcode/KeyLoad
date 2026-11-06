@@ -33,7 +33,8 @@ internal static class SubscriptionPausedDrainAssertions
         var position = store.Position;
         var failure = db.Apply(operation);
         await FailureAsync(failure);
-        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, domain, position + 1);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
+        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, domain, position);
         history.Add((operation, failure, SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)));
         await ReplayAsync(db, store, group, history);
     }
@@ -63,7 +64,7 @@ internal static class SubscriptionPausedDrainAssertions
             }
             var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
             await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         }
     }
 

@@ -32,10 +32,11 @@ internal static class RetainedAppendIdentityFlow
         var command = fixture.Producer("repaired", RetainedAppendIdentityFixture.Candidate, ExpectedStreamRevision.Exact(1));
         var fault = new RetainedAppendIdentityFault(fixture, kind);
         fault.Damage(store);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
         var damaged = QueueWholeFlowStorage.Bytes(store);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RetainedAppendIdentityOperations.RefuseAsync(fixture.Harness.Database,
-            store, command, damaged, position + 1, identity), failures);
+            store, command, damaged, position, identity), failures);
         ServerFailureObserver.Observe(store.Dispose, failures);
         await ServerFailureObserver.ObserveAsync(() => RetainedAppendIdentityCold.RepairAsync(fixture, fault, command,
             original, damaged, position, identity, token), failures);

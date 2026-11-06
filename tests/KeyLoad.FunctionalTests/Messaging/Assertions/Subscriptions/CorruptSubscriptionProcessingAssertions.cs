@@ -24,7 +24,7 @@ internal static class CorruptSubscriptionProcessingAssertions
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Apply(operation));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("The subscription delivery window is inconsistent.");
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(fixture.Store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(fixture.Store, bytes, position, identity);
             await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(
                 KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.CommandId)))).IsNull();
         }

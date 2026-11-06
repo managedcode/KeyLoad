@@ -9,12 +9,12 @@ namespace KeyLoad.Server.Search;
 internal static class TextIncrementalBegin
 {
     internal static TextMaintenanceCapabilityResult Run(DatabaseEngine database, string root, PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
+        TextMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
         CancellationTokenSource shutdown, TextIncrementalSessions sessions, Action<TextFaultStage>? faultObserver,
         TextResourceOwnership? resources, Action<string, TextResourceReservation> retainGeneration,
         IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
-        var work = new MaintenanceSessionWork(clock, shutdown.Token);
+        var work = new MaintenanceSessionWork(shutdown.Token);
         var captureStarted = false;
         var captured = false;
         try

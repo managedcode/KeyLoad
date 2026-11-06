@@ -26,10 +26,11 @@ internal static class FeedDeleteClassificationFlow
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await FeedVertexAuthorityAssertions.SameImageAsync(cold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, continued.Position);
+            await FeedVertexAuthorityAssertions.SameImageAsync(cold, continued.Image, reopenedPosition);
             await FeedDeleteClassificationAssertions.HealthyAsync(owner, cold, state, continued.Restored, token);
             await FeedDeleteClassificationAssertions.ReplayAsync(owner, cold, state, continued.Resurrection, continued.Restored, token);
-            await FeedVertexAuthorityAssertions.SameImageAsync(cold, continued.Image, continued.Position);
+            await FeedVertexAuthorityAssertions.SameImageAsync(cold, continued.Image, reopenedPosition);
             return continued;
         });
     }
@@ -38,13 +39,14 @@ internal static class FeedDeleteClassificationFlow
         ZoneTreeStore cold, FeedDeleteClassificationState state, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
-        await FeedVertexAuthorityAssertions.SameImageAsync(cold, state.DirtyImage, state.DirtyPosition);
+        var position = await NativeStoreAssertions.ReopenedAsync(cold, state.DirtyPosition);
+        await FeedVertexAuthorityAssertions.SameImageAsync(cold, state.DirtyImage, position);
         await FeedDeleteClassificationAssertions.RefuseAsync(owner, cold, state, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Key, state.Original); return true; });
         var prefix = Convert.ToHexString(state.Key) + ":";
         var repaired = state.DirtyImage.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(state.Original) : row).ToArray();
-        await FeedVertexAuthorityAssertions.SameImageAsync(cold, repaired, state.DirtyPosition + 1L);
+        await FeedVertexAuthorityAssertions.SameImageAsync(cold, repaired, await NativeStoreAssertions.AdvancedAsync(cold, position));
         await FeedDeleteClassificationAssertions.HealthyAsync(owner, cold, state, null, token);
         await FeedDeleteClassificationAssertions.ReplayAsync(owner, cold, state, null, null, token);
         var command = new CommandRequest(Guid.NewGuid(), state.Source.Seed.Partition,

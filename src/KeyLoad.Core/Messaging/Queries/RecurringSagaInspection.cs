@@ -21,7 +21,7 @@ public static class RecurringSagaInspection
     public static RecurringScheduleInspection? InspectRecurringSchedule(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid scheduleId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.InspectRecurringScheduleRead(principalId, lane, scheduleId, budget);
     }
 
@@ -51,7 +51,7 @@ public static class RecurringSagaInspection
     public static SagaInspection? InspectSaga(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid sagaId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.InspectSagaRead(principalId, lane, sagaId, budget);
     }
 

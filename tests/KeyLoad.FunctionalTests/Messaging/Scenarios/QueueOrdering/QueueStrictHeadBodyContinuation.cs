@@ -17,12 +17,13 @@ internal static class QueueStrictHeadBodyContinuation
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
-                await QueueLifecycleConditionAssertions.Same(cold, state.Damaged);
+                var damaged = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, state.Damaged);
+                state = state with { Damaged = damaged };
                 await QueueStrictHeadBodyAssertions.RefusalAsync(owner, cold, state);
                 QueueLifecycleConditionOperations.Restore(cold, state.BodyKey, state.OriginalBody);
                 await QueueLifecycleConditionAssertions.Same(cold, state.Original with
                 {
-                    Position = state.Original.Position + 2
+                    Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
                 });
                 await QueueStrictHeadBodyAssertions.ReplayAsync(owner, cold, state.Queue,
                     state.HeadState == MessageState.Leased ? QueueOrderedRetryProtocol.First : null);
@@ -40,6 +41,7 @@ internal static class QueueStrictHeadBodyContinuation
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var owner = fixture.CreateConfiguredDatabase(second);
+            healthyCut = await QueueLifecycleConditionAssertions.ReopenedAsync(second, healthyCut);
             await QueueLifecycleConditionAssertions.Same(second, healthyCut);
             await QueueStrictHeadBodyAssertions.TerminalAsync(owner, second, state);
             await QueueStrictHeadBodyAssertions.ReplayAsync(owner, second, state.Queue);

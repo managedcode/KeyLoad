@@ -45,7 +45,7 @@ internal static class MixedEventingJournalRecovery
         source.Store.Commit((transaction, _) => { transaction.Put(key, exact); return true; });
         var repairedCut = source.ReadCanonicalCut();
         await Assert.That(repairedCut.AppliedPosition).IsEqualTo(rejectedCut.AppliedPosition);
-        await Assert.That(repairedCut.StorePosition).IsEqualTo(before + SingleStorageCommit);
+        await NativeStoreAssertions.AdvancedAsync(source.Store, before);
         await Assert.That(QueueWholeFlowStorage.Bytes(source.Store))
             .IsEquivalentTo(corruptRaw.Append(Convert.ToHexString(key) + ":" + Convert.ToHexString(exact))
                 .Order(StringComparer.Ordinal), CollectionOrdering.Matching);
@@ -56,7 +56,7 @@ internal static class MixedEventingJournalRecovery
         var retained = source.ReadStoredOutcome(id);
         var expectedSequence = checked(repairedCut.AppliedPosition + SingleStorageCommit);
         await Assert.That(retained.CanonicalSequence).IsEqualTo(expectedSequence);
-        await Assert.That(source.Database.LastApplied).IsEqualTo(expectedSequence);
+        await Assert.That(NativeStoreAssertions.Applied(source.Store, state.Partition)).IsEqualTo(expectedSequence);
         await Assert.That(retained.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(retained.PreparedCommand.UserId).IsEqualTo(operation.UserId);
         await Assert.That(retained.PreparedCommand.Value!.Kind).IsEqualTo(operation.Value!.Kind);
@@ -78,7 +78,7 @@ internal static class MixedEventingJournalRecovery
         await Assert.That(repeated.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(repeated.Message).IsEqualTo(MissingReference);
         await Assert.That(source.ReadCanonicalCut()).IsEqualTo(cut);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(source.Store, corruptRaw, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(source.Store, corruptRaw, position, identity);
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
             KeySpace.PartitionOutcome(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(

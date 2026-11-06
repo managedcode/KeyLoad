@@ -8,9 +8,10 @@ internal static class RequiredProcessingPolicyProcessing
     internal static async Task<Delivery> ReceiveAsync(RequiredProcessingPolicyFixture fixture, string id, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), fixture.Lane, LeaseSeconds: fixture.Resource.QueuePolicy.MaxLeaseSeconds);
-        var position = fixture.Harness.Store.Position + 1L;
+        var position = fixture.Harness.Store.Position;
         var expectedToken = fixture.Harness.NextCommitToken();
         var result = fixture.Apply(OperationKind.Receive, request, request.RequestId, token: token).Get<ReceiveResult>();
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, position);
         await Assert.That(result.Deliveries.Length).IsEqualTo(1);
         var actual = result.Deliveries[0];
         await RequiredProcessingPolicyAssertions.EqualAsync(new ReceiveResult(request.RequestId,
@@ -18,7 +19,7 @@ internal static class RequiredProcessingPolicyProcessing
             expectedToken), result);
         await Assert.That(fixture.Harness.Store.Position).IsEqualTo(position);
         await Assert.That(actual.Token).IsNotEmpty();
-        var evaluatedAt = fixture.Harness.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+        var evaluatedAt = fixture.Harness.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(StorageCommandKeys.Clock(fixture.Harness.Partition))!));
         await Assert.That(actual.LeaseUntil).IsEqualTo(evaluatedAt.AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds));
         await RequiredProcessingPolicyAssertions.EqualAsync(new DeliveryClaims(fixture.Lane, id, RequiredProcessingPolicyFixture.Worker,
             1L, 1L, fixture.Harness.Store.Identity.Incarnation), fixture.Harness.Database.Verify<DeliveryClaims>(actual.Token));
@@ -28,9 +29,10 @@ internal static class RequiredProcessingPolicyProcessing
         RequiredProcessingPolicyFixture fixture, ProcessingRequest request, string document, CancellationToken token)
     {
         var operation = fixture.Operation(OperationKind.Processing, request, request.CommandId);
-        var position = fixture.Harness.Store.Position + 1L;
+        var position = fixture.Harness.Store.Position;
         var expectedToken = fixture.Harness.NextCommitToken();
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, position);
         var expected = new CommitReceipt(request.CommandId, expectedToken, [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, actual);
         await Assert.That(fixture.Harness.Store.Position).IsEqualTo(position);

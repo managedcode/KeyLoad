@@ -33,7 +33,7 @@ internal static class EventQueueStateEnvelopeSourceAssertions
         await Assert.That(OrleansSerialization.Deserialize<long>(Required(fixture,
             KeySpace.Partition(SequenceFamily, fixture.Partition)))).IsEqualTo(TopicEventSequence);
         var expectedPage = new StreamPage(fixture.Stream, new(InitialRevision, InitialRevision, InitialGeneration),
-            [record], fixture.Database.LastApplied, false, null, fixture.Database.LastApplied);
+            [record], fixture.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition)), false, null, fixture.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition)));
         await EqualAsync(fixture.Database.ReadStream(Root, fixture.Stream, limit: SingleResult), expectedPage);
         foreach (var family in new[] { HeadFamily, EventFamily, FeedFamily, IdentityFamily, SequenceFamily })
         {

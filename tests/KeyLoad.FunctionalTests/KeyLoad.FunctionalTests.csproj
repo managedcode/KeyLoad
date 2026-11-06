@@ -12,6 +12,7 @@
     <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadCoverageToolVersion)]" />
     <Using Include="KeyLoad.InternalSerialization" />
     <Using Include="KeyLoad.Core" />
+    <Using Include="KeyLoad.ProcessRecoveryTests.NativeStoreAssertions" Alias="NativeStoreAssertions" />
     <Using Include="KeyLoad.ProcessRecoveryTests.OrleansExecution" />
   </ItemGroup>
   <ItemGroup>

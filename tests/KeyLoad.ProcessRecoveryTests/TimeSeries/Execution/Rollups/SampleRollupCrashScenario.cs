@@ -50,7 +50,6 @@ internal static class SampleRollupCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SampleRollupCrashContract.InflightId);
         await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), OrleansSerialization.Serialize(operation));
         SampleChunkSnapshotFile.CaptureExpectedToken(directory, request.CommandId, database, request.Partition);
-        boundary.Position = checked(database.Store.Position + SampleRollupCrashContract.PositionStep);
         await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(database.Store);

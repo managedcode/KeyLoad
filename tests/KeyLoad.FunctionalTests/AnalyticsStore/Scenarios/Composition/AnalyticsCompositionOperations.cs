@@ -13,7 +13,7 @@ internal static class AnalyticsCompositionOperations
     internal static Command<DatabaseCommand> Issue<T>(SafeProjectorOperationDatabase owner, OperationKind kind,
         T payload, Guid id, string principal = D.Root) where T : notnull
     {
-        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.CallerToken);
+        var work = new ReadExecutionBudget(owner.CallerToken);
         return owner.Database.CreateCommand(kind, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(), payload, work);
     }

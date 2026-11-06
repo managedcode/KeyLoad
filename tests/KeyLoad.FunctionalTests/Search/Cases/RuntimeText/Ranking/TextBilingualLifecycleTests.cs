@@ -29,7 +29,7 @@ internal sealed class TextBilingualLifecycleTests
             var receipt = database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
             await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
             await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-            await Assert.That(receipt.Token.Position).IsEqualTo(database.Database.LastApplied);
+            await Assert.That(receipt.Token.Position).IsEqualTo(NativeStoreAssertions.Applied(database.Store, database.Partition));
             var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
             var expected = new MutationReceipt(DeleteKind, TextBilingualAudit.Collection,
                 TextBilingualAudit.UkrainianId, DeletedRevision);

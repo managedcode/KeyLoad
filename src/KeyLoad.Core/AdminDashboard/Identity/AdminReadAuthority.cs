@@ -30,6 +30,6 @@ internal static class AdminReadAuthority
         }
     }
 
-    internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value
-        ? OrleansSerialization.Deserialize<long>(value) : 0;
+    internal static long Position(IKeyValueView view)
+        => StorageReplicaExecution.ReadPartitionPositions(view).Sum(position => position.Position);
 }

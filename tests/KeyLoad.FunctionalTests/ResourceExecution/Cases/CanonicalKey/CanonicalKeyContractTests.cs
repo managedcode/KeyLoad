@@ -4,9 +4,9 @@ namespace KeyLoad.FunctionalTests.ResourceExecution;
 
 internal sealed class CanonicalKeyContractTests
 {
-    private const string SystemSpace = "system";
-    private const string AppliedName = "last-applied";
-    private const string ClockName = "clock";
+    private const string AppliedFamily = "command-applied";
+    private const string Metadata = "metadata";
+    private const string Collection = "documents";
     private const string Tenant = "tenant";
     private const string Database = "database";
     private const string Domain = "orders";
@@ -14,33 +14,36 @@ internal sealed class CanonicalKeyContractTests
     private const string SecondKey = "customer-2";
 
     [Test]
-    public async Task AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties()
+    public async Task AcRoc002CommandKeysKeepOwnedBytesAndSeparateMetadataFromCaseSensitivePartitions()
     {
-        var applied = KeySpace.Applied;
-        var clock = KeySpace.Clock;
-        var owned = applied.ToArray();
+        var partition = new PartitionRef(Tenant, Database, Domain, FirstKey);
+        var applied = StorageCommandKeys.Applied(partition);
+        var owned = StorageCommandKeys.Applied(partition);
         owned[0] ^= byte.MaxValue;
-
-        await Assert.That(typeof(KeySpace).GetProperty(nameof(KeySpace.Applied))!.PropertyType)
-            .IsEqualTo(typeof(ReadOnlyMemory<byte>));
-        await Assert.That(typeof(KeySpace).GetProperty(nameof(KeySpace.Clock))!.PropertyType)
-            .IsEqualTo(typeof(ReadOnlyMemory<byte>));
-        await Assert.That(applied.ToArray()).IsEquivalentTo(KeyCodec.Encode(SystemSpace, AppliedName));
-        await Assert.That(clock.ToArray()).IsEquivalentTo(KeyCodec.Encode(SystemSpace, ClockName));
+        await Assert.That(applied).IsEquivalentTo(KeyCodec.Encode(AppliedFamily, Tenant, Database, Domain, FirstKey));
+        await Assert.That(StorageCommandKeys.Applied(null)).IsEquivalentTo(KeyCodec.Encode(AppliedFamily, Metadata));
+        await Assert.That(applied.AsSpan().SequenceEqual(owned)).IsFalse();
+        await Assert.That(applied.AsSpan().SequenceEqual(StorageCommandKeys.Applied(partition with { PartitionKey = FirstKey.ToUpperInvariant() }))).IsFalse();
     }
 
     [Test]
-    public async Task AcRoc002AppliedWatermarkUsesTheCanonicalKeyInTheRealStore()
+    public async Task AcRoc002RealCommandsAdvanceOnlyTheirOwnPartitionPrefix()
     {
         using var database = new TestDatabase();
-        const long position = 7;
-        database.Store.Commit((transaction, _) =>
-        {
-            transaction.PutRecord(KeySpace.Applied.ToArray(), position);
-            return true;
-        });
-
-        await Assert.That(database.Database.LastApplied).IsEqualTo(position);
+        database.Configure(Collection, ResourceKind.Collection);
+        var second = database.Partition with { PartitionKey = SecondKey };
+        var metadata = database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, null));
+        var first = database.Commit(new PutDocument(Collection, FirstKey, "{}"));
+        var secondRequest = new CommandRequest(Guid.NewGuid(), second, [new PutDocument(Collection, SecondKey, "{}")]);
+        var other = database.Submit(OperationKind.Batch, secondRequest, id: secondRequest.CommandId).Get<CommitReceipt>();
+        var next = database.Commit(new PutDocument(Collection, FirstKey, "{\"updated\":true}", 1));
+        await Assert.That(first.Token.Position).IsEqualTo(1L);
+        await Assert.That(other.Token.Position).IsEqualTo(1L);
+        await Assert.That(next.Token.Position).IsEqualTo(2L);
+        await Assert.That(first.Token.AtomicPartitionId).IsNotEqualTo(other.Token.AtomicPartitionId);
+        await Assert.That(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, database.Partition))).IsEqualTo(2L);
+        await Assert.That(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, second))).IsEqualTo(1L);
+        await Assert.That(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, null))).IsEqualTo(metadata);
     }
 
     [Test]

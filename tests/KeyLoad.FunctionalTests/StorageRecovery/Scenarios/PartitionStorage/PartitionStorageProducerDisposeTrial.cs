@@ -44,7 +44,7 @@ internal static class PartitionStorageProducerDisposeTrial
     {
         var services = app.Services;
         var owner = services.GetRequiredService<PartitionHostApplicationOwner>();
-        var host = owner.Borrow();
+        var host = owner.Session.Host;
         return new(owner, services.GetRequiredService<OrleansNode>(), services.GetRequiredService<ServerConnectionRegistry>(),
             host.Database.Store.Read(_ => host.Database.Store.Identity),
             host.DirectoryPath);

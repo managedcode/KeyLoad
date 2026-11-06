@@ -39,7 +39,7 @@ internal static class TypedQueueGraphReplayFixture
              new PutDocument(ToCollection, Second, SecondJson),
              new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                  payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]), at);
-        var nextPosition = checked(db.Database.LastApplied + 1);
+        var nextPosition = checked(ExpectedCanonicalCommit.Applied(db.Database, db.Partition) + 1);
         var receipt = db.Database.Apply(seed).Get<CommitReceipt>();
         await SeedReceiptAsync(db, seed, receipt, nextPosition);
         var failed = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,

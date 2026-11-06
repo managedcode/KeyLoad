@@ -55,6 +55,7 @@ internal static class SqlCompositionParameterFlow
             var position = fixture.Store.Position;
             var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             fixture.Reopen();
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
             await SqlCompositionParameterAssertions.ConserveAsync(fixture, image, position, identity);
             await SqlCompositionParameterRefusals.RunAsync(fixture, forward, false, token);
             await SqlCompositionParameterRefusals.RunAsync(fixture, reverse, true, token);

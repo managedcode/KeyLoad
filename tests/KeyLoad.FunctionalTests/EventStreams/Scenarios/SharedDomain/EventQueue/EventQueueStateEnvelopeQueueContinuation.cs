@@ -69,12 +69,12 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         };
         var expected = state.ProcessingReceipt ?? throw new InvalidOperationException(MissingReceive);
         var before = Domain(fixture, request.CommandId);
-        var expectedPosition = checked(fixture.Store.Position + CommitPositionStep);
-        var expectedCanonicalPosition = checked(fixture.Database.LastApplied + CommitPositionStep);
+        var physicalBefore = fixture.Store.Position;
+        var expectedCanonicalPosition = checked(fixture.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition)) + CommitPositionStep);
         _ = await SubmitAsync(fixture, state, OperationKind.Processing, request.CommandId, request, fixture.ScheduledAt, expected);
-        await Assert.That(fixture.Store.Position).IsEqualTo(expectedPosition);
-        await Assert.That(fixture.Database.LastApplied).IsEqualTo(expectedCanonicalPosition);
-        await Assert.That(KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Clock(fixture.Store)).IsEqualTo(fixture.ScheduledAt);
+        await NativeStoreAssertions.AdvancedAsync(fixture.Store, physicalBefore);
+        await Assert.That(fixture.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition))).IsEqualTo(expectedCanonicalPosition);
+        await Assert.That(KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition)).IsEqualTo(fixture.ScheduledAt);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await EventQueueStateEnvelopeHistoryAssertions.InboxAsync(fixture, state);
@@ -89,15 +89,13 @@ internal static class EventQueueStateEnvelopeQueueContinuation
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(fixture.Partition, Root, id)) + RowSeparator;
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.Partition, Root, id)) + RowSeparator;
-        var clock = Convert.ToHexString(KeySpace.Clock.Span) + RowSeparator;
-        var applied = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
-        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + RowSeparator;
+        var clock = Convert.ToHexString(StorageCommandKeys.Clock(fixture.Partition)) + RowSeparator;
+        var applied = Convert.ToHexString(StorageCommandKeys.Applied(fixture.Partition)) + RowSeparator;
         return KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
             .Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
                 && !row.StartsWith(locator, StringComparison.Ordinal)
                 && !row.StartsWith(clock, StringComparison.Ordinal)
-                && !row.StartsWith(applied, StringComparison.Ordinal)
-                && !row.StartsWith(lastCommand, StringComparison.Ordinal)).ToArray();
+                && !row.StartsWith(applied, StringComparison.Ordinal)).ToArray();
     }
 
     internal static void ConsumeReceive(EventQueueStateEnvelopeState state, Guid id)

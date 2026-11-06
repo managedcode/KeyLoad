@@ -1,11 +1,9 @@
-using System.Collections.Immutable;
-using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Completes the last persisted canonical batch on lagging copies through typed Orleans service calls.</summary>
-internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogger diagnostics)
+internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogger diagnostics, PartitionRef? partition)
 {
     /// <summary>Completes every owner that missed part of the last committed batch and returns the shared cut.</summary>
     internal async Task<long> CompleteAsync(StorageCopyOwner[] owners, CancellationToken cancellationToken)
@@ -21,7 +19,7 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
         }
 
         var committed = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
-            .ReadLastCommittedCommandsAsync(cancellationToken);
+            .ReadReplicaBatchAsync(partition, cancellationToken);
         var completed = StorageCopyContract.UnpersistedCopies;
         foreach (var owner in owners)
         {
@@ -30,10 +28,12 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
                 continue;
             }
             cancellationToken.ThrowIfCancellationRequested();
-            var missing = Missing(committed, owner.Cut.Position, maximum);
-            var applied = await storage.On(owner.Address).ApplyBatchAsync(missing,
-                owner.Cut.Position + StorageCopyContract.NextSequence, includeOutcome: false, cancellationToken);
-            if (applied.Position != maximum || applied.Applied.Length != missing.Length)
+            if (committed is null || committed.PreviousPosition != owner.Cut.Position || committed.Position != maximum)
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
+            }
+            var applied = await storage.CopyAsync(owner.Address, committed, cancellationToken);
+            if (applied.Position != maximum)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
             }
@@ -43,16 +43,4 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
         return maximum;
     }
 
-    /// <summary>Selects the committed commands after <paramref name="position"/>; they must reach the shared cut.</summary>
-    private static ImmutableArray<Command<DatabaseCommand>> Missing(ImmutableArray<StoredCommand> committed,
-        long position, long maximum)
-    {
-        var missing = committed.Where(command => command.Sequence > position).ToImmutableArray();
-        if (missing.Length == 0 || missing.Length != maximum - position
-            || missing[StorageCopyContract.FirstOwner].Sequence != position + StorageCopyContract.NextSequence)
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
-        }
-        return [.. missing.Select(command => command.Command)];
-    }
 }

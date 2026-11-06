@@ -36,13 +36,16 @@ public static class StorageOperationBatchApply
     /// <param name="operations">Prepared canonical commands.</param>
     /// <param name="firstSequence">The first newly persisted canonical sequence.</param>
     /// <param name="cancellationToken">Cancellation before physical publication.</param>
+    /// <param name="retainReplication">Atomically retains the primary effects when other persisted copies are required.</param>
     /// <returns>The applied results after process-persistent native WAL publication.</returns>
     public static Task<StorageBatchResult> ApplyStorageOperationsAsync(this DatabaseEngine engine,
-        IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence, CancellationToken cancellationToken)
+        IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence, CancellationToken cancellationToken,
+        bool retainReplication = false)
     {
         var verified = Verify(engine, operations, firstSequence);
+        var batchId = Guid.NewGuid();
         return engine.Store.CommitAsync((transaction, position)
-            => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken), cancellationToken);
+            => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken, retainReplication, batchId), cancellationToken);
     }
 
     private static Command<DatabaseCommand>[] Verify(DatabaseEngine engine,
@@ -60,7 +63,8 @@ public static class StorageOperationBatchApply
         for (var index = 0; index < verified.Length; index++)
         {
             verified[index] = engine.OwnCommand(operations[index]);
-            if (engine.IsOwnedSiloLocalOperation(verified[index]))
+            if (engine.IsOwnedSiloLocalOperation(verified[index])
+                || StorageCommandKeys.PartitionOf(verified[index]) != StorageCommandKeys.PartitionOf(verified[0]))
             {
                 throw Errors.Fail(ErrorCode.Validation, StorageOperationApply.InvalidStorageOperationScope);
             }
@@ -70,22 +74,26 @@ public static class StorageOperationBatchApply
     }
 
     private static StorageBatchResult ApplyInOrder(this DatabaseEngine engine, IAtomicTransaction transaction,
-        long position, Command<DatabaseCommand>[] operations, long firstSequence, CancellationToken cancellationToken)
+        long position, Command<DatabaseCommand>[] operations, long firstSequence, CancellationToken cancellationToken,
+        bool retainReplication = false, Guid batchId = default)
     {
+        var partition = StorageCommandKeys.PartitionOf(operations[0]);
+        var before = StorageOperationApply.ReadCanonicalSequence(transaction, partition);
         var staging = operations.Length == SingleCommand ? null
             : transaction as IAtomicActionStaging ?? throw new InvalidOperationException(ActionStagingRequired);
         var applied = ImmutableArray.CreateBuilder<StorageOperationResult>(operations.Length);
-        var outcomeKeys = new List<byte[]>(operations.Length);
+        var readPartitions = retainReplication ? new HashSet<PartitionRef>() : null;
+        var current = before;
         var next = firstSequence;
         foreach (var operation in operations)
         {
             staging?.BeginAction();
-            StorageOperationResult result;
+            (StorageOperationResult Result, bool Persisted) result;
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                result = engine.ApplyCommittedCommand(transaction, operation, position, next, siloLocal: false,
-                    cancellationToken);
+                result = engine.ApplyCommittedCommand(transaction, operation, position, current, next, siloLocal: false,
+                    cancellationToken, readPartitions);
             }
             catch (Exception error) when (applied.Count > 0 && CqrsRuntimeFailures.FindFatal(error) is null)
             {
@@ -93,13 +101,13 @@ public static class StorageOperationBatchApply
                 break;
             }
 
-            applied.Add(result);
-            if (StorageOperationApply.ReadCanonicalSequence(transaction) != next)
+            applied.Add(result.Result);
+            if (!result.Persisted)
             {
                 continue;
             }
 
-            outcomeKeys.Add(transaction.GetRecord<byte[]>(KeySpace.LastCommandBytes)!);
+            current = result.Result.Sequence;
             if (next == long.MaxValue)
             {
                 break;
@@ -107,17 +115,9 @@ public static class StorageOperationBatchApply
             next++;
         }
 
-        RetainBatchOutcomeKeys(transaction, outcomeKeys);
-        return new(StorageOperationApply.ReadCanonicalSequence(transaction), applied.ToImmutable());
+        var batch = new StorageBatchResult(current, applied.ToImmutable());
+        return retainReplication && batch.Position > before
+            ? engine.RetainReplicaBatch(transaction, partition, before, batchId, batch, readPartitions) : batch;
     }
 
-    /// <summary>Records every outcome key of a commit that persisted several commands, so a later writer can
-    /// complete a copy that missed the whole commit.</summary>
-    private static void RetainBatchOutcomeKeys(IAtomicTransaction transaction, List<byte[]> outcomeKeys)
-    {
-        if (outcomeKeys.Count > SingleCommand)
-        {
-            transaction.PutRecord(KeySpace.LastBatchBytes, outcomeKeys.ToArray());
-        }
-    }
 }

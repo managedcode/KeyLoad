@@ -29,31 +29,30 @@ public sealed partial class QueryEngine
         return liveQueries.Start(principalId, request, timeProvider, cancellationToken, binding);
     }
 
-    internal LiveQueryPage ReadLiveQueryBound(string principalId, ReadLiveQueryRequest request,
-        TimeProvider? timeProvider, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
+    internal LiveQueryPage ReadLiveQueryBound(string principalId, ReadLiveQueryRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        return liveQueries.Read(principalId, request, timeProvider, cancellationToken, binding);
+        return liveQueries.Read(principalId, request, cancellationToken, binding);
     }
     internal PartitionQueryPage QueryPartitionsBound(string principalId, PartitionQueryRequest request,
-        PhysicalShardRecord expectedOwner, TimeProvider? timeProvider, IResourceLifetimeWorkBinding binding,
+        PhysicalShardRecord expectedOwner, IResourceLifetimeWorkBinding binding,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return QueryExecution.PartitionQueryPublicExecution.Execute(this, principalId, request,
-            expectedOwner, timeProvider, cancellationToken, binding);
+            expectedOwner, cancellationToken, binding);
     }
     internal Task<GraphSearchResult> SearchSqlBoundAsync(string principalId, SqlGraphSearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        return SqlGraphSearchExecutor.ExecuteAsync(database, graphSearch, principalId, request, execution, token, binding);
+        return SqlGraphSearchExecutor.ExecuteAsync(graphSearch, principalId, request, execution, token, binding);
     }
     internal GraphShortestPathResult ShortestPathSqlBound(string principalId, SqlGraphPathRequest request,
-        TimeProvider? timeProvider, IResourceLifetimeWorkBinding binding, CancellationToken token)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        return ExecuteShortestPathSql(principalId, request, timeProvider, token, binding);
+        return ExecuteShortestPathSql(principalId, request, token, binding);
     }
     internal QueryPage ExecuteBound(string principalId, AstQueryRequest request, ReadExecutionBudget work,
         TimeProvider? timeProvider, IResourceLifetimeWorkBinding binding, CancellationToken token)

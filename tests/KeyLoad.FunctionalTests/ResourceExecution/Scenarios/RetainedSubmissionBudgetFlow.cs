@@ -27,7 +27,7 @@ internal static class RetainedSubmissionBudgetFlow
         var committed = fixture.SubmitIssued(original);
         await Assert.That(Errors.Code(committed.Problem).Value).IsNull();
         await Assert.That(committed.Get<CommitReceipt>().CommandId).IsEqualTo(original.CommandId);
-        var work = Work(fixture);
+        var work = TestDatabase.CreateReadWork(CancellationToken.None);
         await HealthyAsync(fixture, original, committed, work);
         await MissingAsync(fixture);
         await CurrentAuthorityAsync(fixture, subject, original, work);
@@ -48,7 +48,7 @@ internal static class RetainedSubmissionBudgetFlow
     {
         var uncommitted = Issue(fixture, UncommittedDocumentId);
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
-        var healthy = Work(fixture);
+        var healthy = TestDatabase.CreateReadWork(CancellationToken.None);
         await Assert.That(fixture.Database.ReadRetainedSubmissionOutcome(uncommitted, healthy)).IsNull();
         await Assert.That(fixture.Database.GetDocument("root",
             new(fixture.Partition, Collection, UncommittedDocumentId))).IsNull();
@@ -69,12 +69,6 @@ internal static class RetainedSubmissionBudgetFlow
             fixture.Database.ReadRetainedSubmissionOutcome(original, work));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await before.UnchangedAsync(fixture);
-    }
-
-    private static ReadExecutionBudget Work(TestDatabase fixture)
-    {
-        var work = fixture.CreateReadWork(CancellationToken.None);
-        return work;
     }
 
     private static Command<DatabaseCommand> Issue(TestDatabase fixture, string documentId)

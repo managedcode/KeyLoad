@@ -77,6 +77,7 @@ internal static class RelationalUniqueReplayContinuation
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution);
+            cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

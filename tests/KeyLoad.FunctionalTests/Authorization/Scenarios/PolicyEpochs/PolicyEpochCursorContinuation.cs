@@ -36,12 +36,14 @@ internal static class PolicyEpochCursorContinuation
         var identity = db.Store.Identity;
         var image = TeamRowPolicyAssertions.Image(db.Store);
         var cut = db.Store.Position;
+        var cursorCut = cut;
         db.Store.Dispose();
         Exception? primary = null;
         var failures = new List<Exception>();
         try
         {
             using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution, timeProvider: db.Database.EvaluationClock);
+            cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
             try
             {
                 var database = db.CreateConfiguredDatabase(cold);
@@ -53,7 +55,7 @@ internal static class PolicyEpochCursorContinuation
                 await PolicyEpochCursorAssertions.RefusedAsync(queries, cold, request, originalCursor, ErrorCode.CursorExpired, token);
                 if (cold.Identity.ReadGeneration == identity.ReadGeneration)
                 {
-                    await PolicyEpochCursorAssertions.ContinuationAsync(queries, cold, request, repairedCursor, cut, token);
+                    await PolicyEpochCursorAssertions.ContinuationAsync(queries, cold, request, repairedCursor, cursorCut, token);
                 }
                 else
                 {

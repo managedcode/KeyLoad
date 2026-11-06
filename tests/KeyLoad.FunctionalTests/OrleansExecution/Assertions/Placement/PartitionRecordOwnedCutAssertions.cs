@@ -36,7 +36,7 @@ internal static class PartitionRecordOwnedCutAssertions
             {
                 throw Errors.Fail(ErrorCode.Corruption, "The bounded execution fixture image is incomplete.");
             }
-            return rows.Where(row => !CanonicalStoreImage.IsStorePosition(row.Key)).ToArray();
+            return rows.ToArray();
         });
 
     internal static async Task ImageAsync(ZoneTreeStore store, (byte[] Key, byte[] Value)[] expected,

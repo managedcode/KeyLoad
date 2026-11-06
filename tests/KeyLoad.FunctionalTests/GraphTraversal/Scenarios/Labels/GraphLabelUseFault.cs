@@ -17,11 +17,12 @@ internal static class GraphLabelUseFault
         {
             var damaged = OrleansSerialization.Serialize("wrong-execution-vertex-type");
             Write(db, key, damaged);
+            position = await NativeStoreAssertions.AdvancedAsync(db.Store, position);
             var encoded = Convert.ToHexString(key) + ":";
             var originalRow = encoded + Convert.ToHexString(original);
             await Assert.That(image.Count(row => row == originalRow)).IsEqualTo(1);
             var expected = image.Select(row => row == originalRow ? encoded + Convert.ToHexString(damaged) : row).ToArray();
-            await GraphLabelUseOperations.ConserveAsync(db.Store, expected, position + 1L, identity);
+            await GraphLabelUseOperations.ConserveAsync(db.Store, expected, position, identity);
             await GraphLabelUseOperations.ObserveAsync(db.Store, () => GraphLabelUseOperations.RefuseAsync(() =>
                 GraphLabelUseFixture.Traverse(db.Database, db.Partition, ["route"], token),
                 ErrorCode.PermissionDenied, GraphLabelUseFixture.DeniedDetail));
@@ -29,8 +30,11 @@ internal static class GraphLabelUseFault
                 GraphLabelUseFixture.Traverse(db.Database, db.Partition, null, token), ErrorCode.Corruption, null));
         }, failures);
         ServerFailureObserver.Observe(() => Write(db, key, original), failures);
-        await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(db.Store,
-            image, position + 2L, identity), failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            position = await NativeStoreAssertions.AdvancedAsync(db.Store, position);
+            await GraphLabelUseOperations.ConserveAsync(db.Store, image, position, identity);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, false, token);
     }

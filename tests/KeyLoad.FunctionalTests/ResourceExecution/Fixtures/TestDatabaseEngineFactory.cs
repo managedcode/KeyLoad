@@ -1,5 +1,5 @@
 using KeyLoad.Core.Authorization;
-using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.FunctionalTests;
@@ -9,7 +9,7 @@ internal static class TestDatabaseEngineFactory
 {
     private const string AllFields = "*";
 
-    internal static Func<ZoneTreeStore, DatabaseEngine> Capture(IOptions<DatabaseLimits> limits,
+    internal static Func<IAtomicStore, DatabaseEngine> Capture(IOptions<DatabaseLimits> limits,
         IOptions<ClaimsExecutionOptions> claims,
         TimeSeriesExecutionOptions? timeSeries, TimeProvider clock)
         => store => new DatabaseEngine(store, new AuthorizationPolicy(), limits,

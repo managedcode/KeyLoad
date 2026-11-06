@@ -36,14 +36,13 @@ internal static class QueueClaimAckCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.OperationFile),
             OrleansSerialization.Serialize(operation));
         var target = CrashDatabase.NextCommitToken(database, QueueClaimAckCrashProtocol.Partition);
-        var physicalTarget = checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition);
+        var seedTimestamp = store.Position;
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.BaselineFile),
             OrleansSerialization.Serialize(CaptureBaseline(store)));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.TargetFile),
             OrleansSerialization.Serialize(target));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.PhysicalTargetFile),
-            OrleansSerialization.Serialize(physicalTarget));
-        boundary.Position = physicalTarget;
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.SeedTimestampFile),
+            OrleansSerialization.Serialize(seedTimestamp));
         await boundary.ArmAsync(store);
         _ = database.Apply(operation);
         await RecoveryProcessPause.WaitForKillAsync(store);
@@ -55,6 +54,6 @@ internal static class QueueClaimAckCrashScenario
         {
             throw new InvalidOperationException(QueueClaimAckCrashProtocol.BaselineBoundExceeded);
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + QueueClaimAckCrashProtocol.ImageRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + QueueClaimAckCrashProtocol.ImageRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

@@ -5,6 +5,12 @@ namespace KeyLoad.Clustering;
 
 internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngine search, TimeProvider clock)
 {
+    internal static bool ReadsAuthorizedView(GrainReadKind kind)
+        => kind is GrainReadKind.Query or GrainReadKind.AstQuery or GrainReadKind.Search
+            or GrainReadKind.ApproximateSearch or GrainReadKind.GraphSearch or GrainReadKind.SqlGraphSearch
+            or GrainReadKind.SqlGraphPath or GrainReadKind.WaitForIndex or GrainReadKind.WaitForAnnIndex
+            or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead;
+
     internal async ValueTask<GrainValue> ExecuteAsync(GrainReadKind kind, string principal, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -35,7 +41,7 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
         if (kind == GrainReadKind.SqlGraphPath)
         {
             return new GrainValue(queries.ShortestPathSqlBound(principal, (GrainPayload.Read<SqlGraphPathRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.SqlGraphPathRequest at this closed operation boundary before executing typed code. */),
-                clock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this SqlGraphPath response with its generated runtime type header. */;
+                binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this SqlGraphPath response with its generated runtime type header. */;
         }
         return kind switch
         {
@@ -43,7 +49,7 @@ internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngi
             GrainReadKind.AstQuery => new GrainValue(queries.ExecuteAstBound(principal, (GrainPayload.ReadPublicInput<AstQueryRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.AstQueryRequest at this closed operation boundary before executing typed code. */), clock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this AstQuery response with its generated runtime type header. */,
             GrainReadKind.QueryCapabilities => new GrainValue(Capabilities(request)) /* KLD0041: The current GrainValue wire slot carries this QueryCapabilities response with its generated runtime type header. */,
             GrainReadKind.LiveQueryStart => new GrainValue(queries.StartLiveQueryBound(principal, (GrainPayload.ReadPublicInput<StartLiveQueryRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.StartLiveQueryRequest at this closed operation boundary before executing typed code. */), clock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this LiveQueryStart response with its generated runtime type header. */,
-            GrainReadKind.LiveQueryRead => new GrainValue(queries.ReadLiveQueryBound(principal, (GrainPayload.ReadPublicInput<ReadLiveQueryRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.ReadLiveQueryRequest at this closed operation boundary before executing typed code. */), clock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this LiveQueryRead response with its generated runtime type header. */,
+            GrainReadKind.LiveQueryRead => new GrainValue(queries.ReadLiveQueryBound(principal, (GrainPayload.ReadPublicInput<ReadLiveQueryRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.ReadLiveQueryRequest at this closed operation boundary before executing typed code. */), binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this LiveQueryRead response with its generated runtime type header. */,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

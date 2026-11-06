@@ -51,21 +51,32 @@ public static class StorageOperationApply
     }
 
     internal static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ApplyEmbedded(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken) => engine.ApplyCore(operation, null, selectEmbeddedClock: true, cancellationToken).Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
-    internal static long ReadCanonicalSequence(IKeyValueView view)
+    /// <summary>Reads one owner's sequence from the same native cut as the operation.</summary>
+    public static long ReadCanonicalSequence(IKeyValueView view, PartitionRef? partition)
     {
-        var encoded = view.ReadOwnedValue(KeySpace.AppliedBytes);
-        var current = encoded is null ? InitialCanonicalSequence : OrleansSerialization.Deserialize<long>(encoded);
-        if (current < InitialCanonicalSequence)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, CanonicalSequenceRequired);
-        }
-
-        return current;
+        var encoded = view.GetRecord<StoragePartitionPosition>(StorageCommandKeys.Applied(partition));
+        return encoded is null ? InitialCanonicalSequence : RequireCanonicalSequence(encoded, partition, null);
     }
 
-    internal static long SelectNextCanonicalSequence(IKeyValueView view)
+    /// <summary>Validates a stored prefix against its actual key scope before using its position.</summary>
+    public static long ReadCanonicalSequence(ReadOnlySpan<byte> bytes, PartitionRef? partition, string? invalidMessage = null)
     {
-        var current = ReadCanonicalSequence(view);
+        var encoded = OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes);
+        return RequireCanonicalSequence(encoded, partition, invalidMessage);
+    }
+
+    private static long RequireCanonicalSequence(StoragePartitionPosition? encoded, PartitionRef? partition, string? invalidMessage)
+    {
+        if (encoded is null || encoded.Position < InitialCanonicalSequence || encoded.Partition != partition)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, invalidMessage ?? CanonicalSequenceRequired);
+        }
+
+        return encoded.Position;
+    }
+
+    internal static long SelectNextCanonicalSequence(long current)
+    {
         if (current == long.MaxValue)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, CanonicalSequenceExhausted);
@@ -74,17 +85,20 @@ public static class StorageOperationApply
         return current + NextCanonicalSequence;
     }
 
-    internal static void RequireNextCanonicalSequence(IKeyValueView view, long sequence)
+    internal static void RequireNextCanonicalSequence(long current, long sequence)
     {
-        if (sequence != SelectNextCanonicalSequence(view))
+        if (sequence != SelectNextCanonicalSequence(current))
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, CanonicalSequenceRequired);
         }
     }
 
     internal static void RequireStoredCanonicalSequence(IKeyValueView view, StoredOutcome outcome, bool siloLocal)
+        => RequireStoredCanonicalSequence(ReadCanonicalSequence(view, StorageCommandKeys.PartitionOf(outcome.PreparedCommand)), outcome, siloLocal);
+
+    internal static void RequireStoredCanonicalSequence(long current, StoredOutcome outcome, bool siloLocal)
     {
-        if (siloLocal ? outcome.CanonicalSequence != InitialCanonicalSequence : outcome.CanonicalSequence <= InitialCanonicalSequence || outcome.CanonicalSequence > ReadCanonicalSequence(view))
+        if (siloLocal ? outcome.CanonicalSequence != InitialCanonicalSequence : outcome.CanonicalSequence <= InitialCanonicalSequence || outcome.CanonicalSequence > current)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, CanonicalSequenceRequired);
         }

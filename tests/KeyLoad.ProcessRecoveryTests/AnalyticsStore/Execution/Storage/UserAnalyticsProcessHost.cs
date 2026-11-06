@@ -24,7 +24,7 @@ internal static class UserAnalyticsProcessHost
                 startupCancellation: token).ConfigureAwait(false);
             reservation.Stop();
             await application.StartAsync(token).ConfigureAwait(false);
-            var host = application.Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+            var host = application.Services.GetRequiredService<PartitionHostApplicationOwner>().Session.Host;
             await body(host, application.Services.GetRequiredService<ServerRuntimeOptions>()).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (application is not null)

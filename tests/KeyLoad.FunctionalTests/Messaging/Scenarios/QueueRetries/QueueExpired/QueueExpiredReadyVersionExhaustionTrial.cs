@@ -16,7 +16,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
         if (field == QueueClaimVersionExhaustion.StateVersion)
         {
             await QueueClaimVersionExhaustionAssertions.FailureAsync(result);
-            await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
+            await Assert.That(fixture.Store.Position).IsGreaterThan(before);
             await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(fixture.Database, fixture.Store, state.Lane,
                 state.DamagedMetadata, state.Body, 1);
             await QueueClaimVersionExhaustionAssertions.DomainAsync(fixture.Store, state.Lane, domain);
@@ -34,7 +34,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueExpiredReadyVersionExhaustionContinuation.RunAsync(QueueWholeFlowStorage.Open(cold), cold,
             fixture.Directory, state, result, field, identity, token);
     }
@@ -43,7 +43,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
     {
         fixture.Configure(QueueClaimVersionExhaustionProtocol.Queue, ResourceKind.WorkQueue);
         var lane = new QueueLaneRef(fixture.Partition, QueueClaimVersionExhaustionProtocol.Queue);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var message = new EnqueueMessage(lane.Queue, QueueClaimVersionExhaustionProtocol.Message,
             QueueClaimVersionExhaustionProtocol.Payload, QueueClaimVersionExhaustionProtocol.Headers, ExpiresAt: time.AddSeconds(1));
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition, [message]);

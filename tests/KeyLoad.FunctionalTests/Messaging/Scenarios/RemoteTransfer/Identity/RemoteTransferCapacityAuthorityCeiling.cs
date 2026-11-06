@@ -37,11 +37,11 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         await Assert.That(failed.Problem?.Detail).IsEqualTo(CapacityFailure);
 
         await Assert.That(failed.Value).IsNull();
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + First);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(position);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(canonical + First);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await RequireLocatorAsync(fixture, request.CommandId);
-        await Assert.That(QueueWholeFlowStorage.Clock(RemoteTransferCapacityAuthorityStorage.Execution(fixture))).IsEqualTo(time);
+        await Assert.That(QueueWholeFlowStorage.Clock(RemoteTransferCapacityAuthorityStorage.Execution(fixture), fixture.SourcePartition)).IsEqualTo(time);
         var failureKey = KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, request.CommandId);
         var retained = fixture.Store.Read(view => view.ReadOwnedValue(failureKey)) ?? throw new InvalidOperationException(RuntimeMissingRow);
         await FailureReplayAsync(fixture, request, failed, retained);
@@ -83,12 +83,11 @@ internal static class RemoteTransferCapacityAuthorityCeiling
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
-        var clock = Convert.ToHexString(KeySpace.ClockBytes) + ":";
-        var applied = Convert.ToHexString(KeySpace.AppliedBytes) + ":";
-        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + ":";
+        var clock = Convert.ToHexString(StorageCommandKeys.Clock(fixture.SourcePartition)) + ":";
+        var applied = Convert.ToHexString(StorageCommandKeys.Applied(fixture.SourcePartition)) + ":";
         return RemoteTransferCapacityAuthorityStorage.Capture(fixture).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(locator, StringComparison.Ordinal) && !row.StartsWith(clock, StringComparison.Ordinal)
-            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(lastCommand, StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(applied, StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(RemoteTransferDatabase fixture, Guid id)

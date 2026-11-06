@@ -14,8 +14,9 @@ internal sealed class DocumentMutationImageReadTests
     private const long PlacementWitnessBorrowedPoints = 3;
     private const long ResourceLifetimeBorrowedPoints = 2;
     private const long TableWriteModeBorrowedPoints = 1;
+    private const long PartitionSequenceBorrowedPoints = 1;
     private const long NewPutBorrowedPoints = MutationAndOutcomeBorrowedPoints
-        + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints + TableWriteModeBorrowedPoints;
+        + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints + TableWriteModeBorrowedPoints + PartitionSequenceBorrowedPoints;
 
     [Test]
     public async Task AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead()
@@ -76,7 +77,7 @@ internal sealed class DocumentMutationImageReadTests
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, db.Partition, [mutation]);
-        var nextPosition = checked(db.Database.LastApplied + 1);
+        var nextPosition = checked(db.Database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, db.Partition)) + 1);
         var before = db.Store.GetReadDiagnostics();
         var receipt = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         var delta = Delta(db, before);

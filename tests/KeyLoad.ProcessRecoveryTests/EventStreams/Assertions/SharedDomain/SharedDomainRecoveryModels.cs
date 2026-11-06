@@ -55,8 +55,9 @@ internal static class SharedDomainRecoveryModels
         var actual = database.ReadStream(Root, stream, cancellationToken: token);
         await Assert.That(actual.Stream).IsEqualTo(stream);
         await Assert.That(actual.Head).IsEqualTo(new StreamHead(present ? FirstRevision : NoRevision, FirstRevision, Generation));
-        await Assert.That(actual.CutPosition).IsEqualTo(database.LastApplied);
-        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.LastApplied);
+        var applied = CrashDatabase.AppliedPosition(database.Store, scope.Partition);
+        await Assert.That(actual.CutPosition).IsEqualTo(applied);
+        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(applied);
         await Assert.That(actual.HasMore).IsFalse();
         await Assert.That(actual.Cursor).IsNull();
         EventRecord[] expected = present ? [new(stream, FirstRevision, sequence, new(id, EventType, scope.Payload, Headers), time)] : [];

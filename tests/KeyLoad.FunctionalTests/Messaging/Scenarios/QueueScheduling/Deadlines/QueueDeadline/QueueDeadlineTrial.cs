@@ -13,7 +13,7 @@ internal static class QueueDeadlineTrial
         using var fixture = new TestDatabase();
         fixture.Configure(RuntimeQueueDeadlineProtocol.Queue, ResourceKind.WorkQueue);
         var lane = new QueueLaneRef(fixture.Partition, RuntimeQueueDeadlineProtocol.Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var due = start.AddSeconds(30);
         var producer = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EnqueueMessage(lane.Queue, "input", "{\"work\":1}", "{\"kind\":\"job\"}", NotBefore: due)]);
@@ -52,7 +52,7 @@ internal static class QueueDeadlineTrial
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, damaged, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, damaged, position, identity);
         await RefuseDueBodyAsync(database, first, operation, damaged, position, identity);
         first.Commit((tx, _) => { tx.Put(key, originalBody); return true; });
         await Assert.That(QueueWholeFlowStorage.Bytes(first)).IsEquivalentTo(originalBytes,
@@ -82,7 +82,7 @@ internal static class QueueDeadlineTrial
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("A queue message body is absent.");
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
     }
 
@@ -97,7 +97,7 @@ internal static class QueueDeadlineTrial
         if (receiveSweep)
         {
             await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
             delivery = await Assert.That(result.Get<ReceiveResult>().Deliveries).HasSingleItem();
         }
         else
@@ -109,7 +109,7 @@ internal static class QueueDeadlineTrial
                 LeaseVersion: kind == QueueDeadlineKind.ExpireLease ? 1 : 0);
             await Assert.That(database.InspectMessage("root", lane, "input")).IsEqualTo(
                 new MessageInspection(ready, "{\"work\":1}", "{\"kind\":\"job\"}"));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
             var request = new ReceiveRequest(Guid.NewGuid(), lane);
             delivery = await Assert.That(QueueDeadlineOperations.Apply(database, OperationKind.Receive,
                 request, request.RequestId, due).Get<ReceiveResult>().Deliveries).HasSingleItem();
@@ -137,7 +137,7 @@ internal static class QueueDeadlineTrial
     {
         using var fixture = new TestDatabase();
         fixture.Configure(RuntimeQueueDeadlineProtocol.Queue, ResourceKind.WorkQueue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var due = start.AddSeconds(RuntimeQueueDeadlineProtocol.DueSeconds);
         var lane = new QueueLaneRef(fixture.Partition, RuntimeQueueDeadlineProtocol.Queue);
         QueueDeadlineOperations.ConfigureWorker(fixture.Database, fixture.Partition, start,

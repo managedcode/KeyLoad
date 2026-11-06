@@ -10,7 +10,7 @@ internal static class AdministratorAuthenticationRequests
     internal static Task<PrincipalRecord> StartupAsync(OrleansNode node, string secret,
         IOptions<McpExecutionOptions> options, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(node.CatalogRequestCodec().RuntimeClock, token);
+        var work = new ReadExecutionBudget(token);
         return AuthenticateAsync(node, secret, options, work, token);
     }
 

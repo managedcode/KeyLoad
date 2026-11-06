@@ -71,8 +71,8 @@ internal sealed class DocumentPatchAtomicityOwner
         : Source.ReadStoredOutcome(original);
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(StorageCommandKeys.Applied(Source.Partition)) is { } bytes
+            ? OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes).Position : default(long), Store.Position));
 
     internal async Task ReopenAsync()
     {

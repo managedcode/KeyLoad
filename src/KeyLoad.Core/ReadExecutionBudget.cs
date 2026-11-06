@@ -5,11 +5,10 @@ using KeyLoad.Storage;
 namespace KeyLoad.Core;
 
 /// <summary>Carries one operation's caller cancellation and resource lifetime bindings within one consistent read cut.</summary>
-/// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
 /// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
-public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
+public sealed partial class ReadExecutionBudget(CancellationToken cancellationToken = default)
 {
-    private ReadExecutionBudgetLifetime executionLifetime = new(timeProvider, cancellationToken);
+    private ReadExecutionBudgetLifetime executionLifetime = new(cancellationToken);
 
     internal CancellationToken Cancellation => executionLifetime.Cancellation;
 

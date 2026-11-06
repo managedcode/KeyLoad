@@ -21,8 +21,11 @@ internal static class SampleChunkCrashState
         var rows = database.ReadSamples(CrashFixtureValues.Principal, SampleChunkCrashContract.Partition,
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, SampleChunkCrashContract.From,
             SampleChunkCrashContract.Until, SampleChunkCrashContract.SampleLimit);
-        var state = new SampleChunkCrashSnapshot(window, rows, Raw(database), database.Store.Position,
-            Convert.ToHexString(receipt), inflightResult);
+        var state = new SampleChunkCrashSnapshot(window, rows, Raw(database), CrashDatabase.AppliedPosition(database.Store, SampleChunkCrashContract.Partition),
+            Convert.ToHexString(receipt), inflightResult)
+        {
+            NativePosition = database.Store.Position
+        };
         await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), state)
             .ConfigureAwait(false);
     }
@@ -39,7 +42,7 @@ internal static class SampleChunkCrashState
             {
                 throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
             }
-            rows.AddRange(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row =>
+            rows.AddRange(page.Records.Select(row =>
                 new[] { Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span) }));
         }
         return Convert.ToHexString(JsonDefaults.Serialize(rows));
@@ -52,6 +55,6 @@ internal static class SampleChunkCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return Convert.ToHexString(JsonDefaults.Serialize(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).ToArray()));
+        return Convert.ToHexString(JsonDefaults.Serialize(page.Records.ToArray()));
     });
 }

@@ -17,6 +17,7 @@ internal static class SqlTypedInsertCold
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var database = fixture.CreateConfiguredDatabase(store);

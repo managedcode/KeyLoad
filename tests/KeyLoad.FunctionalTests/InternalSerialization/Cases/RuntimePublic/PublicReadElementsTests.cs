@@ -71,7 +71,7 @@ internal sealed class PublicReadElementsTests
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
         await using var owner = new RequestWorkOwner();
         object? read = null;
-        await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(database, owner, (lease, _, work) =>
+        await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(owner, (lease, _, work) =>
         {
             read = GrainCoreReadCapabilities.Execute(database.Database, GrainReadKind.Traverse, principal.Id,
                 request, work, lease, null).Value;

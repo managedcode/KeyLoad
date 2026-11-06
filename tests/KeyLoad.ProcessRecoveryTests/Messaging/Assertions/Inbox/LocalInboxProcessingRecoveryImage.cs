@@ -22,7 +22,7 @@ internal static class LocalInboxProcessingRecoveryImage
         {
             throw new InvalidOperationException("The complete local processing fixture exceeded its bounded execution inventory.");
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
     internal static async Task ExactAsync<T>(T actual, T expected)
@@ -56,7 +56,8 @@ internal static class LocalInboxProcessingRecoveryImage
     internal static async Task CutAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
         MessageInspection input, long seedPosition, long seedTail, bool committed, EntityRefLifetime lifetime)
     {
-        await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? 1L : 0L));
+        await Assert.That(CrashDatabase.AppliedPosition(store, LocalInboxProcessingCrashContract.Partition))
+            .IsEqualTo(seedPosition + (committed ? 1L : 0L));
         var record = store.Read(view => view.GetRecord<InboxRecord>(InboxKey()));
         await Assert.That(record is not null).IsEqualTo(committed);
         await Assert.That(OutcomeStoreOracle.Read(store, original) is not null).IsEqualTo(committed);

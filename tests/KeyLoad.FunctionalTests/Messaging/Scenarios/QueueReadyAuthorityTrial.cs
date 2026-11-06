@@ -10,7 +10,7 @@ internal static class QueueReadyAuthorityTrial
         using var fixture = new TestDatabase();
         fixture.Configure("jobs", ResourceKind.WorkQueue);
         var lane = new QueueLaneRef(fixture.Partition, "jobs");
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var producer = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EnqueueMessage("jobs", "input", "{\"input\":1}", "{\"kind\":\"job\"}",
                 ExpiresAt: expired ? time.AddSeconds(1) : null)]);
@@ -35,7 +35,7 @@ internal static class QueueReadyAuthorityTrial
         using var first = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(fixture.Directory),
             UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, damaged, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, damaged, position, identity);
         await CounterRefusalAsync(database, first, operation, lane, damaged, position, identity, detail);
         first.Commit((tx, _) => { tx.Put(key, row); return true; });
         await Assert.That(QueueWholeFlowStorage.Bytes(first)).IsEquivalentTo(original,
@@ -44,7 +44,7 @@ internal static class QueueReadyAuthorityTrial
         var repairedImage = QueueWholeFlowStorage.Bytes(first);
         var repairedPosition = first.Position;
         await global::KeyLoad.FunctionalTests.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), received);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, repairedImage, repairedPosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(first, repairedImage, repairedPosition, identity);
         await QueueReadyAuthorityColdContinuation.RunAsync(database, first, fixture.Directory, lane, received.Get<ReceiveResult>(), expired,
             operation, producer, produced, identity, token);
     }
@@ -93,7 +93,7 @@ internal static class QueueReadyAuthorityTrial
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(operation));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
             await Assert.That(failure.Message).IsEqualTo(detail);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             var outcome = store.Read(view => view.GetRecord<global::KeyLoad.Core.StoredOutcome>(
                 global::KeyLoad.Core.KeySpace.PartitionOutcome(lane.Partition, "root", operation.CommandId)));
             await Assert.That(outcome).IsNull();
@@ -109,7 +109,7 @@ internal static class QueueReadyAuthorityTrial
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("worker", "tenant",
             [new("database", "jobs", Capability.QueueConsume | Capability.QueueAck),
                 new("database", "orders", Capability.DocumentsWrite)], []))).Get<PrincipalRecord>();
-        var now = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var now = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var producer = Guid.NewGuid();
         fixture.Submit(OperationKind.Batch, new CommandRequest(producer, fixture.Partition,
             [new EnqueueMessage("jobs", "input", "{\"input\":1}", ExpiresAt: expired ? now.AddSeconds(1) : null)]),
@@ -160,7 +160,7 @@ internal static class QueueReadyAuthorityTrial
             using var cold = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(fixture.Directory),
                 fixture.StorageExecution);
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+            position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
             var stored = OutcomeStoreOracle.Read(cold, original)
                 ?? throw new InvalidOperationException("The repaired original receive outcome is absent.");
             await global::KeyLoad.FunctionalTests.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(
@@ -175,8 +175,8 @@ internal static class QueueReadyAuthorityTrial
                 await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
                 await Assert.That(replay.Value).IsNull();
             }
-            await Assert.That(owner.LastApplied).IsEqualTo(cut.AppliedPosition);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+            await Assert.That(NativeStoreAssertions.Applied(cold, fixture.Partition)).IsEqualTo(cut.AppliedPosition);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, image, position, identity);
         }
     }
 }

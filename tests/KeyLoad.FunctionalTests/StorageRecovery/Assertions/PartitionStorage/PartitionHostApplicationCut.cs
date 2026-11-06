@@ -33,11 +33,10 @@ internal sealed record PartitionHostApplicationCut(byte[] Identity, long Positio
             transaction.Put(key, value);
             return proposedPosition;
         });
-        var expectedPosition = checked(Position + PartitionHostApplicationProtocol.NextPosition);
-        await Assert.That(returned).IsEqualTo(expectedPosition);
-        var positionRow = Convert.ToHexString(StoreFileFixture.PositionKey) + PartitionHostApplicationProtocol.Separator;
-        var expectedRows = Rows.Where(row => !row.StartsWith(positionRow, StringComparison.Ordinal))
-            .Append(Encode(StoreFileFixture.PositionKey, StoreFileFixture.PositionValue(expectedPosition)))
+        var expectedPosition = store.Position;
+        await Assert.That(returned).IsGreaterThan(Position);
+        await Assert.That(returned).IsLessThanOrEqualTo(expectedPosition);
+        var expectedRows = Rows
             .Append(Encode(key, value))
             .OrderBy(row => row[..row.IndexOf(PartitionHostApplicationProtocol.Separator, StringComparison.Ordinal)],
                 StringComparer.Ordinal).ToArray();

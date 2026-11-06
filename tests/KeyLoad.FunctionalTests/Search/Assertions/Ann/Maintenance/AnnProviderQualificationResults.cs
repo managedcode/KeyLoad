@@ -15,11 +15,11 @@ internal static class AnnProviderQualificationResults
         var records = AnnProviderQualificationCorpus.Read(owner);
         await Assert.That(JsonSerializer.Serialize(records, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(AnnProviderQualificationCorpus.Expected(state), JsonDefaults.Options));
-        await IndexAsync(owner, state, index, token);
+        await IndexAsync(state, index, token);
         await AnnProviderQualificationImages.SameAsync(owner, image);
     }
 
-    internal static async Task IndexAsync(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
+    internal static async Task IndexAsync(AnnProviderQualificationState state,
         PackedAnnIndex index, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -30,16 +30,16 @@ internal static class AnnProviderQualificationResults
         await Assert.That(index.RetainedBytesUpperBound).IsLessThanOrEqualTo(state.Policy.MaxIndexBytes);
         await Assert.That(index.BuildScratchBytesUpperBound).IsLessThanOrEqualTo(state.Policy.MaxScratchBytes);
         var snapshot = index.Snapshot(Field, Options.Create(new PackedAnnStorageOptions()),
-            AnnProviderQualificationCorpus.Budget(owner, token));
+            AnnProviderQualificationCorpus.Budget(token));
         await Assert.That(JsonSerializer.Serialize(snapshot.Records, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         var result = index.Search(AnnProviderQualificationCorpus.Query, expected.Length, null,
-            AnnProviderQualificationCorpus.Budget(owner, token));
+            AnnProviderQualificationCorpus.Budget(token));
         await CandidatesAsync(result, AnnProviderQualificationCorpus.Candidates(state), state);
         var mask = state.Deleted && !state.Reinserted ? BothRemainingEligibility : AlphaGammaEligibility;
         ulong[] eligibility = [mask];
         var filtered = index.Search(AnnProviderQualificationCorpus.Query, FilteredCount, eligibility,
-            AnnProviderQualificationCorpus.Budget(owner, token));
+            AnnProviderQualificationCorpus.Budget(token));
         await CandidatesAsync(filtered, AnnProviderQualificationCorpus.Candidates(state)
             .Where(row => row.DocumentId != Beta).ToArray(), state);
     }

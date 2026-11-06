@@ -21,7 +21,7 @@ internal static class CredentialFrameBudgetFlow
             new ConfigureApiKeyRequest(AuthorizationExecution.Credential(CredentialId, PrincipalId, Secret))).Problem).Value).IsNull();
         var before = Image(fixture);
         var position = fixture.Store.Position;
-        var work = fixture.CreateReadWork(CancellationToken.None);
+        var work = TestDatabase.CreateReadWork(CancellationToken.None);
         var principal = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(), work);
         await Assert.That(principal.Id).IsEqualTo(PrincipalId);
         await Assert.That(principal.ClusterAdministrator).IsFalse();
@@ -41,7 +41,7 @@ internal static class CredentialFrameBudgetFlow
         var before = Image(fixture);
         var position = fixture.Store.Position;
         var revoked = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Authenticate(Secret,
-            fixture.Database.EvaluationClock.GetUtcNow(), fixture.CreateReadWork(CancellationToken.None)));
+            fixture.Database.EvaluationClock.GetUtcNow(), TestDatabase.CreateReadWork(CancellationToken.None)));
         await Assert.That(revoked.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await UnchangedAsync(fixture, before, position);
         await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal,
@@ -52,7 +52,7 @@ internal static class CredentialFrameBudgetFlow
         before = Image(fixture);
         position = fixture.Store.Position;
         var repaired = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(),
-            fixture.CreateReadWork(CancellationToken.None));
+            TestDatabase.CreateReadWork(CancellationToken.None));
         await Assert.That(repaired.Id).IsEqualTo(PrincipalId);
         await Assert.That(repaired.PolicyEpoch).IsEqualTo(RepairedEpoch);
         await UnchangedAsync(fixture, before, position);
@@ -61,7 +61,7 @@ internal static class CredentialFrameBudgetFlow
     // Primitive failure injection only: the actual credential/storage read is real; no execution transport success is claimed.
     private static async Task IndeterminateAsync(TestDatabase fixture)
     {
-        var work = fixture.CreateReadWork(CancellationToken.None);
+        var work = TestDatabase.CreateReadWork(CancellationToken.None);
         _ = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(), work);
 
         var before = Image(fixture);

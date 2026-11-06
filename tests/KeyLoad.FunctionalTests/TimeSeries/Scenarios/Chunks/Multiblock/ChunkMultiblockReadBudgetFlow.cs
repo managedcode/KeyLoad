@@ -36,9 +36,7 @@ internal static class ChunkMultiblockReadBudgetFlow
         {
             var before = SampleRawIntegrityAssertions.Capture(fixture.Store);
             fixture.Reopen();
-            var after = SampleRawIntegrityAssertions.Capture(fixture.Store);
-            await Assert.That(after.Image).IsEqualTo(before.Image);
-            await Assert.That(after.Position).IsEqualTo(before.Position);
+            await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, before);
             await ChunkMultiblockReadBudgetAssertions.RequireAsync(fixture, healthy: true);
         }
     }

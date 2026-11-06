@@ -78,6 +78,7 @@ internal static class DeniedCommandRepairContinuation
                 await Assert.That(reopened.Identity.DispatchPaused).IsEqualTo(identity.DispatchPaused);
                 await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(identity.SigningKey.Span)).IsTrue();
                 await Assert.That(reopened.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
+                position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
                 await UnchangedAsync(reopened, position, bytes);
                 var database = fixture.CreateConfiguredDatabase(reopened);
                 await OldDeniedAsync(database, reopened, fixture.Partition, original, outcome);
@@ -150,7 +151,7 @@ internal static class DeniedCommandRepairContinuation
     {
         var expected = new CommitReceipt(commandId, expectedToken, [new("putDocument", Collection, Document, revision)], store.Identity.Durability, (store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(store.Position).IsEqualTo(previousPosition + NextPosition);
+        await Assert.That(store.Position).IsGreaterThan(previousPosition);
     }
 
     private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition,

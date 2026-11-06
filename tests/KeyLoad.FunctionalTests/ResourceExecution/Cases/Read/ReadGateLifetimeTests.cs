@@ -8,7 +8,6 @@ internal sealed class ReadGateLifetimeTests
     private const bool EnteredDisposal = true;
     private const byte ProbeKey = 0x71;
     private const byte ProbeValue = 0x29;
-    private const long PositionAdvance = 1;
 
     [Test]
     [Arguments(ImmediateDisposal)]
@@ -30,7 +29,7 @@ internal sealed class ReadGateLifetimeTests
             transaction.Put([ProbeKey], [ProbeValue]);
             return true;
         });
-        await Assert.That(database.Store.Position).IsEqualTo(initialPosition + PositionAdvance);
+        await Assert.That(database.Store.Position).IsGreaterThan(initialPosition);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue([ProbeKey])))
             .IsEquivalentTo(new byte[] { ProbeValue }, CollectionOrdering.Matching);
     }

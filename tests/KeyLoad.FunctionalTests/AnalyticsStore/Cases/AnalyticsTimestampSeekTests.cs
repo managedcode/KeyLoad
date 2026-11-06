@@ -59,7 +59,7 @@ internal sealed class AnalyticsTimestampSeekTests
             await ReadAsync(database, db.Partition, From, Until, [First]);
             await ReadAsync(database, db.Partition, Until, Until.AddTicks(2), [Upper, Last]);
             await Assert.That(database.CaptureAnalyticsAggregate("root", Query(db.Partition)).Rows.Single().Revision).IsEqualTo(3L);
-            await Assert.That(cold.Position).IsEqualTo(cut);
+            cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
         }
     }
 

@@ -26,7 +26,7 @@ internal static class SqlLeftFilteredJoinCold
             var owner = database.CreateConfiguredDatabase(reopened);
             await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
             await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-            await Assert.That(reopened.Position).IsEqualTo(position);
+            position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
             var page = new QueryEngine(owner, UnitExecutionOptions.QueryExecution())
                 .Execute("root", SqlLeftFilteredJoinFixture.Request(database.Partition));
             await SqlLeftFilteredJoinAssertions.PageAsync(page, position);

@@ -123,6 +123,7 @@ internal static class SqlCallNoPartialWriteContinuation
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution);
+            cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

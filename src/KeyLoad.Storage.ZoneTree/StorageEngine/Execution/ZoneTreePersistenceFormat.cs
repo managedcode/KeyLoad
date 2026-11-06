@@ -10,7 +10,6 @@ internal static class ZoneTreePersistenceFormat
     internal const string TemporaryFileSuffix = ".tmp";
     internal const string GuidFormat = "N";
     internal const string SystemNamespace = "system";
-    internal const string PositionKey = "position";
     internal const string IdentityChecksumInvalid = "The database identity checksum is invalid.";
     internal const string IdentityFormatUnsupported = "The database identity format is unsupported.";
     internal const string IdentityScopeInvalid = "The configured cluster identity does not match this database.";

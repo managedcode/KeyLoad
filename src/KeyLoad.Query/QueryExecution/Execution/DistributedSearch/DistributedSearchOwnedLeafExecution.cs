@@ -11,7 +11,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
 
     internal static DistributedSearchLeafResult Execute(DatabaseEngine database, string principalId,
         DistributedSearchOwnedLeaf request, PhysicalShardRecord actualOwner,
-        IOptions<QueryExecutionOptions> options, TimeProvider clock,
+        IOptions<QueryExecutionOptions> options,
         CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         if (request is null || request.Definition is null || request.Coverage is null
@@ -20,7 +20,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, InvalidPhase);
         }
         var original = request;
-        var budget = new ReadExecutionBudget(clock, token);
+        var budget = new ReadExecutionBudget(token);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

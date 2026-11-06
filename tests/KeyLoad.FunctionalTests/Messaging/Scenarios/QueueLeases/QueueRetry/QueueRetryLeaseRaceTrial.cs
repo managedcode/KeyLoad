@@ -12,7 +12,7 @@ internal static class QueueRetryLeaseRaceTrial
             OrderingProfile = QueueOrderingProfile.StrictPerKey,
             RetryJitter = QueueRetryJitter.Full
         });
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue);
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition), QueueParkedHeadPolicy.Continue);
         state.Batch(fixture.Database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.First)).Get<CommitReceipt>();
         var original = await QueueOrderedRetryOperations.ClaimAsync(fixture.Database, state, QueueOrderedRetryProtocol.First);
         if (renewFirst)

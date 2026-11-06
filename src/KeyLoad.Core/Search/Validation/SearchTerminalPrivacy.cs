@@ -13,10 +13,10 @@ internal static class SearchTerminalPrivacy
         PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, ReadExecutionBudget budget)
     {
         var identity = database.Store.Identity;
-        var applied = budget.Read(view, KeySpace.AppliedBytes)
+        var applied = budget.Read(view, StorageCommandKeys.Applied(partition))
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Missing);
         return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
-            database.Store.Position, OrleansSerialization.Deserialize<long>(applied), principal.PolicyEpoch,
+            database.Store.Position, StorageOperationApply.ReadCanonicalSequence(applied, partition, Missing), principal.PolicyEpoch,
             resource.SchemaVersion, ResourceHash(resource), database.ReadPlacementWitness(view, partition));
     }
 

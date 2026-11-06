@@ -31,7 +31,7 @@ internal static class ProjectionDigestAssertions
             var actual = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
             result = actual;
             await EqualAsync(actual, Result<object>.Fail(Errors.Problem(ErrorCode.Validation, "The mutation resource and canonical owner differ.")));
-            await Assert.That(fixture.Harness.Store.Position).IsEqualTo(before + 1L);
+            await Assert.That(fixture.Harness.Store.Position).IsGreaterThan(before);
             var outcome = fixture.Harness.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
                 fixture.Partition, EventProjectionFixture.WorkerId, command.CommandId)));
             await Assert.That(outcome).IsNotNull();
@@ -102,8 +102,7 @@ internal static class ProjectionDigestAssertions
         {
             var identity = fixture.Harness.Store.Identity;
             var head = fixture.Database.ReadOutboxHead(view, fixture.Partition);
-            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
+            var applied = StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition);
             return new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.ReadGeneration, fixture.Harness.Store.Position,
                 applied, head.Tail, head.FirstAvailable);
         });

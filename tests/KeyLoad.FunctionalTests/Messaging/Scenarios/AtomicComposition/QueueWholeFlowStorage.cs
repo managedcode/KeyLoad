@@ -14,12 +14,18 @@ internal static class QueueWholeFlowStorage
         {
             throw new InvalidOperationException("Whole store state exceeded the fixture bound.");
         }
-        return page.Records.Where(record => !CanonicalStoreImage.IsStorePosition(record.Key.Span))
+        return page.Records
             .Select(record => Convert.ToHexString(record.Key.Span) + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
 
-    internal static DateTimeOffset Clock(ZoneTreeStore store) => store.Read(view =>
-        OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+    internal static DateTimeOffset Clock(ZoneTreeStore store, PartitionRef partition) => store.Read(view =>
+    {
+        var data = view.ReadOwnedValue(StorageCommandKeys.Clock(partition)) is { } dataBytes
+            ? OrleansSerialization.Deserialize<DateTimeOffset>(dataBytes) : DateTimeOffset.MinValue;
+        var metadata = view.ReadOwnedValue(StorageCommandKeys.Clock(null)) is { } metadataBytes
+            ? OrleansSerialization.Deserialize<DateTimeOffset>(metadataBytes) : DateTimeOffset.MinValue;
+        return data > metadata ? data : metadata;
+    });
 
     internal static DatabaseEngine Open(ZoneTreeStore store, TimeProvider? timeProvider = null) => new(store, new AuthorizationPolicy(),
         UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(),

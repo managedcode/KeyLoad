@@ -4,10 +4,8 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal static class ChunkMultiblockReadBudgetCalls
 {
-    internal static ReadExecutionBudget Budget(ChunkSelectedIntegrityFixture fixture)
-        => new(fixture.Owner.EvaluationClock);
 
-    internal static SampleRecord[] Read(ChunkSelectedIntegrityFixture fixture, ReadExecutionBudget budget)
+    internal static SampleRecord[] Read(ChunkSelectedIntegrityFixture fixture, ReadExecutionBudget budget, Action? afterPointRead = null)
         => fixture.Store.Read(original =>
         {
             var options = UnitExecutionOptions.TimeSeriesExecution();
@@ -17,7 +15,8 @@ internal static class ChunkMultiblockReadBudgetCalls
             var manifest = SampleChunkManifestReader.Read(original, fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window,
                 options.Value.MaximumChunkWindowRecords, options);
-            return SampleChunkGenerationReader.Read(budget.CreateView(original), fixture.Partition,
+            var observed = afterPointRead is null ? original : new PointObservedView(original, afterPointRead);
+            return SampleChunkGenerationReader.Read(budget.CreateView(observed), fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window, manifest,
                 options, SampleChunkWork.Observe(budget));
         });

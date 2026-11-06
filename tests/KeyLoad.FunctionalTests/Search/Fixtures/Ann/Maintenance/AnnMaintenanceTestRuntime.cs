@@ -46,7 +46,7 @@ internal sealed class AnnMaintenanceTestRuntime : IAsyncDisposable
         var principal = database.Store.Read(view => database.Database.Principal(view,
             AnnProjectionPinTestSupport.Principal, database.Database.EvaluationClock.GetUtcNow()));
         CommitToken? expected = phase == AnnMaintenanceCapabilityKind.Verify
-            ? new(database.Store.Identity.Incarnation, request.Consumer.Partition.AtomicPartitionId, database.Database.LastApplied)
+            ? new(database.Store.Identity.Incarnation, request.Consumer.Partition.AtomicPartitionId, ExpectedCanonicalCommit.Applied(database.Database, request.Consumer.Partition))
             : null;
         var result = await Owner.ExecuteAsync(principal, new(request, SessionId, phase, page, intent),
             token ?? TestContext.Current!.Execution.CancellationToken);

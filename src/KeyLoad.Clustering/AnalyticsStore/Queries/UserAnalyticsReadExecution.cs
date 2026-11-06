@@ -16,7 +16,7 @@ internal static class UserAnalyticsReadExecution
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        var work = new ReadExecutionBudget(database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         work.AttachResourceLifetimeBinding(binding);
         return kind switch
         {

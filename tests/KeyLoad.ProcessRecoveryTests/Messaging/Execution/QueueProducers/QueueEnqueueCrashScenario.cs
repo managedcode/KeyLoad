@@ -25,12 +25,11 @@ internal static class QueueEnqueueCrashScenario
                     QueueEnqueueCrashProtocol.Headers, NotBefore: due)]);
         var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, command, command.CommandId));
         var target = CrashDatabase.NextCommitToken(database, QueueEnqueueCrashProtocol.Partition);
-        var physicalTarget = checked(store.Position + QueueEnqueueCrashProtocol.AdjacentPosition);
+        var seedTimestamp = store.Position;
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.TargetFile), OrleansSerialization.Serialize(target));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.PhysicalTargetFile), OrleansSerialization.Serialize(physicalTarget));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.SeedTimestampFile), OrleansSerialization.Serialize(seedTimestamp));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.BaselineFile), OrleansSerialization.Serialize(Capture(store)));
-        boundary.Position = physicalTarget;
         await boundary.ArmAsync(store);
         _ = database.Apply(operation);
         await RecoveryProcessPause.WaitForKillAsync(store);
@@ -43,6 +42,6 @@ internal static class QueueEnqueueCrashScenario
         {
             throw new InvalidOperationException(QueueEnqueueCrashProtocol.BaselineExceeded);
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

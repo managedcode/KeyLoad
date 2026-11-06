@@ -47,13 +47,14 @@ internal static class PolicyEpochCursorAssertions
         string cursor, long cut, CancellationToken token)
     {
         var image = TeamRowPolicyAssertions.Image(store);
+        var nativePosition = store.Position;
         var page = queries.Execute(Reader, request with
         {
             Cursor = cursor
         }, cancellationToken: token);
         await RowAsync(page, LastRow, cut);
         await Assert.That(page.Cursor).IsNull();
-        await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);
+        await TeamRowPolicyAssertions.UnchangedAsync(store, image, nativePosition);
     }
 
     private static async Task RowAsync(QueryPage page, string id, long cut)

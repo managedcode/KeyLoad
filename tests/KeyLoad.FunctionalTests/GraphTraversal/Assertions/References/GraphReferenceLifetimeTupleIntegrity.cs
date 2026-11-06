@@ -133,8 +133,15 @@ internal static class GraphReferenceLifetimeTupleIntegrity
             var delta = ReferenceEquals(cut.Owner, profile.Source) ? sourceFixtureCommits : 0;
             await Assert.That(cut.Owner.Store.Identity.NodeId).IsEqualTo(cut.NodeId);
             await Assert.That(cut.Owner.Store.Identity.Incarnation).IsEqualTo(cut.Incarnation);
-            await Assert.That(cut.Owner.Store.Position).IsEqualTo(cut.Position + delta);
-            await Assert.That(cut.Owner.Database.LastApplied).IsEqualTo(cut.Applied);
+            if (delta == 0)
+            {
+                await Assert.That(cut.Owner.Store.Position).IsEqualTo(cut.Position);
+            }
+            else
+            {
+                await Assert.That(cut.Owner.Store.Position).IsGreaterThan(cut.Position);
+            }
+            await Assert.That(cut.Owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(cut.Applied);
             await Assert.That(QueueWholeFlowStorage.Bytes(cut.Owner.Store).SequenceEqual(cut.Image)).IsTrue();
         }
     }

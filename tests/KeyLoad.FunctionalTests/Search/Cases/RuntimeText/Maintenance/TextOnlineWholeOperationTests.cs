@@ -149,8 +149,7 @@ internal sealed class TextOnlineWholeOperationTests
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var first = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
-        var budget = new KeyLoad.Core.ReadExecutionBudget(
-            fixture.Database.EvaluationClock, token);
+        var budget = new KeyLoad.Core.ReadExecutionBudget(token);
         var publication = fixture.Database.ReadOnlineTextOriginalPublication(TextMaintenanceTestValues.Principal, request, budget)!;
         var path = Path.Combine(fixture.Directory, KeyLoad.Server.Search.TextOnlineRoot.DirectoryName, publication.Authority.Leaf);
         using (var held = runtime.BorrowCurrent(fixture, TextBilingualAudit.Request(fixture.Partition, "hello"), budget))

@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 
 namespace KeyLoad.FunctionalTests.ResourceExecution;
@@ -71,8 +70,7 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp012_InFlightCancellationAfterNativeReadProgressReleasesAdmission()
     {
-        var clock = new QueryObservedWorkClock();
-        using var db = new TestDatabase(timeProvider: clock);
+        using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, FirstDocument, DocumentJson),
             new PutDocument(Collection, SecondDocument, DocumentJson));
@@ -82,24 +80,22 @@ internal sealed class AnalyticalAdmissionTests
         var before = db.Store.GetReadDiagnostics();
         var position = db.Store.Position;
         var admitted = 0;
-        clock.Arm(() => db.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes, () =>
+        await using var observed = new ObservedWorkCancellation(() =>
         {
-            admitted = db.Database.QueryReadsInFlight;
-            cancellation.Cancel();
-        });
+            var bytes = db.Store.GetReadDiagnostics().RangeExaminedBytes;
+            if (bytes > before.RangeExaminedBytes)
+            {
+                Volatile.Write(ref admitted, db.Database.QueryReadsInFlight);
+            }
+            return bytes;
+        }, cancellation);
+        await observed.Ready;
         RankedDocument[]? partial = null;
-        try
-        {
-            var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
-                partial = search.Search(Principal, request, cancellation.Token));
-            await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
-        }
-        finally
-        {
-            clock.Disarm();
-        }
-        await Assert.That(clock.Triggered).IsTrue();
-        await Assert.That(admitted).IsEqualTo(1);
+        var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
+            partial = search.Search(Principal, request, cancellation.Token));
+        await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
+        await Assert.That(Volatile.Read(ref admitted)).IsEqualTo(1);
         await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);

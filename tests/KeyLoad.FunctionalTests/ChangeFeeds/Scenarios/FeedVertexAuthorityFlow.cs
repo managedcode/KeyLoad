@@ -40,7 +40,8 @@ internal static class FeedVertexAuthorityFlow
         await ColdAsync(database, async secondCold =>
         {
             var owner = database.CreateConfiguredDatabase(secondCold);
-            await FeedVertexAuthorityAssertions.SameImageAsync(secondCold, continued.Image, continued.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(secondCold, continued.Position);
+            await FeedVertexAuthorityAssertions.SameImageAsync(secondCold, continued.Image, reopenedPosition);
             await FeedVertexAuthorityAssertions.HealthyAsync(owner, secondCold, state, continued.Receipt, token);
             await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, state.Seed, state.Receipt, state.CommittedAt, token);
             await FeedVertexAuthorityAssertions.ReplayAsync(owner, secondCold, continued.Command, continued.Receipt, state.CommittedAt, token);
@@ -56,13 +57,14 @@ internal static class FeedVertexAuthorityFlow
         ZoneTreeStore cold, FeedVertexAuthorityState state, string[] corruptImage, long corruptPosition, int? historicalFault, CancellationToken token)
     {
         var owner = database.CreateConfiguredDatabase(cold);
+        corruptPosition = await NativeStoreAssertions.ReopenedAsync(cold, corruptPosition);
         await FeedVertexAuthorityAssertions.SameImageAsync(cold, corruptImage, corruptPosition);
         await RefuseAsync(owner, cold, state, historicalFault, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Key, state.Original); return true; });
         var prefix = Convert.ToHexString(state.Key) + ":";
         var repaired = corruptImage.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(state.Original) : row).ToArray();
-        await FeedVertexAuthorityAssertions.SameImageAsync(cold, repaired, corruptPosition + 1L);
+        await FeedVertexAuthorityAssertions.SameImageAsync(cold, repaired, await NativeStoreAssertions.AdvancedAsync(cold, corruptPosition));
         await FeedVertexAuthorityAssertions.HealthyAsync(owner, cold, state, null, token);
         await FeedVertexAuthorityAssertions.ReplayAsync(owner, cold, state.Seed, state.Receipt, state.CommittedAt, token);
         if (state.Update is { } update && state.UpdateReceipt is { } updateReceipt)

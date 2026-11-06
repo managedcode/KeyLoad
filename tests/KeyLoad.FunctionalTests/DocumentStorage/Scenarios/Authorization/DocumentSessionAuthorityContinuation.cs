@@ -21,7 +21,7 @@ internal static class DocumentSessionAuthorityContinuation
         await Assert.That(cancelled.CancellationToken).IsEqualTo(cancellation.Token);
         await A.UnchangedAsync(fixture, image, position);
         var id = Guid.NewGuid();
-        var next = checked(fixture.Database.LastApplied + 1);
+        var next = checked(fixture.Database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Source.Partition)) + 1);
         var request = new CommandRequest(id, fixture.Source.Partition,
             [new PutDocument(A.Collection, A.Id, A.Json, 1, ExplicitReplacement: true)]);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, id, A.Root,

@@ -34,7 +34,7 @@ internal sealed class DistributedSearchStatisticsTests
                 QueryDataset.Local, fixture.SourceOwner, token);
             var remote = DistributedSearchStatisticsFlow.Capture(fixture.Destination,
                 QueryFixture.Partition, fixture.DestinationOwner, token);
-            var statistics = DistributedSearchStatisticsFlow.Combine(fixture.Source, old, remote, token);
+            var statistics = DistributedSearchStatisticsFlow.Combine(old, remote, token);
             flow.SetSourceGrant(UpdatedPolicyEpoch, granted: true);
             var source = QueryFixtureAssertions.Image(fixture.Source);
             var destination = QueryFixtureAssertions.Image(fixture.Destination);
@@ -54,6 +54,8 @@ internal sealed class DistributedSearchStatisticsTests
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
             await fixture.Source.ReopenAsync();
             await fixture.Destination.ReopenAsync();
+            sourcePosition = await NativeStoreAssertions.ReopenedAsync(fixture.Source.Store, sourcePosition);
+            destinationPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Destination.Store, destinationPosition);
             await DistributedSearchStatisticsAssertions.HealthyAsync(fixture, token);
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
         });

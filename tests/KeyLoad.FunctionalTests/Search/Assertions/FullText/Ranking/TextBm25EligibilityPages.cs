@@ -36,7 +36,7 @@ internal static class TextBm25EligibilityPages
     private static async Task<RankedDocument[]> ReadAsync(Bm25OriginalPhaseRecoveryFlow flow, bool? expectedHead)
     {
         var owner = flow.Owner;
-        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var work = TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var execution = UnitExecutionOptions.QueryExecution().Value;
         var request = new SearchRequest(owner.Source.Partition, "orders", "/text", "needle");
         RuntimeTextProjection? projection = null;

@@ -18,8 +18,8 @@ internal static class SharedDomainImage
     internal static async Task ScopeAsync(IAtomicStore store, PartitionRef partition, string[] before)
         => await Assert.That(Capture(store, partition)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
 
-    internal static DateTimeOffset Clock(IAtomicStore store)
-        => OrleansSerialization.Deserialize<DateTimeOffset>(Required(store, KeySpace.Clock.ToArray()));
+    internal static DateTimeOffset Clock(IAtomicStore store, PartitionRef partition)
+        => OrleansSerialization.Deserialize<DateTimeOffset>(Required(store, StorageCommandKeys.Clock(partition)));
 
     internal static byte[] Required(IAtomicStore store, byte[] key)
         => store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(RuntimeMissing);

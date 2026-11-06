@@ -47,6 +47,7 @@ internal static class SharedDomainColdFlow
     private static async Task<SharedDomainCut> ExecuteAsync(DatabaseEngine database, ZoneTreeStore store, SharedDomainState state,
         SharedDomainCut cut, bool continueHealthy, CancellationToken token)
     {
+        cut = cut with { Position = await NativeStoreAssertions.ReopenedAsync(store, cut.Position) };
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, cut.Identity, cut.Position);
         await SharedDomainImage.SameAsync(store, cut.Rows, cut.Position);
         await SharedDomainModelAssertions.AllAsync(database, state, token);

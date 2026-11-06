@@ -37,8 +37,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         {
             OpenDatabase(runtimeOptions, authorization, clock);
             OpenSearch(runtimeOptions, clock);
-            Coordinator = runtimeOptions.Node.Value.StorageMode == StorageAccessMode.SharedVolume
-                ? new LocalStorageCommitCoordinator(Database) : new SiloCommandCoordinator(Database, grains);
+            Coordinator = new SiloCommandCoordinator(Database, grains);
             ownership.Host.BeginConstructor();
             AnnMaintenance = new(DirectoryPath, Database, runtimeOptions, clock);
             ownership.Host.ConstructorReturned();

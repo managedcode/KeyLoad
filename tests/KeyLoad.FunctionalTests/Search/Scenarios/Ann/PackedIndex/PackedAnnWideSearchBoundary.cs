@@ -41,7 +41,7 @@ internal static class PackedAnnWideSearchBoundary
         var ready = new TaskCompletionSource<AnnWorkBudget>(TaskCreationOptions.RunContinuationsAsynchronously);
         var search = Task.Run(() =>
         {
-            var budget = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, request.Token),
+            var budget = new AnnWorkBudget(new ReadExecutionBudget(request.Token),
                 PackedAnnIndexTestSupport.GenerousWorkLimit);
             ready.SetResult(budget);
             return index.Search(query, SearchLimit, null, budget);

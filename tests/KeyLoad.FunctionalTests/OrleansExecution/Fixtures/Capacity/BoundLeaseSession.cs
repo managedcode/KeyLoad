@@ -27,13 +27,13 @@ internal sealed class BoundLeaseSession
     internal BoundLeaseOperation Initialize(BoundLeaseSeeded state, CancellationToken token)
     {
         var services = state.Leader.PhysicalServices;
-        var database = services.GetRequiredService<DatabaseEngine>();
+
         Owner = services.GetRequiredService<PartitionStorageScope>().Work;
         Ledger = new();
         Parent = Owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
         Parent.AttachResultRetention(Ledger);
         Linked = CancellationTokenSource.CreateLinkedTokenSource(token, Parent.Cancellation);
-        var budget = new ReadExecutionBudget(database.EvaluationClock, Linked.Token);
+        var budget = new ReadExecutionBudget(Linked.Token);
         budget.AttachResourceLifetimeBinding(Parent);
         return new(Owner, Ledger, Parent, budget, Linked.Token);
     }

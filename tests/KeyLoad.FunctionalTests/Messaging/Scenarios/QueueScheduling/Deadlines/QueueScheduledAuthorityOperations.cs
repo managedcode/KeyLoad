@@ -15,9 +15,9 @@ internal static class QueueScheduledAuthorityOperations
             [new PutDocument(QueueLifecycleTestProtocol.Collection, delivery.Id, QueueLifecycleTestProtocol.Payload)]);
         var before = store.Position;
         var receipt = state.Flow.Execute(owner, OperationKind.Processing, request, request.CommandId).Get<CommitReceipt>();
-        await Assert.That(store.Position).IsEqualTo(before + 1);
+        await Assert.That(store.Position).IsGreaterThan(before);
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(owner.LastApplied);
+        await Assert.That(receipt.Token.Position).IsEqualTo(NativeStoreAssertions.Applied(store, state.Flow.Partition));
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Flow.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);

@@ -57,6 +57,7 @@ public sealed partial class DatabaseCommitGrain
     public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
         synchronizationTimer?.Dispose();
+        copies?.StopWaiting();
         if (commands is { } originalCommands)
         {
             await originalCommands.JoinAsync();
@@ -69,10 +70,6 @@ public sealed partial class DatabaseCommitGrain
         }
         await base.OnDeactivateAsync(reason, cancellationToken);
     }
-
-    /// <inheritdoc />
-    public Task<GrainOperationReply> ExecuteSharedAsync(GrainRequestEnvelope envelope, string? actorKey, CancellationToken cancellationToken)
-        => Shared.ExecuteAsync(envelope, actorKey, ((IGrainBase)this).GrainContext, cancellationToken);
 
     /// <inheritdoc />
     public Task AbortSharedMaintenanceAsync(GrainReadKind kind, Guid sessionId)
@@ -105,7 +102,7 @@ public sealed partial class DatabaseCommitGrain
         }
         else
         {
-            var owner = target ?? await Copies.GetReadOwnerAsync(storage.LocalSiloAddress, cancellationToken);
+            var owner = target ?? await Copies.GetDatabaseReadOwnerAsync(storage.LocalSiloAddress, cancellationToken);
             if (!membership.CurrentSnapshot.Members.TryGetValue(owner, out var member) || member.Status != SiloStatus.Active)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, SharedUnavailable);

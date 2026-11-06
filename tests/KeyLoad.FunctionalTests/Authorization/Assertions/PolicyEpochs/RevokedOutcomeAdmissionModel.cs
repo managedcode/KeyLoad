@@ -15,8 +15,8 @@ internal static class RevokedOutcomeAdmissionModel
         {
             events = [.. events, new(stream, 2, 2, new("healthy", "Created", "{\"event\":2}"), RevokedOutcomeAdmissionFixture.Epoch)];
         }
-        await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.ReadStream(RevokedOutcomeAdmissionFixture.Worker, new ReadStreamRequest(stream), token), new StreamPage(stream, new(events.Length, 1, 1), [.. events], fixture.Database.LastApplied,
-                false, null, fixture.Database.LastApplied));
+        await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.ReadStream(RevokedOutcomeAdmissionFixture.Worker, new ReadStreamRequest(stream), token), new StreamPage(stream, new(events.Length, 1, 1), [.. events], NativeStoreAssertions.Applied(fixture.Store, fixture.Harness.Partition),
+                false, null, NativeStoreAssertions.Applied(fixture.Store, fixture.Harness.Partition)));
         var queue = new QueueLaneRef(fixture.Harness.Partition, RevokedOutcomeAdmissionFixture.Queue);
         await RevokedOutcomeAdmissionValues.EqualAsync(fixture.Database.InspectMessage(RevokedOutcomeAdmissionFixture.Worker, queue, "original"),
             new MessageInspection(new("original", MessageState.Ready, 0, 1, 1, null, null), "{\"work\":1}", "{}"));

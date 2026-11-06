@@ -20,7 +20,7 @@ internal static class BoundLeaseSeed
             [new PutDocument(K.Collection, K.FirstId, K.FirstJson, K.Empty),
                 new PutDocument(K.Collection, K.SecondId, K.SecondJson, K.Empty)]);
         await owner.Coordinator.ReadBarrierAsync(token);
-        var next = checked(owner.Database.LastApplied + K.NextIndex);
+        var next = checked(ExpectedCanonicalCommit.Applied(owner.Database, K.Partition) + K.NextIndex);
         var receipt = (await owner.Coordinator.RuntimeSubmitAsync<object>(OperationKind.Batch, writeId, K.Root,
             write, cancellationToken: token)).Get<CommitReceipt>();
         var original = OutcomeStoreOracle.ReadStored(owner.Database, writeId, token).PreparedCommand;
@@ -45,8 +45,7 @@ internal static class BoundLeaseSeed
             {
                 throw new InvalidOperationException(K.ImageLimit);
             }
-            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : K.Empty;
+            var applied = StorageOperationApply.ReadCanonicalSequence(view, K.Partition);
             return (applied, fixture.Database.Store.Position, page.Records.Select(record =>
                 Convert.ToHexString(record.Key.Span) + K.RecordSeparator + Convert.ToHexString(record.Value.Span)).ToArray());
         });

@@ -32,7 +32,7 @@ internal static class StreamRecordGapAuthorityAssertions
         }
         var empty = fixture.Database.Database.ReadStream(EventAppendWholeFlowFixture.Root,
             new ReadStreamRequest(fixture.Stream, AfterRevision: 3L), token);
-        var expected = new StreamPage(fixture.Stream, new(3L, 1L, 1L), [], fixture.Database.Database.LastApplied, false, null, fixture.Database.Database.LastApplied);
+        var expected = new StreamPage(fixture.Stream, new(3L, 1L, 1L), [], ExpectedCanonicalCommit.Applied(fixture.Database.Database, fixture.Stream.Partition), false, null, ExpectedCanonicalCommit.Applied(fixture.Database.Database, fixture.Stream.Partition));
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(empty, JsonDefaults.Options))
             .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);

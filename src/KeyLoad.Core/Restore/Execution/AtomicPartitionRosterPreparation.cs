@@ -6,10 +6,11 @@ namespace KeyLoad.Core.BackupRestore.Execution;
 internal static class AtomicPartitionRosterPreparation
 {
     internal static T Prepare<T>(IAtomicTransaction inner,
-        long storePosition, long appliedIndex, Func<IAtomicTransaction, T> prepare)
+        long storePosition, long appliedIndex, long currentAppliedIndex, PartitionRef? currentPartition,
+        ISet<PartitionRef>? readPartitions, Func<IAtomicTransaction, T> prepare)
     {
         ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return inner.Prepare(child => prepare(new AtomicPartitionRosterTransaction(child,
-            storePosition, appliedIndex)));
+            storePosition, appliedIndex, currentAppliedIndex, currentPartition, readPartitions)));
     }
 }

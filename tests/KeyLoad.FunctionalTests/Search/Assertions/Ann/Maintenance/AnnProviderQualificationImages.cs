@@ -20,4 +20,15 @@ internal static class AnnProviderQualificationImages
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store)).IsEquivalentTo(expected.Rows, CollectionOrdering.Matching);
         await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(expected.CanonicalCut);
     }
+
+    internal static async Task<(StoreIdentity Identity, long Position, string[] Rows,
+        (long AppliedPosition, long StorePosition) CanonicalCut)> ReopenedAsync(AnnProviderQualificationOwner owner,
+        (StoreIdentity Identity, long Position, string[] Rows,
+        (long AppliedPosition, long StorePosition) CanonicalCut) expected)
+    {
+        expected.Position = await NativeStoreAssertions.ReopenedAsync(owner.Store, expected.Position);
+        expected.CanonicalCut = (expected.CanonicalCut.AppliedPosition, expected.Position);
+        await SameAsync(owner, expected);
+        return expected;
+    }
 }

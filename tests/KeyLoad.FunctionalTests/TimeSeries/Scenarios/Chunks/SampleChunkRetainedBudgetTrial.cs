@@ -15,7 +15,7 @@ internal static class SampleChunkRetainedBudgetTrial
 
     private static SampleChunkWindowResult Read(SampleChunkPartialRetentionFixture fixture, bool precedingRead = false)
     {
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(fixture.Clock);
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget();
         return fixture.Store.Read(view =>
         {
             if (precedingRead)

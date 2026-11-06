@@ -24,7 +24,7 @@ internal static class ProjectionDigestWholeFlow
         await ReplayAsync(fixture, malformed.Command, malformed.Result);
         var request = fixture.Request();
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [request]);
-        var beforeCommit = fixture.Database.LastApplied;
+        var beforeCommit = NativeStoreAssertions.Applied(fixture.Harness.Store, fixture.Partition);
         var result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
         var receipt = result.Get<CommitReceipt>();
         await ProjectionDigestAssertions.ReceiptAsync(fixture, command, receipt, beforeCommit);
@@ -40,7 +40,7 @@ internal static class ProjectionDigestWholeFlow
         Result<object>? continued = null;
         if (!effect)
         {
-            var beforeRepair = fixture.Database.LastApplied;
+            var beforeRepair = NativeStoreAssertions.Applied(fixture.Harness.Store, fixture.Partition);
             var actual = fixture.Harness.Submit(OperationKind.Batch, continuation, EventProjectionFixture.WorkerId, continuation.CommandId);
             continued = actual;
             await ProjectionDigestAssertions.ReceiptAsync(fixture, continuation, actual.Get<CommitReceipt>(), beforeRepair);
@@ -70,8 +70,9 @@ internal static class ProjectionDigestWholeFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             ProjectionDigestImage.Write(fixture, key, damaged);
+            position = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, position);
             var fault = ProjectionDigestImage.Replace(image, key, original, damaged);
-            await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, fault, position + 1L);
+            await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, fault, position);
             await ProjectionDigestImage.ObserveAsync(fixture, () => ProjectionDigestAssertions.RefusedAsync(fixture));
             if (!effect)
             {
@@ -80,8 +81,11 @@ internal static class ProjectionDigestWholeFlow
             }
         }, failures);
         ServerFailureObserver.Observe(() => ProjectionDigestImage.Write(fixture, key, original), failures);
-        await ServerFailureObserver.ObserveAsync(() => ClassificationLineageWholeAssertions.UnchangedAsync(
-            fixture, image, position + 2L), failures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            position = await NativeStoreAssertions.AdvancedAsync(fixture.Harness.Store, position);
+            await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, image, position);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

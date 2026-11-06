@@ -19,9 +19,9 @@ internal static class CommandOutcomeApplication
         OnlineTextAuthority = onlineTextAuthority,
         RemoteTransferFailureAuthority = RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(result.Problem) ? transferFailure : null
     } /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */;
-    internal static StoredOutcome ReplayCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, StoredOutcome previous, CommandOutcomeSelection selection, bool siloLocal)
+    internal static StoredOutcome ReplayCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, StoredOutcome previous, CommandOutcomeSelection selection, bool siloLocal, PrincipalRecord principal, long currentSequence)
     {
-        StorageOperationApply.RequireStoredCanonicalSequence(transaction, previous, siloLocal);
+        StorageOperationApply.RequireStoredCanonicalSequence(currentSequence, previous, siloLocal);
         if (previous.Incarnation != engine.Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AtomicCommandCommit.PreviousCommandIncarnationMessage);
@@ -30,8 +30,6 @@ internal static class CommandOutcomeApplication
         DatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, previous);
         CommandOutcomeKeyResolver.ValidateSelectedScope(transaction, operation, selection);
         var current = engine.EvaluateCommand(operation, engine.Clock.GetUtcNow());
-        var principal = engine.Principal(transaction, operation.UserId!, current.Timestamp);
-        _ = (engine.AuthorizeOperation(transaction, principal, current)).Value;
         engine.ValidateCachedResult(transaction, principal, current, previous);
         return previous;
     }
@@ -56,12 +54,8 @@ internal static class CommandOutcomeApplication
 
         if (replicationIndex > AtomicCommandCommit.AtomicCommandCommitInitialSequence)
         {
-            transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
-            if (persistOutcome)
-            {
-                // The last canonical outcome key lets another writer complete a one-position copy gap.
-                transaction.PutRecord(KeySpace.LastCommandBytes, resultKey);
-            }
+            transaction.PutRecord(StorageCommandKeys.Applied(StorageCommandKeys.PartitionOf(operation)), new StoragePartitionPosition(StorageCommandKeys.PartitionOf(operation), replicationIndex));
+
         }
 
         if (!persistOutcome || replicationIndex <= AtomicCommandCommit.AtomicCommandCommitInitialSequence)
@@ -69,9 +63,9 @@ internal static class CommandOutcomeApplication
             return;
         }
 
-        if (transaction.ReadOwnedValue(KeySpace.ClockBytes) is not { } clock || operation.Timestamp >= OrleansSerialization.Deserialize<DateTimeOffset>(clock))
+        if (transaction.ReadOwnedValue(StorageCommandKeys.Clock(StorageCommandKeys.PartitionOf(operation))) is not { } clock || operation.Timestamp >= OrleansSerialization.Deserialize<DateTimeOffset>(clock))
         {
-            transaction.PutRecord(KeySpace.ClockBytes, (DateTimeOffset)operation.Timestamp);
+            transaction.PutRecord(StorageCommandKeys.Clock(StorageCommandKeys.PartitionOf(operation)), (DateTimeOffset)operation.Timestamp);
         }
     }
 }

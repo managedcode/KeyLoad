@@ -11,11 +11,12 @@ internal static class SqlParserAdmissionModelPages
     internal static async Task RunAsync(SqlParserAdmissionFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
     {
         var partition = fixture.Harness.Partition;
+        var sequence = NativeStoreAssertions.Applied(store, partition);
         var source = new StreamRef(partition, SqlParserAdmissionModels.Events, "source");
         await RequiredProcessingPolicyAssertions.EqualAsync(new StreamPage(source, new(2L, 1L, 1L),
             [new(source, 1L, 1L, new("created", "Created", "{\"value\":1}", "{}"), SqlParserAdmissionFixture.Epoch),
              new(source, 2L, 2L, new("updated", "Updated", "{\"value\":2}", "{}"), SqlParserAdmissionFixture.Epoch)],
-            database.LastApplied, false, null, database.LastApplied), database.ReadStream("root", new(source), token));
+            sequence, false, null, sequence), database.ReadStream("root", new(source), token));
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         var sql = "SELECT TOP (10) payload.value AS value FROM EVENTS('parser-events','source',+1) ORDER BY revision";
         var ast = new AstQueryRequest(partition, new(SqlParserAdmissionModels.Events, null, [new("/payload/value", "value")], null,

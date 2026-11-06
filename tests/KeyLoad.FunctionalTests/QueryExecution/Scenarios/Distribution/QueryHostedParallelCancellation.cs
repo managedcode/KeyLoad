@@ -50,7 +50,7 @@ internal static class QueryHostedParallelCancellation
             second.Release.TrySetResult();
             var page = QueryHostedSearchRead.Page(await secondCall.ConfigureAwait(false));
             await second.Disposed.Task.WaitAsync(completion.Token).ConfigureAwait(false);
-            await QueryHostedSearchAssertions.PageAsync(page, data, images[1]).ConfigureAwait(false);
+            await QueryHostedSearchAssertions.PageAsync(page, data).ConfigureAwait(false);
             await QueryHostedSearchAssertions.HealthyAsync(cluster, data, images, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         await firstCaller.CancelAsync().ConfigureAwait(false);

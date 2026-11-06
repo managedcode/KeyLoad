@@ -19,7 +19,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         fixture.Store.Dispose();
         using var first = Open(fixture.Directory);
         var database = QueueWholeFlowStorage.Open(first, clock);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, firstBytes, firstPosition, identity);
+        firstPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, firstBytes, firstPosition, identity);
         await ReplayExpiryAsync(database, first, state, firstBytes, firstPosition, identity);
         var (ack, acked) = await ReclaimAsync(database, first, state);
         var secondBytes = QueueWholeFlowStorage.Bytes(first);
@@ -27,27 +27,27 @@ internal static class QueueLeaseExpiryEqualityTrial
         first.Dispose();
         using var second = Open(fixture.Directory);
         var restored = QueueWholeFlowStorage.Open(second, clock);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, secondBytes, secondPosition, identity);
+        secondPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, secondBytes, secondPosition, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, ack, state.Boundary), acked);
         await ReplayResultAssertions.Same<CommitReceipt>(Batch(restored, state.Producer, state.Boundary), state.Produced);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, secondBytes, secondPosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(second, secondBytes, secondPosition, identity);
         var (producer, produced, healthyAck, healthyReceipt) = await HealthyAsync(restored, state);
         var finalBytes = QueueWholeFlowStorage.Bytes(second);
         var finalPosition = second.Position;
         second.Dispose();
         using var final = Open(fixture.Directory);
         var completed = QueueWholeFlowStorage.Open(final, clock);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(final, finalBytes, finalPosition, identity);
+        finalPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(final, finalBytes, finalPosition, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(completed, healthyAck, state.Boundary), healthyReceipt);
         await ReplayResultAssertions.Same<CommitReceipt>(Batch(completed, producer, state.Boundary), produced);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(final, finalBytes, finalPosition, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(final, finalBytes, finalPosition, identity);
         await Assert.That(completed.InspectMessage("root", state.Lane, "input")!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(completed.InspectMessage("root", state.Lane, "healthy")!.Metadata.State).IsEqualTo(MessageState.Acked);
     }
 
     private static async Task<QueueLeaseExpiryEqualityState> SeedExpiredAsync(TestDatabase fixture)
     {
-        var time = QueueWholeFlowStorage.Clock(fixture.Store);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var lane = new QueueLaneRef(fixture.Partition, "jobs");
         var producer = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EnqueueMessage("jobs", "input", "{\"work\":1}", "{\"kind\":\"job\"}")]);
@@ -81,12 +81,12 @@ internal static class QueueLeaseExpiryEqualityTrial
             var replay = Apply(database, command, state.Boundary);
             await QueueLeaseExpiryEqualityAssertions.RefusalAsync(replay, ErrorCode.LeaseExpired);
             await Assert.That(replay.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
         var claim = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, state.Claim,
             state.Claim.RequestId, state.Boundary);
         await QueueLeaseExpiryEqualityAssertions.RefusalAsync(claim, ErrorCode.LeaseExpired);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
     }
 
     private static async Task<(DeliveryCommand Command, Result<object> Result)> ReclaimAsync(

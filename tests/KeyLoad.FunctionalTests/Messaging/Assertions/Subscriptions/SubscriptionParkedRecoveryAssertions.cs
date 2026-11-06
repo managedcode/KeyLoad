@@ -33,7 +33,8 @@ internal static class SubscriptionParkedRecoveryAssertions
         await Assert.That(failure.Problem?.Detail).IsEqualTo("A parked subscription requires an explicit seek or new group before resuming.");
 
         await Assert.That(failure.Value).IsNull();
-        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
+        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position);
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         var cut = QueueWholeFlowStorage.Bytes(store);
         position = store.Position;
@@ -43,7 +44,7 @@ internal static class SubscriptionParkedRecoveryAssertions
             .IsEqualTo(JsonSerializer.Serialize(failure, JsonDefaults.Options));
         await Assert.That(SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)
             .AsSpan().SequenceEqual(saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
         receipts.Add((operation, failure, saved));
     }
 
@@ -75,7 +76,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         }
         await Assert.That(SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)
             .AsSpan().SequenceEqual(saved)).IsTrue();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
     }
 
     internal static async Task NoWindowAsync(ZoneTreeStore store, SubscriptionRef group)
@@ -102,7 +103,8 @@ internal static class SubscriptionParkedRecoveryAssertions
         await Assert.That(failure.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
 
         await Assert.That(failure.Value).IsNull();
-        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
+        position = await NativeStoreAssertions.AdvancedAsync(store, position);
+        await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position);
     }
 
     internal static async Task OldReceiveAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
@@ -120,7 +122,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         await Assert.That(retained.AsSpan().SequenceEqual(saved)).IsTrue();
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
             OrleansSerialization.Deserialize<StoredOutcome>(retained).Result, original);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, cut, position, identity);
     }
 }
 

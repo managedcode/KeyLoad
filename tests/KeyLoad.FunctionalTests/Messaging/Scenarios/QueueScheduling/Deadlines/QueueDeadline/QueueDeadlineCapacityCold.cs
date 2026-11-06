@@ -20,11 +20,11 @@ internal static class QueueDeadlineCapacityCold
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var owner = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityImage.RequireAsync(owner, state.Lane, messages, sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, messages.First().Metadata));
         await ReplayAsync(owner, cold, state, token);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(cold, image, position, identity);
     }
 
     private static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -43,25 +43,25 @@ internal static class QueueDeadlineCapacityCold
             if (result.Value is CommitReceipt receipt)
             {
                 await QueueDeadlineCapacityOperations.ReceiptAsync(database.Apply(operation), receipt);
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
                 await QueueDeadlineCapacityOperations.ReceiptAsync(database.ResolveOutcome(operation), receipt);
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             }
             if (result.Value is ReceiveResult received)
             {
                 if (received.Deliveries.IsEmpty)
                 {
                     await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
-                    await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                    await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
                     await ReplayResultAssertions.Same<ReceiveResult>(database.ResolveOutcome(operation), result);
                 }
                 else
                 {
                     await Assert.That(database.Apply(operation)).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.StaleLease, StaleClaimDetail)));
-                    await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                    await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
                     await Assert.That(database.ResolveOutcome(operation)).IsEqualTo(Result<object>.Fail(Errors.Problem(ErrorCode.StaleLease, StaleClaimDetail)));
                 }
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
                 var retained = OutcomeStoreOracle.Read(store, operation)
                     ?? throw new InvalidOperationException("The deadline receive outcome is absent after replay.");
                 await Assert.That(OrleansSerialization.Serialize(retained))
@@ -70,11 +70,11 @@ internal static class QueueDeadlineCapacityCold
             if (Errors.Code(result.Problem).Value is not null)
             {
                 await Assert.That(database.Apply(operation)).IsEqualTo(result);
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
                 await Assert.That(database.ResolveOutcome(operation)).IsEqualTo(result);
-                await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+                await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             }
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
     }
 }

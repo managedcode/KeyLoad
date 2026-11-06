@@ -9,7 +9,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 
 internal static class TopicPurgeCrashScenario
 {
-    private const long PositionStep = 1;
+
     private const long InitialDocumentRevision = 0;
     private const int FirstPublishedPosition = 1;
     private const int SecondPublishedPosition = 2;
@@ -47,7 +47,6 @@ internal static class TopicPurgeCrashScenario
         ConfigurePin(database, pinned);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.PurgeId, SecondPublishedPosition), TopicPurgeCrashContract.PurgeId);
         await SaveAsync(directory, publish, publishResult, seed, seedResult, operation, store, pinned, cursor);
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         var result = database.Apply(operation);
         if (pinned ? Errors.Code(result.Problem).Value != ErrorCode.ResourceExhausted : Errors.Code(result.Problem).Value is not null)
@@ -84,7 +83,7 @@ internal static class TopicPurgeCrashScenario
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.SeedOperationFile, seed);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.SeedReceiptFile, seedResult);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.OperationFile, operation);
-        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.PositionFile, store.Position);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.SequenceFile, CrashDatabase.AppliedPosition(store, TopicPurgeCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.PinnedFile, pinned);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.CursorFile, cursor);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, TopicPurgeCrashContract.ProtectedFile, ProtectedBytes(store));

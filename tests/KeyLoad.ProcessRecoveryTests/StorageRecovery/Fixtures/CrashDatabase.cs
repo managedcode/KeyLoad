@@ -35,12 +35,10 @@ internal static class CrashDatabase
         => database.Store.Read<CommitToken>(view =>
         {
             var placement = database.ReadAtomicPartitionPlacement(view, CrashFixtureValues.Principal, partition);
-            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
+            var applied = NativeStoreAssertions.AppliedInView(view, partition);
             return new(placement.Incarnation, partition.AtomicPartitionId, checked(applied + 1L));
         });
 
-    internal static long AppliedPosition(IAtomicStore store)
-        => store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : 0L);
+    internal static long AppliedPosition(IAtomicStore store, PartitionRef partition)
+        => NativeStoreAssertions.Applied(store, partition);
 }

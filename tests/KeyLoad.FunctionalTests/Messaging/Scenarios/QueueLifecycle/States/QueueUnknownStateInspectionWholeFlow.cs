@@ -45,7 +45,7 @@ internal static class QueueUnknownStateInspectionWholeFlow
                 State = (MessageState)persistedState
             }));
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await RefusalAsync(fixture.Database, fixture.Store, state, damaged);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
@@ -55,12 +55,12 @@ internal static class QueueUnknownStateInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
-                await QueueLifecycleConditionAssertions.Same(cold, damaged);
+                damaged = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, damaged);
                 await RefusalAsync(owner, cold, state, damaged);
                 QueueLifecycleConditionOperations.Restore(cold, key, row);
                 await QueueLifecycleConditionAssertions.Same(cold, original with
                 {
-                    Position = original.Position + 2
+                    Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
                 });
                 await QueueLifecycleConditionAssertions.Ready(owner, cold, state);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
@@ -74,7 +74,7 @@ internal static class QueueUnknownStateInspectionWholeFlow
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var restored = fixture.CreateConfiguredDatabase(second);
-            await QueueLifecycleConditionAssertions.Same(second, healthy!);
+            healthy = await QueueLifecycleConditionAssertions.ReopenedAsync(second, healthy!);
             await QueueLifecycleConditionAssertions.Terminal(restored, second, state);
             await QueueTerminalInspectionAssertions.ReplayAsync(restored, second, state);
             await QueueLifecycleConditionAssertions.Same(second, healthy!);

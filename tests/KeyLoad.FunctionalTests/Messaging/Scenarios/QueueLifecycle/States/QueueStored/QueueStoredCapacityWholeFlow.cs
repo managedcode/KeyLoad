@@ -23,19 +23,22 @@ internal static class QueueStoredCapacityWholeFlow
         var identity = fixture.Store.Identity;
         var rows = QueueStoredCapacityRows.Damage(fixture.Store, fixture.Partition, fault);
         var damagedImage = QueueWholeFlowStorage.Bytes(fixture.Store);
-        await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
-        await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
+        var damagedPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
+        await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, damagedPosition, damagedImage);
+        await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, damagedPosition, damagedImage);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position + QueueEnqueueAuthorityProtocol.First);
-        await QueueStoredCapacityAssertions.RefuseAsync(owner, cold, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
+        damagedPosition = await NativeStoreAssertions.ReopenedAsync(cold, damagedPosition);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, damagedPosition);
+        await QueueStoredCapacityAssertions.RefuseAsync(owner, cold, fixture.Partition, state, fault, damagedPosition, damagedImage);
         QueueStoredCapacityRows.Repair(cold, rows);
-        await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
+        var repairedPosition = await NativeStoreAssertions.AdvancedAsync(cold, damagedPosition);
+        await QueueStoredCapacityAssertions.ImageAsync(cold, repairedPosition, originalImage);
         await QueueEnqueueColdAssertions.RequireInitialAsync(owner, fixture.Partition, state.ScheduledAt);
         await ReplayResultAssertions.Same<CommitReceipt>(owner.Apply(QueueStoredCapacitySetup.Operation(
             owner, OperationKind.Batch, state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Enqueue.Timestamp))), state.Original);
-        await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
+        await QueueStoredCapacityAssertions.ImageAsync(cold, repairedPosition, originalImage);
         await ContinueAsync(fixture, cold, owner, state, identity, token);
     }
 
@@ -94,6 +97,7 @@ internal static class QueueStoredCapacityWholeFlow
         cold.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var secondOwner = fixture.CreateConfiguredDatabase(second);
+        finalPosition = await NativeStoreAssertions.ReopenedAsync(second, finalPosition);
         token.ThrowIfCancellationRequested();
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, finalImage);

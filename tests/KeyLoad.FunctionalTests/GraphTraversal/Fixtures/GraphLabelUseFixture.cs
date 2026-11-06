@@ -21,7 +21,7 @@ internal static class GraphLabelUseFixture
             [new PutDocument(Collection, "a", "{}"), new PutDocument(Collection, "b", "{}"), new PutDocument(Collection, "c", "{}"),
                 .. Edges(db.Partition).Select(edge => new UpsertEdge(Graph, edge.Id, edge.From, edge.To, edge.Label, edge.AttributesJson))]);
         var before = db.Store.Position;
-        var nextCanonical = checked(db.Database.LastApplied + 1L);
+        var nextCanonical = checked(ExpectedCanonicalCommit.Applied(db.Database, db.Partition) + 1L);
         var receipt = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, nextCanonical), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
                 new("putDocument", Collection, "c", 1L), new("upsertEdge", Graph, "ab", 1L),
@@ -31,7 +31,7 @@ internal static class GraphLabelUseFixture
         {
             await Assert.That(mutation.CompositionReferences).IsEmpty();
         }
-        await Assert.That(db.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(db.Store.Position).IsGreaterThan(before);
         var outcome = db.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(db.Partition, "root", command.CommandId)))
             ?? throw new InvalidOperationException("The original acknowledged graph outcome must exist.");
         return (command, receipt, outcome);

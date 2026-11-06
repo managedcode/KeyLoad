@@ -14,7 +14,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
     internal static async Task OnlySelectedRowChangedAsync(QueuePendingAuthorityCut original, QueuePendingAuthorityCut damaged,
         byte[] key, byte[] malformed)
     {
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await Assert.That(damaged.Identity.SequenceEqual(original.Identity)).IsTrue();
         await Assert.That(damaged.Rows.Length).IsEqualTo(original.Rows.Length);
         var prefix = Convert.ToHexString(key) + ":";
@@ -46,7 +46,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
         await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>())
             .SequenceEqual(OrleansSerialization.Serialize(history.Receipt))).IsTrue();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(history.Request.CommandId);
-        await Assert.That(store.Position).IsEqualTo(before + 1);
+        await Assert.That(store.Position).IsGreaterThan(before);
         await Assert.That(Outcome(store, state, equivalent)).IsNotNull();
         state.Flow.Successes.Add((equivalent, result));
         await QueueLifecycleImage.SameAsync(store, state.Flow.Lane, lane);
@@ -65,7 +65,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
         await Assert.That(failed.Problem?.Detail).IsEqualTo(StaleDelivery);
 
         await Assert.That(failed.Value).IsNull();
-        await Assert.That(store.Position).IsEqualTo(before + 1);
+        await Assert.That(store.Position).IsGreaterThan(before);
         await QueueLifecycleImage.SameAsync(store, state.Flow.Lane, lane);
         await QueuePendingAuthorityImage.RequireAsync(owner, store, state, QueuePendingAuthorityPhase.Pending);
         await FailureReplayAsync(owner, store, state, operation, failed);

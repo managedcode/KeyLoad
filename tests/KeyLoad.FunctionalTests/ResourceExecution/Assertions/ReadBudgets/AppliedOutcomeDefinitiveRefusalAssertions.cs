@@ -22,7 +22,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
             await RefusalAsync(resolved, ErrorCode.Conflict, "The command ID was already used with different content.");
             await ReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(original), committed);
             await ReplayResultAssertions.Same<CommitReceipt>(db.Apply(original), committed);
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         }
     }
 
@@ -68,7 +68,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         await RefusalAsync(db.ResolveAppliedSubmissionOutcome(operation), code, detail);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     private static async Task FatalBoundaryAsync(DatabaseEngine db, ZoneTreeStore store,
@@ -79,7 +79,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         var identity = OrleansSerialization.Serialize(store.Identity);
         var refusal = Assert.ThrowsExactly<KeyLoadException>(() => db.ResolveAppliedSubmissionOutcome(operation));
         await Assert.That(refusal.Code).IsEqualTo(code);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     private static async Task RefusalAsync(Result<object> result, ErrorCode code, string detail)

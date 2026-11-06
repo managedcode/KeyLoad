@@ -24,6 +24,7 @@ internal static class QueryEquivalentIntegerDecimalCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, fixture.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = fixture.CreateConfiguredDatabase(store);

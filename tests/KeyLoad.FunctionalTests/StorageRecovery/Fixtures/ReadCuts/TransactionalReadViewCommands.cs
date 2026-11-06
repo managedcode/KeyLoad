@@ -18,7 +18,7 @@ internal static class TransactionalReadViewCommands
                 DocumentIndexCommittedScanOracle.StableJson, 0L));
         state.Identity = ReadCutStoreStateAssertions.SnapshotIdentity(state.Store);
         state.OldPosition = state.Store.Position;
-        state.OldAppliedPosition = state.Database.LastApplied;
+        state.OldAppliedPosition = ExpectedCanonicalCommit.Applied(state.Database, fixture.Partition);
         state.OldImage = QueueImage(state.Store);
         await DocumentIndexCommittedScanOracle.AssertOldCutAsync(
             DocumentIndexCommittedScanOracle.ReadCut(state.Store, fixture.Partition), state.OldPosition);

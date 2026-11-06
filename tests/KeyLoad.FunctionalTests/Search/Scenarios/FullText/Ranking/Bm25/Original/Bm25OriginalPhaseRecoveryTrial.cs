@@ -42,7 +42,8 @@ internal static class Bm25OriginalPhaseRecoveryTrial
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         flow.Owner.Reopen();
-        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
+        await before.RequireReopenedAsync(flow.Owner);
+        before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
         var replay = flow.Publish(flow.Reissue(original));
         await ReplayResultAssertions.SameAsync(expected, replay);

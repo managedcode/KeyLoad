@@ -24,7 +24,8 @@ internal static class SharedDomainRecoverySeed
             var operation = input.SeedOperations[index];
             await Assert.That(operation.Timestamp).IsEqualTo(input.Original.Timestamp);
             await Assert.That(operation.UserId).IsEqualTo(Writer);
-            var position = AppliedPosition(input) - (SeedOperations - index - FirstRevision);
+            var position = OrleansSerialization.Deserialize<StoredOutcome>(OriginalBytes(input.SeedImage,
+                OutcomeStoreOracle.Key(operation))).CanonicalSequence;
             var scope = index < SeedProducers ? scopes[index + SecondIndex] : scopes[SecondIndex];
             if (index < SeedProducers)
             {
@@ -92,5 +93,19 @@ internal static class SharedDomainRecoverySeed
         => store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(RuntimeMissing);
 
     internal static long AppliedPosition(SharedDomainRecoveryInput input)
-        => input.SeedResults[SeedOperations - SecondIndex].Get<CommitReceipt>().Token.Position;
+    {
+        var partition = SharedDomainCorpus.Create(Tenant, Database)[FirstIndex].Partition;
+        var prefix = Convert.ToHexString(StorageCommandKeys.Applied(partition)) + RowSeparator;
+        var original = input.SeedImage.SingleOrDefault(row => row.StartsWith(prefix, StringComparison.Ordinal));
+        if (original is null)
+        {
+            return NoRevision;
+        }
+        var head = OrleansSerialization.Deserialize<StoragePartitionPosition>(Convert.FromHexString(original[prefix.Length..]));
+        if (head.Partition != partition || head.Position < NoRevision)
+        {
+            throw new InvalidOperationException(RuntimeMissing);
+        }
+        return head.Position;
+    }
 }

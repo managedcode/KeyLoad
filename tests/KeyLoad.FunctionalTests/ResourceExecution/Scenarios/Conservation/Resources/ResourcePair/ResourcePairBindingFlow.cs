@@ -105,7 +105,7 @@ internal static class ResourcePairBindingFlow
             var stored = source.ReadStoredOutcome(issued);
             var original = stored.PreparedCommand;
             await Assert.That(stored.CanonicalSequence).IsEqualTo(cut.AppliedPosition + One);
-            await Assert.That(source.Database.LastApplied).IsEqualTo(cut.AppliedPosition + One);
+            await Assert.That(NativeStoreAssertions.Applied(source.Store, source.Partition)).IsEqualTo(cut.AppliedPosition + One);
             await Assert.That(original.CommandId).IsEqualTo(issued.CommandId);
             await Assert.That(original.UserId).IsEqualTo(issued.UserId);
             await Assert.That(original.Value!.Kind).IsEqualTo(issued.Value!.Kind);

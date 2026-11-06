@@ -35,13 +35,14 @@ internal static class ProjectionCheckpointRetentionFixture
     internal static async Task RepairAsync(DatabaseEngine owner, ZoneTreeStore cold,
         ProjectionCheckpointRetentionState state, CancellationToken token)
     {
-        await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.DirtyImage, state.DirtyPosition);
+        var position = await NativeStoreAssertions.ReopenedAsync(cold, state.DirtyPosition);
+        await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.DirtyImage, position);
         await ProjectionCheckpointRetentionAssertions.CorruptAsync(owner, cold, state, token);
         cold.Commit((transaction, _) => { transaction.Put(state.Source.Key, state.Source.Original); return true; });
         var prefix = Convert.ToHexString(state.Source.Key) + ":";
         var repaired = state.DirtyImage.Select(row => row.StartsWith(prefix, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(state.Source.Original) : row).ToArray();
-        await ProjectionConsumerIdentityAssertions.SameAsync(cold, repaired, state.DirtyPosition + 1L);
+        await ProjectionConsumerIdentityAssertions.SameAsync(cold, repaired, await NativeStoreAssertions.AdvancedAsync(cold, position));
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(owner, state.Source);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, state.Pinned, state.PinFailure, token);
         await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, state.Source.Seed, state.Source.Seeded, token);

@@ -13,7 +13,7 @@ internal static class EventQueueStateEnvelopeCommands
     {
         var placement = fixture.Database.ReadAtomicPartitionPlacement(Root, fixture.Partition);
         return new(placement.Incarnation, fixture.Partition.AtomicPartitionId,
-            checked(fixture.Database.LastApplied + CommitPositionStep));
+            checked(fixture.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, fixture.Partition)) + CommitPositionStep));
     }
 
     internal static async Task<EventQueueStateEnvelopeHistory> SubmitAsync<TRequest, TResult>(

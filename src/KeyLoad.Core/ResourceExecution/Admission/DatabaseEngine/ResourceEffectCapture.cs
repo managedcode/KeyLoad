@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.DatabaseComposition;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
@@ -25,7 +24,7 @@ public static class ResourceEffectCapture
     internal static ResourceEffectAdmission CaptureResourceEffectAdmission(this DatabaseEngine engine, IKeyValueView raw, Command<DatabaseCommand> operation, bool preserveBudgetFailure = false, long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
         var scope = new ResourceEffectBindingScope();
-        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, position, KeyLoad.Core.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope, preparationWork ?? new ReadExecutionBudget(CompositionTimeProvider.Instance)) : null;
+        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, position, KeyLoad.Core.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence, StorageOperationApply.InitialCanonicalSequence, null), scope, preparationWork ?? new ReadExecutionBudget()) : null;
         var view = preparation is null ? new ResourceEffectObservationView(raw, scope) : preparation;
         try
         {

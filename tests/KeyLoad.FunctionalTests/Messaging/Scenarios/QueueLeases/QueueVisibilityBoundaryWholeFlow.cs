@@ -27,6 +27,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
         try
         {
             using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+            cut.Position = await NativeStoreAssertions.ReopenedAsync(cold, cut.Position);
             try
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
@@ -109,6 +110,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
         try
         {
             using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+            cut.Position = await NativeStoreAssertions.ReopenedAsync(cold, cut.Position);
             try
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);

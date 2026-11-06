@@ -21,8 +21,7 @@ internal static class QueryHostedSearchAssertions
             }
             var records = page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
                 Convert.ToHexString(record.Value.Span)).ToArray();
-            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : default(long);
+            var applied = StorageOperationApply.ReadCanonicalSequence(view, node.Database.Partition);
             return new QueryHostedStoreImage(applied, node.Database.Store.Position, records);
         })).ToArray();
 
@@ -38,8 +37,7 @@ internal static class QueryHostedSearchAssertions
         }
     }
 
-    internal static async Task PageAsync(DistributedSearchPage page, QueryHostedSearchDataset data,
-        QueryHostedStoreImage image)
+    internal static async Task PageAsync(DistributedSearchPage page, QueryHostedSearchDataset data)
     {
         var lifetime = new EntityRefLifetime(data.Creation.Incarnation.Value);
         RankedDocument[] expected =
@@ -55,8 +53,8 @@ internal static class QueryHostedSearchAssertions
         ];
         PartitionQueryLeafWitness[] leaves =
         [
-            new(data.First, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath),
-            new(data.Second, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath)
+            new(data.First, data.LeafPositions[data.First], QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath),
+            new(data.Second, data.LeafPositions[data.Second], QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath)
         ];
         await Assert.That(JsonDefaults.Serialize(page.Hits).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expected.ToImmutableArray()))).IsTrue();
@@ -74,7 +72,7 @@ internal static class QueryHostedSearchAssertions
         {
             var page = QueryHostedSearchRead.Page(await QueryHostedSearchRead.ExecuteAsync(cluster.Nodes[index],
                 data, Guid.NewGuid(), token).ConfigureAwait(false));
-            await PageAsync(page, data, images[index]).ConfigureAwait(false);
+            await PageAsync(page, data).ConfigureAwait(false);
         }
         await StateAsync(cluster, images).ConfigureAwait(false);
     }

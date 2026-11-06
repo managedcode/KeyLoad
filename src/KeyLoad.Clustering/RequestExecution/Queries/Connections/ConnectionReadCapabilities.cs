@@ -25,10 +25,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         var kind = request.Envelope.ReadKind!.Value;
         if (kind == GrainReadKind.Authenticate)
         {
-            return request.Envelope.Purpose == AdministratorAuthenticationProtocol.Purpose
-                ? (new GrainValue(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock,
-                    request, binding, cancellationToken)) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */)
-                : (new GrainValue(GrainRequestAuthority.Authenticate(localDatabase, (GrainPayload.Read<string>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as string at this closed operation boundary before executing typed code. */), runtimeClock)) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */);
+            return Authenticate(request, binding, cancellationToken);
         }
 
         if (kind == GrainReadKind.RuntimeJournalCatalog
@@ -50,7 +47,13 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.Document)
         {
             return GrainCoreReadCapabilities.Execute(localDatabase, kind, request.Envelope.PrincipalId!, request,
-                new ReadExecutionBudget(runtimeClock, cancellationToken), binding, null);
+                new ReadExecutionBudget(cancellationToken), binding, null);
+        }
+
+        if (GrainQueryReadCapabilities.ReadsAuthorizedView(kind))
+        {
+            GrainRequestAuthority.RequirePublicReadIdentity(request.Envelope.PrincipalId!);
+            return await ReadQueryAsync(kind, request.Envelope.PrincipalId!, request, binding, cancellationToken);
         }
 
         var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
@@ -72,7 +75,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (kind is GrainReadKind.PartitionQueryLeaf or GrainReadKind.DistributedSearchLeaf)
         {
-            return QueryLifetimeReadCapability.Execute(localDatabase, services, runtimeClock,
+            return QueryLifetimeReadCapability.Execute(localDatabase, services,
                 principal, request, binding, cancellationToken);
         }
         if (GrainMaintenanceReadCapabilities.Handles(kind))
@@ -82,6 +85,15 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         return await ReadCapabilityAsync(kind, principal, request, requestId,
             binding, cancellationToken);
+    }
+
+    private GrainValue Authenticate(DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
+        CancellationToken cancellationToken)
+    {
+        return request.Envelope.Purpose == AdministratorAuthenticationProtocol.Purpose
+            ? (new GrainValue(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock,
+                request, binding, cancellationToken)) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */)
+            : (new GrainValue(GrainRequestAuthority.Authenticate(localDatabase, (GrainPayload.Read<string>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as string at this closed operation boundary before executing typed code. */), runtimeClock)) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */);
     }
 
     private async Task<GrainValue> ReadCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
@@ -101,7 +113,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.PartitionQuery)
         {
             return new GrainValue(await PartitionQueryReadCapability.ExecuteAsync(localDatabase, services, principal, request,
-                codec, runtimeClock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this PartitionQuery response with its generated runtime type header. */;
+                codec, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this PartitionQuery response with its generated runtime type header. */;
         }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
@@ -114,7 +126,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {
-            var budget = new ReadExecutionBudget(runtimeClock, cancellationToken);
+            var budget = new ReadExecutionBudget(cancellationToken);
             return GrainCoreReadCapabilities.Execute(localDatabase, kind, principal.Id, request, budget, binding,
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
@@ -127,13 +139,27 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     {
         if (kind is not (GrainReadKind.Backup or GrainReadKind.NodeStatus))
         {
-            using var observation = codec.HasPhaseObserver
-                ? TextPostingObservation.Enter(token => codec.ObservePhaseAsync(request,
-                    GrainRequestPhase.TextOriginalPostingRead, context, token)) : null;
-            return await Query.ExecuteAsync(kind, principal.Id, request, binding, cancellationToken);
+            return await ReadQueryAsync(kind, principal.Id, request, binding, cancellationToken);
         }
 
         return await ReadAdministrationAsync(kind, principal, request, cancellationToken);
+    }
+
+    private async Task<GrainValue> ReadQueryAsync(GrainReadKind kind, string principalId,
+        DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken token)
+    {
+        using var observation = codec.HasPhaseObserver
+            ? TextPostingObservation.Enter(cancellation => codec.ObservePhaseAsync(request,
+                GrainRequestPhase.TextOriginalPostingRead, context, cancellation)) : null;
+        try
+        {
+            return await Query.ExecuteAsync(kind, principalId, request, binding, token);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Unauthenticated)
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
     }
 
     private async Task<GrainValue> ReadAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,

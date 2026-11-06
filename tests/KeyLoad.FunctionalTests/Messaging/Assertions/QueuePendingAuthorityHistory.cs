@@ -17,6 +17,13 @@ internal static class QueuePendingAuthorityHistory
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Rows, CollectionOrdering.Matching);
     }
 
+    internal static async Task<QueuePendingAuthorityCut> ReopenedAsync(ZoneTreeStore store, QueuePendingAuthorityCut expected)
+    {
+        expected = expected with { Position = await NativeStoreAssertions.ReopenedAsync(store, expected.Position) };
+        await SameAsync(store, expected);
+        return expected;
+    }
+
     internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store, QueuePendingAuthorityState state,
         QueuePendingAuthorityCut damaged)
     {

@@ -44,7 +44,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
     internal async Task<Result<object>> CommitAsync(DatabaseEngine database, ZoneTreeStore store,
         CommandRequest command, MutationReceipt[] effects)
     {
-        var position = checked(database.LastApplied + 1);
+        var position = checked(ExpectedCanonicalCommit.Applied(database, command.Partition) + 1);
         var result = KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             command, command.CommandId, Epoch);
         var receipt = result.Get<CommitReceipt>();

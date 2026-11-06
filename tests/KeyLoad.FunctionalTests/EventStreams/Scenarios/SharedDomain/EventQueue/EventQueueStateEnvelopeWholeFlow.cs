@@ -29,6 +29,7 @@ internal static class EventQueueStateEnvelopeWholeFlow
         await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
         var first = Capture(fixture);
         fixture.Reopen();
+        first.Position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, first.Position);
         await SameAsync(fixture, first);
         await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Claimed, groupCompleted: false, token);
         await ReplayAllAsync(fixture, state, token);
@@ -44,6 +45,7 @@ internal static class EventQueueStateEnvelopeWholeFlow
         await ReplayAllAsync(fixture, state, token);
         var final = Capture(fixture);
         fixture.Reopen();
+        final.Position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, final.Position);
         await SameAsync(fixture, final);
         await CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Completed, groupCompleted: true, token);
         await ReplayAllAsync(fixture, state, token);

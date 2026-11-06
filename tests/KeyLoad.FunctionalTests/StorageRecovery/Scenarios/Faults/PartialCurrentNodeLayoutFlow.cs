@@ -46,13 +46,16 @@ internal static class PartialCurrentNodeLayoutFlow
                             transaction.Put(Key, Value);
                             return true;
                         })).IsTrue();
-                        position = checked(start + 1);
-                        var positionRow = Convert.ToHexString(StoreFileFixture.PositionKey) + Separator;
-                        expected = before.Where(row => !row.StartsWith(positionRow, StringComparison.Ordinal))
-                            .Append(positionRow + Convert.ToHexString(StoreFileFixture.PositionValue(position)))
+                        position = store.Position;
+                        await Assert.That(position).IsGreaterThan(start);
+                        expected = before
                             .Append(Convert.ToHexString(Key) + Separator + Convert.ToHexString(Value))
                             .Order(StringComparer.Ordinal).ToArray();
                         identity = JsonSerializer.Serialize(store.Identity, JsonDefaults.Options);
+                    }
+                    else
+                    {
+                        position = await NativeStoreAssertions.ReopenedAsync(store, position);
                     }
                     await Assert.That(store.Position).IsEqualTo(position);
                     await Assert.That(PartialCurrentNodeLayoutState.Rows(store)).IsEquivalentTo(expected!, CollectionOrdering.Matching);

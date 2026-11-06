@@ -16,7 +16,7 @@ internal static class DistributedSearchStatisticsAssertions
             QueryDataset.Local, fixture.SourceOwner, token);
         var destination = DistributedSearchStatisticsFlow.Capture(fixture.Destination,
             QueryFixture.Partition, fixture.DestinationOwner, token);
-        var statistics = DistributedSearchStatisticsFlow.Combine(fixture.Source, source, destination, token);
+        var statistics = DistributedSearchStatisticsFlow.Combine(source, destination, token);
         var expectedStatistics = new DistributedTextStatistics(["source", "destination"],
             CorpusDocuments, CorpusLength, [1, 1]);
         await Assert.That(JsonSerializer.Serialize(statistics, JsonDefaults.Options))

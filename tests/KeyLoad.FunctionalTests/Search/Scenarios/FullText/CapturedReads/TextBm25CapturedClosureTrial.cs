@@ -43,7 +43,7 @@ internal static class TextBm25CapturedClosureTrial
     {
         var owner = flow.Owner;
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
-        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var work = TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var execution = UnitExecutionOptions.QueryExecution().Value;
         var request = new SearchRequest(owner.Source.Partition, SourceCollection, "/text", "needle");
         RuntimeTextProjection? projection = null;

@@ -8,7 +8,7 @@ internal static class QueueScheduledAuthorityTrial
     {
         using var fixture = new TestDatabase();
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
-        var flow = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
+        var flow = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
         var due = flow.Time.AddSeconds(1);
         flow.Batch(fixture.Database, new EnqueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Pending,
             QueueLifecycleTestProtocol.Payload, QueueLifecycleTestProtocol.Headers, NotBefore: due)).Get<CommitReceipt>();
@@ -31,12 +31,12 @@ internal static class QueueScheduledAuthorityTrial
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
+            damaged = await QueuePendingAuthorityHistory.ReopenedAsync(cold, damaged);
             await QueueScheduledAuthorityHistory.RefuseAsync(owner, cold, state, damaged);
             Put(cold, key, exact);
             await QueuePendingAuthorityHistory.SameAsync(cold, original with
             {
-                Position = original.Position + 2
+                Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
             });
             await QueueScheduledAuthorityImage.ScheduledAsync(owner, cold, state);
             var claimed = owner.Apply(receive);
@@ -56,7 +56,7 @@ internal static class QueueScheduledAuthorityTrial
         }
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
-        await QueuePendingAuthorityHistory.SameAsync(second, terminal);
+        terminal = await QueuePendingAuthorityHistory.ReopenedAsync(second, terminal);
         await QueueScheduledAuthorityImage.TerminalAsync(reopened, second, state, healthy: true);
         await QueueScheduledAuthorityHistory.ReplayAsync(reopened, second, state);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);

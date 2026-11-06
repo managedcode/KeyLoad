@@ -10,15 +10,15 @@ internal static class PartitionQueryLifetimeLeafExecution
     private const string OwnerChanged = "The partition query receiving owner changed.";
 
     internal static PartitionQueryLeafResult ExecuteBound(QueryEngine engine, string principalId,
-        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
+        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
-        return Execute(engine, principalId, request, actualOwner, clock, token, binding);
+        return Execute(engine, principalId, request, actualOwner, token, binding);
     }
 
     internal static PartitionQueryLeafResult Execute(QueryEngine engine, string principalId,
-        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
+        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner,
         CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
@@ -34,7 +34,7 @@ internal static class PartitionQueryLifetimeLeafExecution
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);
         }
-        var budget = new ReadExecutionBudget(clock, token);
+        var budget = new ReadExecutionBudget(token);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

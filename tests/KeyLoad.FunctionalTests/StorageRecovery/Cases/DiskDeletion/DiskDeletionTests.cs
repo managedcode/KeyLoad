@@ -10,7 +10,9 @@ internal sealed class DiskDeletionTests
     public async Task DiskDeletionKeepsExactRowsAcrossTwoReopens()
     {
         using var files = new StoreFileFixture();
-        var options = new ZoneTreeStoreOptions(files.DirectoryPath);
+        var publications = new NativePublicationObservation();
+        var options = new ZoneTreeStoreOptions(files.DirectoryPath) { FaultObserver = publications.Observe };
+        long position = 0;
         byte[] deleted = [0x10];
         byte[] retained = [0x20];
         byte[] healthy = [0x30];
@@ -20,21 +22,26 @@ internal sealed class DiskDeletionTests
         {
             store.Commit((tx, _) => { tx.Put(deleted, value); tx.Put(retained, value); return true; });
             PersistToDisk(store);
+            var before = store.Position;
             store.Commit((tx, _) => { tx.Delete(deleted); return true; });
-            await Assert.That(store.Position).IsEqualTo(2L);
+            position = await NativeStoreAssertions.AdvancedAsync(store, before);
+            await Assert.That(publications.Count).IsEqualTo(2);
             identity = store.Identity;
         }
         using (var reopened = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution()))
         {
             await StoreFileFixture.AssertPreservedIdentity(identity, reopened.Identity);
-            await Assert.That(reopened.Position).IsEqualTo(2L);
+            position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
             await Assert.That(reopened.Read(view => view.ReadOwnedValue(deleted))).IsNull();
             await Assert.That(reopened.Read(view => view.ReadOwnedValue(retained))!.SequenceEqual(value)).IsTrue();
             reopened.Commit((tx, _) => { tx.Put(healthy, []); return true; });
+            position = await NativeStoreAssertions.AdvancedAsync(reopened, position);
+            await Assert.That(publications.Count).IsEqualTo(3);
         }
         using var final = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution());
         await StoreFileFixture.AssertPreservedIdentity(identity, final.Identity);
-        await Assert.That(final.Position).IsEqualTo(3L);
+        await NativeStoreAssertions.ReopenedAsync(final, position);
+        await Assert.That(publications.Count).IsEqualTo(3);
         await Assert.That(final.Read(view => view.ReadOwnedValue(deleted))).IsNull();
         await Assert.That(final.Read(view => view.ReadOwnedValue(retained))!.SequenceEqual(value)).IsTrue();
         await Assert.That(final.Read(view => view.ReadOwnedValue(healthy))).IsEmpty();

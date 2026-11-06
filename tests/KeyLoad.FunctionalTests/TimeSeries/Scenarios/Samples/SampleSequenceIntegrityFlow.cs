@@ -60,6 +60,7 @@ internal static class SampleSequenceIntegrityFlow
         {
             token.ThrowIfCancellationRequested();
             fixture.Reopen();
+            cut.StorePosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, cut.StorePosition);
             await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
             await KeyLoad.FunctionalTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
                 fixture.Store, identity, cut.StorePosition);
@@ -101,6 +102,7 @@ internal static class SampleSequenceIntegrityFlow
         await SampleSequenceIntegrityAssertions.EqualAsync(expected, result.Get<CommitReceipt>());
         await Assert.That(outcome.CanonicalSequence).IsEqualTo(expectedSequence);
         await Assert.That(result.Get<CommitReceipt>().Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
-        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo((expectedSequence, cut.StorePosition + 1));
+        await Assert.That(fixture.Store.Position).IsGreaterThan(cut.StorePosition);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo((expectedSequence, fixture.Store.Position));
     }
 }

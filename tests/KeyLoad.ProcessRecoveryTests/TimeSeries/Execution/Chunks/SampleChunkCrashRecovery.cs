@@ -48,8 +48,9 @@ internal static class SampleChunkCrashRecovery
         {
             // The original was killed while staged, so it never committed; its first retry commits it exactly once.
             var staged = database.Store.Position;
-            database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();
-            if (database.Store.Position != checked(staged + SampleChunkCrashContract.PositionStep))
+            var applied = CrashDatabase.AppliedPosition(database.Store, SampleChunkCrashContract.Partition);
+            var receipt = database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();
+            if (database.Store.Position <= staged || receipt.Token.Position != checked(applied + 1L))
             {
                 throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
             }

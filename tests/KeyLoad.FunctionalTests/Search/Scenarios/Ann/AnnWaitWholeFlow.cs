@@ -60,7 +60,7 @@ internal static class AnnWaitWholeFlow
         var command = new CommandRequest(id, database.Partition, mutations);
         var operation = database.Database.OwnCommand(database.Database.CreateCommand(OperationKind.Batch, id, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
         token.ThrowIfCancellationRequested();
-        var index = checked(database.Database.LastApplied + FirstPosition);
+        var index = checked(ExpectedCanonicalCommit.Applied(database.Database, database.Partition) + FirstPosition);
         var receipt = database.SubmitIssuedEmbedded(operation, token).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Position).IsEqualTo(index);

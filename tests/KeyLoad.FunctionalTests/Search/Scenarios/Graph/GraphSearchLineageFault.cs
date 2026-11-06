@@ -29,7 +29,7 @@ internal static class GraphSearchLineageFault
             var damagedRow = Convert.ToHexString(key) + ":" + Convert.ToHexString(damaged);
             var originalRow = Convert.ToHexString(key) + ":" + Convert.ToHexString(original);
             restored = image.Select(row => row == damagedRow ? originalRow : row).ToArray();
-            position = state.Store.Position + 1L;
+            position = state.Store.Position;
             identity = OrleansSerialization.Serialize(state.Store.Identity);
             await Assert.That(image.Count(row => row == damagedRow)).IsEqualTo(1);
         }, failures);
@@ -37,6 +37,7 @@ internal static class GraphSearchLineageFault
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await Assert.That(restored).IsNotNull();
+            position = await NativeStoreAssertions.AdvancedAsync(state.Store, position);
             await GraphLabelUseOperations.ConserveAsync(state.Store, restored!, position, identity);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

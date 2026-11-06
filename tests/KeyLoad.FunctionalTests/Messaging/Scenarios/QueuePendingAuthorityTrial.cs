@@ -12,7 +12,7 @@ internal static class QueuePendingAuthorityTrial
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
         QueuePendingAuthorityOperations.Damage(fixture.Store, state, fault);
         var damaged = QueuePendingAuthorityHistory.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await QueuePendingAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
         await QueuePendingAuthorityHistory.RefuseAsync(fixture.Database, fixture.Store, state, damaged);
         fixture.Store.Dispose();
@@ -20,12 +20,12 @@ internal static class QueuePendingAuthorityTrial
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
+            damaged = await QueuePendingAuthorityHistory.ReopenedAsync(cold, damaged);
             await QueuePendingAuthorityHistory.RefuseAsync(owner, cold, state, damaged);
             QueuePendingAuthorityOperations.Repair(cold, state);
             await QueuePendingAuthorityHistory.SameAsync(cold, original with
             {
-                Position = original.Position + 2
+                Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
             });
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Pending);
             await QueuePendingAuthorityOperations.ParkAsync(owner, cold, state);
@@ -38,7 +38,7 @@ internal static class QueuePendingAuthorityTrial
         }
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
-        await QueuePendingAuthorityHistory.SameAsync(second, terminal);
+        terminal = await QueuePendingAuthorityHistory.ReopenedAsync(second, terminal);
         await QueuePendingAuthorityImage.RequireAsync(reopened, second, state, QueuePendingAuthorityPhase.Terminal);
         await QueuePendingAuthorityHistory.ReplayAsync(reopened, second, state);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);

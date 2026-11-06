@@ -19,7 +19,10 @@ internal static class SampleChunkEarlyCrashState
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, SampleChunkCrashContract.From,
             SampleChunkCrashContract.Until, SampleChunkCrashContract.SampleLimit);
         var snapshot = new SampleChunkEarlyCrashSnapshot(window, rows, SampleChunkCrashState.Raw(database),
-            database.Store.Position, Convert.ToHexString(acknowledged), outcome);
+            CrashDatabase.AppliedPosition(database.Store, SampleChunkCrashContract.Partition), Convert.ToHexString(acknowledged), outcome)
+        {
+            NativePosition = database.Store.Position
+        };
         await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), snapshot)
             .ConfigureAwait(false);
     }

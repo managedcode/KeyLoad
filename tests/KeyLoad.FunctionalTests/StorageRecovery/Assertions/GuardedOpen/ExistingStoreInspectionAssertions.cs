@@ -14,12 +14,12 @@ internal static class ExistingStoreInspectionAssertions
     private const string MissingReceiptMessage = "The inspector child did not return its bounded receipt.";
 
     internal static async Task SucceededAsync(ExistingStoreInspectorExit result, StoreIdentity expectedIdentity,
-        byte[] expectedValue, long expectedPosition)
+        byte[] expectedValue, long previousPosition)
     {
         var receipt = await ReceiptAsync(result, successful: true);
         await Assert.That(receipt.NodeId).IsEqualTo(expectedIdentity.NodeId);
         await Assert.That(receipt.Incarnation).IsEqualTo(expectedIdentity.Incarnation);
-        await Assert.That(receipt.Position).IsEqualTo(expectedPosition);
+        await Assert.That(receipt.Position).IsGreaterThanOrEqualTo(previousPosition);
         await Assert.That(receipt.Value).IsEquivalentTo(expectedValue, CollectionOrdering.Matching);
         await Assert.That(receipt.FailureTypes).IsEmpty();
         await Assert.That(receipt.ErrorCode).IsNull();

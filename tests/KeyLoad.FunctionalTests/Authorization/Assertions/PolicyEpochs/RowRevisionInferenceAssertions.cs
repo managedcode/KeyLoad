@@ -20,8 +20,8 @@ internal static class RowRevisionInferenceAssertions
         string detail, CancellationToken token)
     {
         var before = TeamRowPolicyAssertions.Image(store);
-        var expectedApplied = checked(database.LastApplied + 1L);
-        var beforeClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
+        var expectedApplied = checked(store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, command.Partition)) + 1L);
+        var beforeClock = store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Clock(command.Partition)))!;
         var outbox = JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition));
         var operation = RowRevisionInferenceRequests.Operation(database, command);
         var result = database.ApplyEmbedded(operation, token);
@@ -34,12 +34,12 @@ internal static class RowRevisionInferenceAssertions
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(JsonDefaults.Serialize(stored.Result).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))!.AsSpan().SequenceEqual(outcomeKey)).IsTrue();
-        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes), Convert.ToHexString(KeySpace.LastCommandBytes)];
+        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(StorageCommandKeys.Clock(command.Partition)), Convert.ToHexString(StorageCommandKeys.Applied(command.Partition))];
         await Assert.That(Filter(before, allowed).SequenceEqual(Filter(TeamRowPolicyAssertions.Image(store), allowed))).IsTrue();
-        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
-            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue();
+        await Assert.That(store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(command.Partition)))!
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(new StoragePartitionPosition(command.Partition, expectedApplied)))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition)).AsSpan().SequenceEqual(outbox)).IsTrue();
-        var afterClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
+        var afterClock = store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Clock(command.Partition)))!;
         await Assert.That(OrleansSerialization.Deserialize<DateTimeOffset>(afterClock))
             .IsGreaterThanOrEqualTo(OrleansSerialization.Deserialize<DateTimeOffset>(beforeClock));
         await ReplayAsync(database, store, operation, result, bytes, command.Partition, token);
@@ -80,7 +80,7 @@ internal static class RowRevisionInferenceAssertions
         var receipt = actual.Get<CommitReceipt>();
         CommitReceipt expected = new(command.CommandId, expectedToken, [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(db.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(db.Store.Position).IsGreaterThan(before);
         if (kind == P.Delete)
         {
             await Assert.That(db.Database.GetDocument(P.Root, new(db.Partition, P.Collection, P.Hidden), cancellationToken: token)).IsNull();

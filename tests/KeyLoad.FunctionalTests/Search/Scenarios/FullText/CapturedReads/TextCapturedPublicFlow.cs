@@ -46,9 +46,9 @@ internal static class TextCapturedPublicFlow
                 await AwaitOriginalPostingAsync(entered, original, token);
                 firstRelease.TrySetResult();
                 await TextCapturedPublicContinuation.OriginalAsync(await first, fixture);
-                files.RequireOriginal(fixture, runtime, token);
+                files.RequireOriginal(runtime, token);
                 var successor = await TextCapturedPublicContinuation.SwapAsync(fixture, runtime, request, token);
-                files.RequireOriginal(fixture, runtime, token);
+                files.RequireOriginal(runtime, token);
                 var successorRequest = request with
                 {
                     CommandId = successor.CommandId

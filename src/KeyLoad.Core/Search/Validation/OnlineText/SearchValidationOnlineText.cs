@@ -23,10 +23,10 @@ public static class SearchValidationOnlineText
         engine.ValidateOnlineTextCheckpoint(view, principal, request, command.Result.Checkpoint, null);
         var head = engine.ReadOutboxHead(view, request.Consumer.Partition);
         SearchValidation.RequireTextProjectionHistory(head, consumer.Checkpoint);
-        var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
+        var appliedBytes = view.ReadOwnedValue(StorageCommandKeys.Applied(request.Consumer.Partition)) ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         var placement = engine.ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         var resourceSha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
-        if (source.Incarnation != engine.Store.Identity.Incarnation || source.AppliedPosition != OrleansSerialization.Deserialize<long>(appliedBytes) || source.ThroughSequence != head.Tail || consumer.Checkpoint != source.ThroughSequence || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion || source.ResourceSha256 != resourceSha || placement.PhysicalShardId != request.Placement.PhysicalShardId || placement.Incarnation != request.Placement.Incarnation)
+        if (source.Incarnation != engine.Store.Identity.Incarnation || source.AppliedPosition != StorageOperationApply.ReadCanonicalSequence(appliedBytes, request.Consumer.Partition, OnlineTextPublicationProtocol.InvalidPublication) || source.ThroughSequence != head.Tail || consumer.Checkpoint != source.ThroughSequence || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion || source.ResourceSha256 != resourceSha || placement.PhysicalShardId != request.Placement.PhysicalShardId || placement.Incarnation != request.Placement.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
         }

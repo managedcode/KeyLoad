@@ -22,8 +22,11 @@ internal static class ChunkMultiblockCrashState
         var additional = ReplayUnchanged(database, () => ChunkMultiblockCrashOperations.Additional(database, merge));
         var digest = Convert.ToHexString(SHA256.HashData(Convert.FromHexString(SampleChunkCrashState.Complete(database))));
         var snapshot = new ChunkMultiblockCrashSnapshot(window, raw, SampleChunkCrashState.Raw(database),
-            Blocks(database, window.Generation), digest, database.Store.Position, database.Store.Identity.Incarnation, database.Store.Identity.Durability, Convert.ToHexString(acknowledged),
-            additional, inflight, appended, merged);
+            Blocks(database, window.Generation), digest, CrashDatabase.AppliedPosition(database.Store, SampleChunkCrashContract.Partition), database.Store.Identity.Incarnation, database.Store.Identity.Durability, Convert.ToHexString(acknowledged),
+            additional, inflight, appended, merged)
+        {
+            NativePosition = database.Store.Position
+        };
         await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), snapshot).ConfigureAwait(false);
     }
 

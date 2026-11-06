@@ -39,6 +39,7 @@ internal static class CatalogIdentityLifetime
             {
                 cold = new(new(db.Directory), db.StorageExecution,
                     timeProvider: db.Database.EvaluationClock);
+                cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
                 await ServerFailureObserver.ObserveAsync(async () =>
                     await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut), failures);

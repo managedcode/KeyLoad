@@ -61,12 +61,12 @@ internal static class MaintenanceJoinFlow
     internal static async Task VerifyReopenAsync(string root, string[] image, long position, Guid identity)
     {
         MaintenanceState.ExclusiveFiles(root);
-        await VerifyOpeningAsync(root, image, position, identity, healthy: false);
+        position = await VerifyOpeningAsync(root, image, position, identity, healthy: false);
         MaintenanceState.ExclusiveFiles(root);
-        await VerifyOpeningAsync(root, image, position + 1, identity, healthy: true);
+        await VerifyOpeningAsync(root, image, position, identity, healthy: true);
     }
 
-    private static async Task VerifyOpeningAsync(string root, string[] image, long position, Guid identity, bool healthy)
+    private static async Task<long> VerifyOpeningAsync(string root, string[] image, long position, Guid identity, bool healthy)
     {
         ZoneTreeStore? reopened = null;
         var failures = new List<Exception>();
@@ -75,6 +75,7 @@ internal static class MaintenanceJoinFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 reopened = Open(root);
+                position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
                 await Assert.That(reopened.Position).IsEqualTo(position);
                 await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity);
                 await MaintenanceState.LiteralAsync(reopened, healthy);
@@ -82,6 +83,7 @@ internal static class MaintenanceJoinFlow
                 {
                     await Assert.That(MaintenanceState.Image(reopened)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     reopened.Commit((tx, _) => { tx.Put(MaintenanceState.Key("omega"), MaintenanceState.Value("healthy")); return true; });
+                    position = await NativeStoreAssertions.AdvancedAsync(reopened, position);
                     await MaintenanceState.LiteralAsync(reopened, healthy: true);
                 }
             }, failures);
@@ -94,6 +96,7 @@ internal static class MaintenanceJoinFlow
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
+        return position;
     }
 
     internal static void Seed(ZoneTreeStore store)

@@ -14,7 +14,6 @@ internal sealed class FixtureLifetimeTests
     private const string SentinelContent = "Preserve the existing owner and its files.";
     private const byte ExistingKey = 0x21;
     private const byte ExistingValue = 0x42;
-    private const long ExistingPosition = 1;
 
     [Test]
     [Arguments(ZeroAttempts)]
@@ -90,6 +89,7 @@ internal sealed class FixtureLifetimeTests
                 transaction.Put([ExistingKey], [ExistingValue]);
                 return true;
             });
+            var position = owner.Position;
             var error = Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 using var unexpected = new TestDatabase(new()
@@ -98,7 +98,7 @@ internal sealed class FixtureLifetimeTests
             });
             await Assert.That(error.ParamName).IsEqualTo(DirectoryParameter);
             await Assert.That(await File.ReadAllTextAsync(sentinel)).IsEqualTo(SentinelContent);
-            await Assert.That(owner.Position).IsEqualTo(ExistingPosition);
+            await Assert.That(owner.Position).IsEqualTo(position);
             await Assert.That(owner.Read(view => view.ReadOwnedValue([ExistingKey])))
                 .IsEquivalentTo(new byte[] { ExistingValue }, CollectionOrdering.Matching);
         }

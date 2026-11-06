@@ -8,7 +8,7 @@ internal static class ConnectionCommandExecution
 {
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         Func<SiloAddress, GrainRequestEnvelope, string?, CancellationToken, Task<GrainOperationReply>> runOnOwner,
-        SiloAddress owner, GrainRequestCodec codec, TimeProvider clock,
+        SiloAddress owner, GrainRequestCodec codec,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var stage = GrainFailureStage.PartitionResolution;
@@ -19,7 +19,7 @@ internal static class ConnectionCommandExecution
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             var partition = GrainPartitionResolver.Resolve(request);
             stage = GrainFailureStage.CapabilityExecution;
-            var work = new ReadExecutionBudget(clock, token);
+            var work = new ReadExecutionBudget(token);
             work.AttachResourceLifetimeBinding(binding);
             var reply = await runOnOwner(owner, envelope, partition, token);
             CommandResultWorkBinding.BindReturned(request, reply, work, binding);

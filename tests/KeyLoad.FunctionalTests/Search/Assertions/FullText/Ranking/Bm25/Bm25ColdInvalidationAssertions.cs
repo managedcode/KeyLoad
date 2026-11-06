@@ -11,7 +11,7 @@ internal static class Bm25ColdInvalidationAssertions
 {
     internal static byte[] HeadBytes(Bm25OriginalPhaseRecoveryOwner owner, Bm25CorpusCurrent head)
     {
-        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var work = TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         return owner.Store.Read(view =>
         {
             byte[]? raw = null;
@@ -40,7 +40,7 @@ internal static class Bm25ColdInvalidationAssertions
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         flow.Owner.Reopen();
-        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
+        await before.RequireReopenedAsync(flow.Owner);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
     }
 
@@ -65,7 +65,7 @@ internal static class Bm25ColdInvalidationAssertions
             owner.Source.Partition, Bm25ColdInvalidationTrial.Collection, (view, principal, resource) =>
                 (owner.Database.ReadBm25CorpusCurrent(view, principal, resource, owner.Source.Partition,
                     Bm25ColdInvalidationTrial.Collection, Bm25ColdInvalidationTrial.Field,
-                    TextProjectionProtocol.TokenizerVersion, ["needle"], owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token))).Value);
+                    TextProjectionProtocol.TokenizerVersion, ["needle"], TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token))).Value);
         await Assert.That(current is not null).IsEqualTo(expectedCurrent);
         var rows = await new SearchEngine(owner.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(
             Bm25OriginalPhaseRecoveryFlow.Subject, new(owner.Source.Partition,

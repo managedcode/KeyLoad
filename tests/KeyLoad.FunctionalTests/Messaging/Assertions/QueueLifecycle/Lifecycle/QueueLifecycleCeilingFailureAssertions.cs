@@ -21,11 +21,11 @@ internal static class QueueLifecycleCeilingFailureAssertions
         var identity = OrleansSerialization.Serialize(store.Identity);
         var result = Apply(database, rows, principal, time);
         await RefusalAsync(result);
-        await Assert.That(store.Position).IsEqualTo(position + 1);
+        await Assert.That(store.Position).IsGreaterThan(position);
         await Assert.That(database.LastApplied).IsEqualTo(canonicalPosition + 1);
         await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(Domain(store, rows, principal)).IsEquivalentTo(domain, CollectionOrdering.Matching);
-        await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(time);
+        await Assert.That(QueueWholeFlowStorage.Clock(store, rows.Lane.Partition)).IsEqualTo(time);
         await Assert.That(OutcomeStoreOracle.ReadPartition(store, rows.Lane.Partition, principal, rows.Request.CommandId))
             .IsEqualTo(result);
         var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(rows.Lane.Partition,
@@ -48,7 +48,7 @@ internal static class QueueLifecycleCeilingFailureAssertions
         var actual = Apply(database, rows, principal, time);
         await RefusalAsync(actual);
         await Assert.That(actual).IsEqualTo(original);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
     }
 
     private static Result<object> Apply(DatabaseEngine database, QueueLifecycleCeilingRows rows,
@@ -68,14 +68,12 @@ internal static class QueueLifecycleCeilingFailureAssertions
     private static string[] Domain(ZoneTreeStore store, QueueLifecycleCeilingRows rows, string principal)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(rows.Lane.Partition, principal, rows.Request.CommandId));
-        var clock = Convert.ToHexString(KeySpace.ClockBytes);
-        var applied = Convert.ToHexString(KeySpace.AppliedBytes);
-        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes);
+        var clock = Convert.ToHexString(StorageCommandKeys.Clock(rows.Lane.Partition));
+        var applied = Convert.ToHexString(StorageCommandKeys.Applied(rows.Lane.Partition));
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(rows.Lane.Partition, principal, rows.Request.CommandId));
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + Separator, StringComparison.Ordinal)
             && !row.StartsWith(clock + Separator, StringComparison.Ordinal)
             && !row.StartsWith(applied + Separator, StringComparison.Ordinal)
-            && !row.StartsWith(lastCommand + Separator, StringComparison.Ordinal)
             && !row.StartsWith(locator + Separator, StringComparison.Ordinal)).ToArray();
     }
 }

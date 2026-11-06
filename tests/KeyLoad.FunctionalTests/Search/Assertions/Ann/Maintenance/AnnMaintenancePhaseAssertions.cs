@@ -41,13 +41,14 @@ internal static class AnnMaintenancePhaseAssertions
         return applied;
     }
     internal static async Task<AnnMaintenanceCapabilityResult> FinishAsync(TestDatabase database,
-        AnnMaintenanceTestRuntime runtime, AnnMaintenanceRequest request, long upper)
+        AnnMaintenanceTestRuntime runtime, AnnMaintenanceRequest request, long upper,
+        int pageLimit = AnnMaintenanceTestData.PageLimit)
     {
         var completed = false;
         CommitProjectionBatchRequest? emptyIntent = null;
         for (var number = 0; number < MaximumPages; number++)
         {
-            var page = AnnMaintenanceTestData.Read(database, request, upper);
+            var page = AnnMaintenanceTestData.Read(database, request, upper, pageLimit);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)

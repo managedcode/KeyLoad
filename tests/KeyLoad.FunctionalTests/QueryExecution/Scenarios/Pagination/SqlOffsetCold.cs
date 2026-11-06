@@ -19,6 +19,7 @@ internal static class SqlOffsetCold
                         Incarnation = database.Store.Identity.Incarnation
                     },
                     database.Store.Identity.NodeId, database.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await SqlOffsetRefusals.UnchangedAsync(store, before, position, identity);

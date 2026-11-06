@@ -19,6 +19,7 @@ internal static class ResourceIncarnationCold
             token.ThrowIfCancellationRequested();
             await OpenAsync(fixture, identity, async store =>
             {
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await ResourceIncarnationAssertions.UnchangedAsync(store, image, position);
                 var database = fixture.CreateConfiguredDatabase(store);
                 await ResourceIncarnationAssertions.PreserveAsync(store, fixture.Partition, state);

@@ -97,7 +97,7 @@ public static class DatabaseCompositionIdentity
             throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority);
         }
 
-        var budget = new ReadExecutionBudget(CompositionTimeProvider.Instance);
+        var budget = new ReadExecutionBudget();
         if (mutations.Any(mutation => mutation is QueueToGraph { FromCollection: not null }))
         {
             engine.ValidateTypedEndpointOutcomeReferences(view, principal, partition, references, budget);

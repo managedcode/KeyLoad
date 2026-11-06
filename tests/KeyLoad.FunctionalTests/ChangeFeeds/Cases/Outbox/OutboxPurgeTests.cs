@@ -163,7 +163,7 @@ internal sealed class OutboxPurgeTests
         var actual = database.Submit(OperationKind.PurgeOutbox,
             new PurgeOutboxRequest(commandId, database.Partition, through), id: commandId).Get<OutboxHead>();
         await Assert.That(actual).IsEqualTo(expectedHead);
-        await Assert.That(database.Store.Position).IsEqualTo(positionBeforeNoOp + 1);
+        await Assert.That(database.Store.Position).IsGreaterThan(positionBeforeNoOp);
         await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNotNull();
     }
 

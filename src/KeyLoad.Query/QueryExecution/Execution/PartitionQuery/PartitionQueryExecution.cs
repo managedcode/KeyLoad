@@ -7,11 +7,11 @@ namespace KeyLoad.Query;
 internal static class PartitionQueryExecution
 {
     internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
-        ImmutableArray<PartitionRef> partitions, TimeProvider? timeProvider = null,
+        ImmutableArray<PartitionRef> partitions,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(timeProvider ?? engine.PartitionQueryOwner.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.ExecutePartitionQuery(principalId, request, partitions, budget);
     }
 

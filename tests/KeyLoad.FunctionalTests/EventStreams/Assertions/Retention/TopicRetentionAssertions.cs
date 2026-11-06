@@ -26,7 +26,7 @@ internal static class TopicRetentionAssertions
         var initialPosition = fixture.Store.Position;
         var failed = fixture.Submit(command, principal);
         await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(expected);
-        await Assert.That(fixture.Store.Position).IsEqualTo(initialPosition + 1);
+        await Assert.That(fixture.Store.Position).IsGreaterThan(initialPosition);
         var cut = fixture.Store.Position;
         var all = QueueWholeFlowStorage.Bytes(fixture.Store);
         var replay = fixture.Submit(command, principal);

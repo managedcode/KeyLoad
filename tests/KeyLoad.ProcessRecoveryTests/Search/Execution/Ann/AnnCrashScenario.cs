@@ -45,7 +45,6 @@ internal static class AnnCrashScenario
         var intent = OrleansSerialization.Deserialize<CommitProjectionBatchRequest>(await File.ReadAllBytesAsync(Path.Combine(directory, AnnCrashContract.IntentFile)));
         if (mode == AnnCrashContract.Fault)
         {
-            boundary.Position = checked(database.Store.Position + AnnCrashContract.Version);
             await boundary.ArmAsync(database.Store);
             _ = AnnCrashOperations.Commit(commands, intent);
             await database.Store.SyncAsync();

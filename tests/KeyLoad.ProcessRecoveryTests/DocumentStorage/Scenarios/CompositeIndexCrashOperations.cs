@@ -72,7 +72,6 @@ internal static class CompositeIndexCrashOperations
     internal static async Task ApplyInflightCutAsync(DatabaseEngine database, ZoneTreeStore store,
         CanonicalCrashBoundary boundary)
     {
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         _ = Apply(database, CompositeIndexCrashContract.Partition, CompositeIndexCrashContract.FaultCommandText,
             new PutDocument(CompositeIndexCrashContract.Collection, CompositeIndexCrashContract.ConflictId,

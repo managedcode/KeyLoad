@@ -16,6 +16,7 @@ internal static class AtomicTriadStagedCold
             {
                 Incarnation = identity.Incarnation
             }, identity.NodeId, state.Harness.StorageExecution);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 state.Store = store;

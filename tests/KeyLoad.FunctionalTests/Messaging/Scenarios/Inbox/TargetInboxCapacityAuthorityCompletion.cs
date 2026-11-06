@@ -87,7 +87,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
     {
         var placement = database.ReadAtomicPartitionPlacement(TargetInboxUnitProtocol.Root, output.Partition);
         return new(placement.Incarnation, output.Partition.AtomicPartitionId,
-            checked(database.LastApplied + NextCommitPosition));
+            checked(ExpectedCanonicalCommit.Applied(database, output.Partition) + NextCommitPosition));
     }
 
     private static async Task ExactAsync<T>(T actual, T expected)

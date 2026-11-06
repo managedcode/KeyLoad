@@ -5,12 +5,12 @@ namespace KeyLoad.Query;
 
 internal static class SqlGraphSearchExecutor
 {
-    internal static async Task<GraphSearchResult> ExecuteAsync(DatabaseEngine database, SearchEngine search,
+    internal static async Task<GraphSearchResult> ExecuteAsync(SearchEngine search,
         string principalId, SqlGraphSearchRequest request, QueryExecutionOptions execution, CancellationToken cancellationToken,
         IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlGraphSearchRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

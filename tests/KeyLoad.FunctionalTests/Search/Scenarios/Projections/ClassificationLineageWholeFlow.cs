@@ -46,6 +46,7 @@ internal static class ClassificationLineageWholeFlow
         var beforeCold = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var cut = fixture.Harness.Store.Position;
         fixture.Harness.Reopen();
+        cut = await NativeStoreAssertions.ReopenedAsync(fixture.Harness.Store, cut);
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, beforeCold, cut);
         await WithProviderAsync(fixture, projection => ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection));
         await ClassificationLineageWholeAssertions.RetainedAsync(fixture, vector, lineage);

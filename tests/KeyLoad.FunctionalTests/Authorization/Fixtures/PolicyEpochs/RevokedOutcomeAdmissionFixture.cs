@@ -56,9 +56,9 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
             [new PutDocument(Documents, "a", "{\"value\":1}", 0), new PutDocument(Documents, "b", "{\"value\":2}", 0),
              new AppendEvents(Events, "stream", [new("original", "Created", "{\"event\":1}")], ExpectedStreamRevision.NoStream),
              new EnqueueMessage(Queue, "original", "{\"work\":1}")]);
-        OriginalPosition = Store.Position + 1;
         OriginalToken = ExpectedCanonicalCommit.Next(Database, Harness.Partition);
         OriginalResult = Database.Apply(Operation(Original));
+        OriginalPosition = Store.Position;
         OriginalOutcome = ReadOutcome(Original.CommandId);
         OriginalLocator = Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(Harness.Partition, Worker, Original.CommandId)))
             ?? throw new InvalidOperationException("The original outcome locator is absent.");

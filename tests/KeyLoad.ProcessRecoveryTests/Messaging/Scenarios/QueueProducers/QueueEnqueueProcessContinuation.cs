@@ -33,7 +33,7 @@ internal static class QueueEnqueueProcessContinuation
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var restored = QueueLifecycleRecoveryAssertions.Open(cold);
         await QueueEnqueueProcessValueAssertions.IdentityAsync(cold.Identity, identity);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        _ = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, original, originalResult, token);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, refusal.Operation, refusal.Result, token);

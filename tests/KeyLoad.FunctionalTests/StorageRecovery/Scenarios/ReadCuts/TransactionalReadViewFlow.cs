@@ -26,6 +26,7 @@ internal static class TransactionalReadViewFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 state.Reopen();
+                state.FinalPosition = await NativeStoreAssertions.ReopenedAsync(state.Store, state.FinalPosition);
                 await TransactionalReadViewContinuation.RequireAsync(state, token);
             }, failures);
         }

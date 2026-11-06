@@ -118,7 +118,7 @@ internal static class ResourceAdministrationFlow
             await Assert.That(CanonicalStoreImage.Bytes(database.Store).SequenceEqual(image.Rows, StringComparer.Ordinal)).IsTrue();
             await Assert.That(OrleansSerialization.Serialize(database.Store.Identity).SequenceEqual(image.Identity)).IsTrue();
             await Assert.That(database.ReadCanonicalCut()).IsEqualTo(image.Cut);
-            await Assert.That(database.Database.LastApplied).IsEqualTo(image.Cut.AppliedPosition);
+            await Assert.That(NativeStoreAssertions.Applied(database.Store, database.Partition)).IsEqualTo(image.Cut.AppliedPosition);
             await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
                 KeySpace.GlobalOutcome(principal.Id, commandId)))).IsNull();
         }

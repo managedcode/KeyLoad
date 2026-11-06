@@ -35,7 +35,7 @@ internal static class SampleRollupLeaseDropFlow
                 await SampleRollupWholeFlow.Literal(held.Result, 1, 6, 3, 12, 2, 6, 4);
                 await Assert.That(held.CompleteImage).IsEqualTo(before);
                 await Assert.That(held.Position).IsEqualTo(position);
-                await Assert.That(db.Store.Position).IsEqualTo(position + 1);
+                await Assert.That(db.Store.Position).IsGreaterThan(position);
             }, failures);
         }
         finally { release.Set(); }
@@ -72,7 +72,7 @@ internal static class SampleRollupLeaseDropFlow
     private static SampleRollupHeldRead Capture(TestDatabase db, KeyLoad.Storage.IKeyValueView view,
         CancellationToken cancellation)
     {
-        var budget = new ReadExecutionBudget(db.Database.EvaluationClock, cancellation);
+        var budget = new ReadExecutionBudget(cancellation);
         var request = new ReadSampleRollupRequest(db.Partition, SampleRollupWholeFlow.Set,
             SampleRollupWholeFlow.Series, SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End);
         var result = SampleRollupReader.Read(db.Database, budget.CreateView(view), SampleRollupWholeFlow.Root, request, budget);

@@ -11,8 +11,7 @@ internal static class AnnProjectionPublicationRead
     private const int RetainedFrames = 2;
 
     internal static async Task<AnnProjectionPublication> ReadAsync(DatabaseEngine database,
-        PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured,
-        TimeProvider clock, AnnMaintenanceAdmissions admissions,
+        PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured, AnnMaintenanceAdmissions admissions,
         Func<AnnGenerationOwner> owningRoot, CancellationToken token,
         ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
@@ -23,7 +22,7 @@ internal static class AnnProjectionPublicationRead
             using var operation = admissions.Enter();
             try
             {
-                result = await ReadOwnedAsync(database, principal, request, configured, clock, owningRoot, token, originalBudget, binding);
+                result = await ReadOwnedAsync(database, principal, request, configured, owningRoot, token, originalBudget, binding);
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -35,12 +34,11 @@ internal static class AnnProjectionPublicationRead
     }
 
     private static Task<AnnProjectionPublication> ReadOwnedAsync(DatabaseEngine database,
-        PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured,
-        TimeProvider clock, Func<AnnGenerationOwner> owningRoot, CancellationToken token,
+        PrincipalRecord principal, AnnMaintenanceRequest request, ServerRuntimeOptions configured, Func<AnnGenerationOwner> owningRoot, CancellationToken token,
         ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
         AnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);
-        var read = originalBudget ?? new ReadExecutionBudget(clock, token);
+        var read = originalBudget ?? new ReadExecutionBudget(token);
         var eligible = binding is null
             ? database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read)
             : database.ReadProjectionMaintenanceEligibilityBound(request.Consumer, request.IndexGeneration, read, binding);

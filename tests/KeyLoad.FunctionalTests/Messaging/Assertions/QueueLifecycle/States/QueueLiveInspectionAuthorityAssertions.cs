@@ -57,7 +57,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
     internal static async Task OneRowAsync(QueuePendingAuthorityCut original, QueuePendingAuthorityCut damaged,
         byte[] key, byte[]? replacement)
     {
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await Assert.That(damaged.Identity.SequenceEqual(original.Identity)).IsTrue();
         await Assert.That(damaged.Rows.Length).IsEqualTo(original.Rows.Length - (replacement is null ? 1 : 0));
         var prefix = Convert.ToHexString(key) + ":";

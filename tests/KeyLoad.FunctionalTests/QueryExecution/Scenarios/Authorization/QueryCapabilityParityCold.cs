@@ -23,6 +23,7 @@ internal static class QueryCapabilityParityCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, bytes), failures);

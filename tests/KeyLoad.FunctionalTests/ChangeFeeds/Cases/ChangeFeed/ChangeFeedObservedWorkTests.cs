@@ -1,5 +1,4 @@
 using KeyLoad.FunctionalTests.Messaging;
-using KeyLoad.FunctionalTests.QueryExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.ChangeFeeds;
@@ -7,17 +6,13 @@ namespace KeyLoad.FunctionalTests.ChangeFeeds;
 internal sealed class ChangeFeedObservedWorkTests
 {
     private const string Principal = "root";
-    private const int ExpiredSeconds = 2;
-    private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(true)]
-    public async Task OriginalObservedFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy(bool cancel)
+    public async Task OriginalObservedFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy()
     {
-        var clock = new QueryObservedWorkClock();
-        using var database = new TestDatabase(new DatabaseLimits(), timeProvider: clock);
+        using var database = new TestDatabase();
         database.Configure(ChangeFeedLiteralOracle.Collection, ResourceKind.Collection);
-        var committedAt = clock.GetUtcNow();
+        var committedAt = database.Database.EvaluationClock.GetUtcNow();
         var commandId = Guid.NewGuid();
         var receipt = database.Submit(OperationKind.Batch, new CommandRequest(commandId, database.Partition,
             [new PutDocument(ChangeFeedLiteralOracle.Collection,
@@ -29,27 +24,14 @@ internal sealed class ChangeFeedObservedWorkTests
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        clock.Arm(() => database.Store.GetReadDiagnostics().PointExaminedBytes > before.PointExaminedBytes,
-            () => { if (cancel) { cancellation.Cancel(); } else { clock.Advance(TimeSpan.FromSeconds(ExpiredSeconds)); } });
+        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
+            static progress => progress.PointExaminedBytes);
+        await observed.Ready;
         ChangeFeedPage? partial = null;
-        try
-        {
-            if (cancel)
-            {
-                var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
-                    partial = database.Database.ReadChangeFeed(Principal, request, cancellation.Token));
-                await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-            }
-            else
-            {
-                var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-                    partial = database.Database.ReadChangeFeed(Principal, request, cancellation.Token));
-                await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-                await Assert.That(failure.Message).IsEqualTo(DeadlineDetail);
-            }
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+        var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
+            partial = database.Database.ReadChangeFeed(Principal, request, cancellation.Token));
+        await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(database.Store.GetReadDiagnostics().PointExaminedBytes).IsGreaterThan(before.PointExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);

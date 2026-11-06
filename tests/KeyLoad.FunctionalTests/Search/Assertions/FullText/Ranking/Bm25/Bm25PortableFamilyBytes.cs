@@ -5,17 +5,16 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal static class Bm25PortableFamilyBytes
 {
-    internal static string[] Complete(IAtomicStore store, TimeProvider clock, CancellationToken token)
+    internal static string[] Complete(IAtomicStore store, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(clock, token);
+        var work = new ReadExecutionBudget(token);
         return store.Read(view => work.CreateView(view).ScanAll([]).Select(row => Convert.ToHexString(row.Key.Span) + ":"
             + Convert.ToHexString(row.Value.Span)).ToArray());
     }
 
-    internal static async Task RequireHeadsAsync(IAtomicStore store, Bm25CorpusCurrent[] originals, byte[][] originalBytes,
-        TimeProvider clock, CancellationToken token)
+    internal static async Task RequireHeadsAsync(IAtomicStore store, Bm25CorpusCurrent[] originals, byte[][] originalBytes, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(clock, token);
+        var work = new ReadExecutionBudget(token);
         await Assert.That(originalBytes.Length).IsEqualTo(originals.Length);
         for (var index = 0; index < originals.Length; index++)
         {

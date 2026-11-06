@@ -65,10 +65,10 @@ internal static class EventingArtifactFences
         var result = fixture.Database.Apply(original);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        await Assert.That(fixture.Database.Store.Position).IsEqualTo(before + 1);
+        var publishedPosition = await NativeStoreAssertions.AdvancedAsync((Storage.ZoneTree.ZoneTreeStore)fixture.Database.Store, before);
         var stored = EventingArtifactState.FullBytes(fixture.Database.Store);
         await EventingArtifactState.SameResultAsync(result, fixture.Database.Apply(original));
         await Assert.That(EventingArtifactState.FullBytes(fixture.Database.Store)).IsEquivalentTo(stored, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(fixture.Database.Store.Position).IsEqualTo(before + 1);
+        await Assert.That(fixture.Database.Store.Position).IsEqualTo(publishedPosition);
     }
 }

@@ -32,7 +32,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsNull();
         var commandId = Guid.NewGuid();
         fixture.WriteLocalDocument(AtomicPartitionRosterFixture.Destination, DocumentId, DocumentJson, lifetime);
-        var firstSeenIndex = checked(fixture.Database.LastApplied + 1);
+        var firstSeenIndex = checked(ExpectedCanonicalCommit.Applied(fixture.Database, AtomicPartitionRosterFixture.Source) + 1);
         var source = fixture.Batch(AtomicPartitionRosterFixture.Source, commandId, firstSeenIndex,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, DocumentJson));
         await Assert.That(Errors.Code(source.Problem).Value).IsNull();
@@ -69,8 +69,8 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var firstPosition = first.Store.Position;
         var secondPosition = second.Store.Position;
         var commandId = Guid.NewGuid();
-        var firstSeenIndex = checked(first.Database.LastApplied + 1);
-        await Assert.That(second.Database.LastApplied).IsEqualTo(first.Database.LastApplied);
+        var firstSeenIndex = checked(ExpectedCanonicalCommit.Applied(first.Database, AtomicPartitionRosterFixture.Source) + 1);
+        await Assert.That(ExpectedCanonicalCommit.Applied(second.Database, AtomicPartitionRosterFixture.Source)).IsEqualTo(ExpectedCanonicalCommit.Applied(first.Database, AtomicPartitionRosterFixture.Source));
         var firstResult = first.Batch(AtomicPartitionRosterFixture.Source, commandId, firstSeenIndex,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, DocumentJson));
         var secondResult = second.Batch(AtomicPartitionRosterFixture.Source, commandId, firstSeenIndex,

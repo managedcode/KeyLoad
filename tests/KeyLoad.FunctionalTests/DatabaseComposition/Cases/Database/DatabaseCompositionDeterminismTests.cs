@@ -32,7 +32,7 @@ internal sealed class DatabaseCompositionDeterminismTests
             var request = new CommandRequest(commandId, left.Partition,
                 [new QueueToGraph(Graph, Queue, EdgePrefix),
                     new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
-            var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
+            var work = TestDatabase.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
             var operation = left.Database.CreateCommand(OperationKind.Batch, commandId, "root", fixedEvaluation,
                 request, work);
             var limits = new DatabaseLimits();
@@ -41,8 +41,8 @@ internal sealed class DatabaseCompositionDeterminismTests
             var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), steady);
             var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), jumping);
 
-            var sequence = checked(leftEngine.LastApplied + NextSequence);
-            await Assert.That(rightEngine.LastApplied).IsEqualTo(sequence - NextSequence);
+            var sequence = checked(ExpectedCanonicalCommit.Applied(leftEngine, left.Partition) + NextSequence);
+            await Assert.That(ExpectedCanonicalCommit.Applied(rightEngine, left.Partition)).IsEqualTo(sequence - NextSequence);
             var callerToken = TestContext.Current!.Execution.CancellationToken;
             var leftReceipt = leftEngine.ApplyStorageOperation(operation, sequence, callerToken).Result.Get<CommitReceipt>();
             var rightReceipt = rightEngine.ApplyStorageOperation(operation, sequence, callerToken).Result.Get<CommitReceipt>();
@@ -59,8 +59,8 @@ internal sealed class DatabaseCompositionDeterminismTests
                 MessagePrefix + EdgePrefix + SourceId)).IsTrue();
             await Assert.That(SameStored<MessageBody>(left, right, MessageBodySpace, Queue,
                 MessagePrefix + EdgePrefix + SourceId)).IsTrue();
-            await Assert.That(leftEngine.LastApplied).IsEqualTo(sequence);
-            await Assert.That(rightEngine.LastApplied).IsEqualTo(sequence);
+            await Assert.That(ExpectedCanonicalCommit.Applied(leftEngine, left.Partition)).IsEqualTo(sequence);
+            await Assert.That(ExpectedCanonicalCommit.Applied(rightEngine, left.Partition)).IsEqualTo(sequence);
         });
     }
 

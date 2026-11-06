@@ -19,12 +19,12 @@ internal static class QueueClaimAckRecovery
             Path.Combine(root, QueueClaimAckCrashProtocol.DeliveryFile), token)) : null;
         var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.TargetFile), token));
-        var physicalTarget = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(
-            Path.Combine(root, QueueClaimAckCrashProtocol.PhysicalTargetFile), token));
+        var seedTimestamp = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(
+            Path.Combine(root, QueueClaimAckCrashProtocol.SeedTimestampFile), token));
         var baseline = OrleansSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.BaselineFile), token));
         await AssertOriginalAsync(database, operation, target, ack, original);
-        var recovered = await RecoveredCutAsync(database, store, operation, stage, ack, original, target, physicalTarget, baseline, token);
+        var recovered = await RecoveredCutAsync(database, store, operation, stage, ack, original, target, seedTimestamp, baseline, token);
         var image = QueueClaimAckRecoveryAssertions.Capture(store);
         var position = store.Position;
         var identity = store.Identity;
@@ -32,7 +32,7 @@ internal static class QueueClaimAckRecovery
         store.Dispose();
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        _ = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await QueueClaimAckRecoveryContinuation.ColdAsync(root, QueueLifecycleRecoveryAssertions.Open(cold), cold,
             operation, ack, recovered.Result, recovered.Delivery, token);
@@ -40,13 +40,13 @@ internal static class QueueClaimAckRecovery
 
     private static async Task<(Result<object> Result, Delivery? Delivery)> RecoveredCutAsync(DatabaseEngine database,
         ZoneTreeStore store, Command<DatabaseCommand> operation, CommitStage stage, bool ack, Delivery? original,
-        CommitToken target, long physicalTarget, string[] baseline, CancellationToken token)
+        CommitToken target, long seedTimestamp, string[] baseline, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var outcome = OutcomeStoreOracle.ReadPartition(store, QueueClaimAckCrashProtocol.Partition,
             CrashFixtureValues.Principal, operation.CommandId);
-        await Assert.That(store.Position).IsEqualTo(outcome is null
-            ? physicalTarget - QueueClaimAckCrashProtocol.AdjacentPosition : physicalTarget);
+        var recoveredTimestamp = store.Position;
+        await Assert.That(recoveredTimestamp).IsGreaterThanOrEqualTo(seedTimestamp);
         if (outcome is null)
         {
             await Assert.That(QueueClaimAckRecoveryAssertions.Capture(store)).IsEquivalentTo(baseline, CollectionOrdering.Matching);
@@ -68,7 +68,14 @@ internal static class QueueClaimAckRecovery
             RecoveredState(ack, outcome is not null), delivery, 1);
         token.ThrowIfCancellationRequested();
         var result = database.Apply(operation);
-        await Assert.That(store.Position).IsEqualTo(physicalTarget);
+        if (outcome is null)
+        {
+            await Assert.That(store.Position).IsGreaterThan(recoveredTimestamp);
+        }
+        else
+        {
+            await Assert.That(store.Position).IsEqualTo(recoveredTimestamp);
+        }
         if (outcome is { } retained)
         {
             await QueueClaimAckRecoveryAssertions.EqualAsync(result, retained);

@@ -11,7 +11,7 @@ internal static class AnnProviderQualificationCold
         AnnProviderQualificationDamage damage, PackedAnnIndex healthy, CancellationToken token)
     {
         var image = AnnProviderQualificationImages.Capture(owner);
-        state.DamagedFile = AnnProviderQualificationDamageCodec.Create(owner, state, damage, token);
+        state.DamagedFile = AnnProviderQualificationDamageCodec.Create(state, damage, token);
         state.DamagedDigest = SHA256.HashData(state.DamagedFile);
         await Assert.That(state.DamagedFile.AsSpan().SequenceEqual(state.OriginalFile)).IsFalse();
         await AnnProviderQualificationPersistence.WriteExactAsync(owner, state.DamagedFile, token);
@@ -20,7 +20,7 @@ internal static class AnnProviderQualificationCold
         await AnnProviderQualificationHistoryAssertions.AllAsync(owner, state, token);
         await AnnProviderQualificationImages.SameAsync(owner, image);
         owner.Reopen();
-        await AnnProviderQualificationImages.SameAsync(owner, image);
+        image = await AnnProviderQualificationImages.ReopenedAsync(owner, image);
         await RefuseAsync(owner, state, token);
         await AnnProviderQualificationResults.CurrentAsync(owner, state, healthy, token);
         await AnnProviderQualificationHistoryAssertions.AllAsync(owner, state, token);
@@ -37,7 +37,7 @@ internal static class AnnProviderQualificationCold
     {
         var image = AnnProviderQualificationImages.Capture(owner);
         owner.Reopen();
-        await AnnProviderQualificationImages.SameAsync(owner, image);
+        await AnnProviderQualificationImages.ReopenedAsync(owner, image);
         await FileAsync(owner.SnapshotPath, state.OriginalFile, state.OriginalDigest, token);
         if (state.Healthy)
         {
@@ -55,7 +55,7 @@ internal static class AnnProviderQualificationCold
         using var source = new FileStream(owner.SnapshotPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(source, state.DamagedDigest,
             UnitExecutionOptions.PackedAnn(state.Policy), Options.Create(new PackedAnnStorageOptions()),
-            AnnProviderQualificationCorpus.Budget(owner, token))) ?? throw new InvalidOperationException(ExpectedRefusal);
+            AnnProviderQualificationCorpus.Budget(token))) ?? throw new InvalidOperationException(ExpectedRefusal);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(PackedAnnStorageFrames.InvalidSnapshot);
         await AnnProviderQualificationImages.SameAsync(owner, image);

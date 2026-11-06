@@ -44,7 +44,9 @@ internal static class SampleRollupProcessAssertions
                 await LiteralAsync(root, SampleRollupCrashContract.FinalFile, HealthyRevision, false, token);
                 var healthy = await ReadAsync(root, SampleRollupCrashContract.HealthyFile, token);
                 var final = await ReadAsync(root, SampleRollupCrashContract.FinalFile, token);
-                await Assert.That(JsonDefaults.Serialize(final).SequenceEqual(JsonDefaults.Serialize(healthy))).IsTrue();
+                await Assert.That(final.NativePosition).IsGreaterThanOrEqualTo(healthy.NativePosition);
+                await Assert.That(JsonDefaults.Serialize(final with { NativePosition = healthy.NativePosition })
+                    .SequenceEqual(JsonDefaults.Serialize(healthy))).IsTrue();
                 break;
             default:
                 throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
@@ -71,14 +73,15 @@ internal static class SampleRollupProcessAssertions
             : await ReadAsync(root, SampleRollupCrashContract.PreparedFile, token);
         var expectedPosition = revision switch
         {
-            InitialRevision => prepared.Position,
-            RecoveredRevision => checked(prepared.Position + SampleRollupCrashContract.PositionStep),
-            RefreshedRevision => checked(prepared.Position + RecoveredRevision),
-            DroppedRevision => checked(prepared.Position + RefreshedRevision),
-            HealthyRevision => checked(prepared.Position + SourceSequence),
+            InitialRevision => prepared.AppliedPosition,
+            RecoveredRevision => checked(prepared.AppliedPosition + SampleRollupCrashContract.PositionStep),
+            RefreshedRevision => checked(prepared.AppliedPosition + RecoveredRevision),
+            DroppedRevision => checked(prepared.AppliedPosition + RefreshedRevision),
+            HealthyRevision => checked(prepared.AppliedPosition + SourceSequence),
             _ => throw new InvalidOperationException(SampleRollupCrashContract.Invalid)
         };
-        await Assert.That(actual.Position).IsEqualTo(expectedPosition);
+        await Assert.That(actual.AppliedPosition).IsEqualTo(expectedPosition);
+        await Assert.That(actual.NativePosition).IsGreaterThanOrEqualTo(prepared.NativePosition);
         var receipt = OrleansSerialization.Deserialize<CommitReceipt>(originalReceipt);
         await Assert.That(receipt.CommandId).IsEqualTo(SampleRollupCrashContract.AcknowledgedId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(SampleRollupCrashContract.Partition.AtomicPartitionId);

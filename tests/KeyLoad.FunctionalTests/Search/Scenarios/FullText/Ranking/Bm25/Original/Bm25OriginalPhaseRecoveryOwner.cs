@@ -82,7 +82,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             throw new InvalidOperationException("The original BM25 phase partition is inconsistent.");
         }
         var key = OutcomeStoreOracle.PartitionKey(phase.Current.Partition, operation.UserId!, operation.CommandId);
-        var inspection = Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var inspection = TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var stored = Store.Read(raw => inspection.CreateView(raw).GetRecord<StoredOutcome>(key));
         if (stored is null || stored.ScopeKind != CommandOutcomeScopeKind.Partition
             || stored.Partition != phase.Current.Partition || stored.PreparedCommand is not { } prepared
@@ -96,8 +96,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     }
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, Source.Partition), Store.Position));
 
     internal void Reopen()
     {

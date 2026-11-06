@@ -25,7 +25,7 @@ internal sealed class DuePageState
         MaximumRecordsPerPage = maximumRecordsPerPage;
         WakeAt = wakeAt;
         CancellationToken = cancellationToken;
-        budget = new(clock, cancellationToken);
+        budget = new(cancellationToken);
     }
 
     internal DateTimeOffset WakeAt

@@ -7,4 +7,8 @@ public interface IAtomicActionStaging
 {
     /// <summary>Completes the current action, keeping its writes, and starts the next one.</summary>
     void BeginAction();
+
+    /// <summary>Captures the provider-owned staged writes for persisted replication. Later staging never mutates
+    /// these buffers; no borrowed read-snapshot bytes are retained.</summary>
+    StorageMutation[] CaptureWrites();
 }

@@ -16,7 +16,7 @@ internal static class AnnProviderQualificationPersistence
         using (var output = new FileStream(Path(owner, state), FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
         {
             digest = index.Save(output, Options.Create(new PackedAnnStorageOptions()),
-                AnnProviderQualificationCorpus.Budget(owner, token));
+                AnnProviderQualificationCorpus.Budget(token));
             await output.FlushAsync(token);
             RandomAccess.FlushToDisk(output.SafeFileHandle);
         }
@@ -32,7 +32,7 @@ internal static class AnnProviderQualificationPersistence
             state.OriginalFile = bytes;
             state.OriginalDigest = digest;
         }
-        await FramesAsync(owner, state, index, bytes, token);
+        await FramesAsync(state, index, bytes, token);
         await AnnProviderQualificationResults.CurrentAsync(owner, state, Load(owner, state, token), token);
         await AnnProviderQualificationImages.SameAsync(owner, image);
         var first = await File.ReadAllBytesAsync(owner.SnapshotPath, token);
@@ -44,7 +44,7 @@ internal static class AnnProviderQualificationPersistence
     {
         using var source = new FileStream(Path(owner, state), FileMode.Open, FileAccess.Read, FileShare.Read);
         return PackedAnnIndex.Load(source, state.Healthy ? state.HealthyDigest : state.OriginalDigest, UnitExecutionOptions.PackedAnn(state.Policy),
-            Options.Create(new PackedAnnStorageOptions()), AnnProviderQualificationCorpus.Budget(owner, token));
+            Options.Create(new PackedAnnStorageOptions()), AnnProviderQualificationCorpus.Budget(token));
     }
 
     internal static async Task WriteExactAsync(AnnProviderQualificationOwner owner, byte[] bytes, CancellationToken token)
@@ -58,11 +58,11 @@ internal static class AnnProviderQualificationPersistence
     internal static string Path(AnnProviderQualificationOwner owner, AnnProviderQualificationState state)
         => state.Healthy ? System.IO.Path.Combine(owner.Source.Directory, HealthySnapshotFile) : owner.SnapshotPath;
 
-    private static async Task FramesAsync(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
+    private static async Task FramesAsync(AnnProviderQualificationState state,
         PackedAnnIndex index, byte[] bytes, CancellationToken token)
     {
         using var source = new MemoryStream(bytes, writable: false);
-        var budget = AnnProviderQualificationCorpus.Budget(owner, token);
+        var budget = AnnProviderQualificationCorpus.Budget(token);
         var header = PackedAnnStorageFrames.Read<PackedAnnStorageHeader>(source, budget);
         await Assert.That(header.Space).IsEqualTo(AnnProviderQualificationCorpus.Space(state.Metric));
         await Assert.That(header.Policy).IsEqualTo(state.Policy);

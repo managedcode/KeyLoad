@@ -51,7 +51,7 @@ internal static class OutcomeStoreOracle
 
     internal static StoredOutcome ReadStored(DatabaseEngine database, Guid commandId, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         return database.Store.Read(raw =>
         {
             var records = work.CreateView(raw).ScanAll(KeyCodec.Encode(ScopedOutcomeSpace));

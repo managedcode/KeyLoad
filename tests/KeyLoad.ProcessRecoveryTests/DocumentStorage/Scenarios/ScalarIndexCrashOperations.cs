@@ -13,7 +13,7 @@ internal static class ScalarIndexCrashOperations
     private const long EmptyRevision = 0;
     private const long FirstRevision = 1;
     private const long SecondRevision = 2;
-    private const int PositionStep = 1;
+
     private const int EmptyEvidenceBytes = 0;
     private const string ConflictOutcomeMessage = "The unique-index conflict batch did not return its canonical conflict outcome.";
     private const string ConflictMutationMessage = "The rejected unique-index batch changed canonical document state.";
@@ -88,7 +88,6 @@ internal static class ScalarIndexCrashOperations
     internal static async Task ApplyInflightCutAsync(DatabaseEngine database, ZoneTreeStore store,
         CanonicalCrashBoundary boundary)
     {
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         _ = Apply(database, ScalarIndexCrashContract.Partition, ScalarIndexCrashContract.FaultCommandText,
             new PutDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.ConflictId,

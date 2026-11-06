@@ -57,11 +57,27 @@ internal sealed class CopySynchronizationTests
                 source.Database.Submit(OperationKind.Batch, command, id: commandId, cancellationToken: bounded));
             await Assert.That(interrupted.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
             await fault.RepairArrived.Task.WaitAsync(bounded);
-            await Assert.That(fault.Sends).IsEqualTo(3);
+            await Assert.That(fault.Sends).IsEqualTo(2);
             await Assert.That(source.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(before + 1);
             await Assert.That(replica.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(before);
             await source.Database.Coordinator.ReadBarrierAsync(bounded);
             await RequireDocumentAsync(source, creation);
+            var independent = source.Database.Partition with { PartitionKey = "independent-during-copy-repair" };
+            var independentId = Guid.NewGuid();
+            var independentResult = await source.Database.Coordinator.RuntimeSubmitAsync<CommitReceipt>(OperationKind.Batch,
+                independentId, RequestCqrsHostedProfile.Root,
+                new CommandRequest(independentId, independent, [new PutDocument(Collection, Healthy, Json)]),
+                cancellationToken: bounded);
+            await Assert.That(independentResult.IsSuccess).IsTrue();
+            await Assert.That(independentResult.Value).IsNotNull();
+            await Assert.That(independentResult.Value!.PersistedCopies).IsEqualTo(cluster.Nodes.Length);
+            foreach (var node in cluster.Nodes)
+            {
+                var value = node.Database.Database.GetDocument(RequestCqrsHostedProfile.Root,
+                    new EntityRef(independent, Collection, Healthy), cancellationToken: bounded);
+                await Assert.That(value!.Json).IsEqualTo(Json);
+                await Assert.That(value.Revision).IsEqualTo(1L);
+            }
         }
         finally
         {

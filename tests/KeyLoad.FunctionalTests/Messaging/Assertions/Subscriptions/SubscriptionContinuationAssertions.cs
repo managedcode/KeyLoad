@@ -65,7 +65,7 @@ internal static class SubscriptionContinuationAssertions
         {
             await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, entry.Result);
         }
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
     }
 
     internal static async Task TerminalAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
@@ -161,7 +161,7 @@ internal static class SubscriptionContinuationAssertions
         await Assert.That(refused.Problem?.Detail).IsEqualTo(StaleDetail);
 
         await Assert.That(refused.Value).IsNull();
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
     }
 
     private static async Task EqualAsync<T>(T actual, T expected)

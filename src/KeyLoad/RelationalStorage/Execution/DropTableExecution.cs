@@ -18,7 +18,7 @@ internal sealed class DropTableExecution(PartitionHost partition, TimeProvider c
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
-        var work = new ReadExecutionBudget(clock, cancellationToken);
+        var work = new ReadExecutionBudget(cancellationToken);
         await partition.Coordinator.ReadBarrierAsync(cancellationToken);
         var principal = partition.Database.Store.Read(raw => partition.Database.Principal(
             work.CreateView(raw), principalId, clock.GetUtcNow()));

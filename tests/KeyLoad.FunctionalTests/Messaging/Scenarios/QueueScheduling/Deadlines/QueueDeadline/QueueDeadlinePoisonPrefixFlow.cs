@@ -22,7 +22,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         using var fixture = new TestDatabase();
         fixture.Configure(RuntimeQueueDeadlineProtocol.Queue, ResourceKind.WorkQueue);
         var lane = new QueueLaneRef(fixture.Partition, RuntimeQueueDeadlineProtocol.Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var due = start.AddSeconds(DueSeconds);
         QueueDeadlineOperations.ConfigureWorker(fixture.Database, lane.Partition, start,
             Capability.QueueConsume | Capability.QueueInspect | Capability.QueueAck, QueueDeadlinePoisonPrefixProtocol.First);
@@ -47,7 +47,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
             cursor = cursor.Advance(DuePrefixCursor.Empty);
         }
         cursor = await RefuseAndDeferAsync(fixture.Database, fixture.Store, cursor, due, token);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(fixture.Store, damaged, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(fixture.Store, damaged, position, identity);
         var outcomes = await AdvanceOthersAsync(fixture.Database, fixture.Store, cursor, lane, due, healthy, token);
         outcomes.AddRange(seeded);
         await Assert.That(fixture.Database.InspectMessage(QueueDeadlinePoisonPrefixProtocol.Root, lane, blocked)).IsEqualTo(blockedImage);
@@ -58,7 +58,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, retained, retainedPosition, identity);
+        retainedPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, retained, retainedPosition, identity);
         await Assert.That(cold.InspectMessage(QueueDeadlinePoisonPrefixProtocol.Root, lane, blocked)).IsEqualTo(blockedImage);
         var selected = QueueDeadlineCursor.Match(first.Identity, null);
         if (leased)
@@ -89,7 +89,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var final = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, complete, finalPosition, identity);
+        finalPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, complete, finalPosition, identity);
         await ReplayAsync(final, second, outcomes, token);
         await QueueDeadlinePoisonPrefixAssertions.FinalAsync(final, lane, due, leased);
         await QueueDeadlinePoisonPrefixHealthy.RunAsync(final, second, directory, lane, due, leased, outcomes, token);
@@ -139,7 +139,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
                 var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, RuntimeQueueDeadlineProtocol.Worker, due, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
                 var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
                 var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
-                    lane.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
+                    lane.Partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(database, lane.Partition) + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
                 var result = database.Apply(operation);
                 await Assert.That(Errors.Code(result.Problem).Value).IsNull();
 
@@ -168,6 +168,6 @@ internal static class QueueDeadlinePoisonPrefixFlow
             await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(item.Operation), item.Result);
             await ReplayResultAssertions.Same<CommitReceipt>(database.ResolveOutcome(item.Operation), item.Result);
         }
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 }

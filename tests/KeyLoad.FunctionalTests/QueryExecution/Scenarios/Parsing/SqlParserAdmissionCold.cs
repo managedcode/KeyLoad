@@ -24,6 +24,7 @@ internal static class SqlParserAdmissionCold
                 {
                     Incarnation = identity.Incarnation
                 }, identity.NodeId, db.StorageExecution);
+                cut = await NativeStoreAssertions.ReopenedAsync(store, cut);
                 await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, bytes), failures);
                 await ServerFailureObserver.ObserveAsync(() => SqlParserAdmissionWave.RunAsync(fixture, db.CreateConfiguredDatabase(store), store, token), failures);
                 await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, bytes), failures);

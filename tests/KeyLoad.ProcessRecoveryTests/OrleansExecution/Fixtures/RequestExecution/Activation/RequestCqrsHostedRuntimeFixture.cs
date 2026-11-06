@@ -52,7 +52,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     internal IOptions<GrainRoutingOptions> RoutingOptions => profile.Routing;
     internal IServiceProvider Services => application?.Services ?? throw new InvalidOperationException(NotInitialized);
     internal IServiceProvider PhysicalServices => Services.GetRequiredService<PartitionHostApplicationOwner>().Session.Services;
-    private PartitionHost Local => Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+    private PartitionHost Local => Services.GetRequiredService<PartitionHostApplicationOwner>().Session.Host;
     internal GrainRequestCodec Codec => Services.GetRequiredService<GrainRequestCodec>();
     internal RequestWorkOwner RequestWork => Services.GetRequiredService<OrleansNode>().RequestWork;
     internal (bool HasValue, TextIncrementalMaintenanceService? Value) RuntimeMaintenance => profile.RuntimeText

@@ -23,7 +23,7 @@ internal static class StreamRecordKeyAuthorityCold
                 var database = fixture.Database.CreateConfiguredDatabase(store);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    await Assert.That(store.Position).IsEqualTo(position);
+                    position = await NativeStoreAssertions.ReopenedAsync(store, position);
                     await Assert.That(QueueWholeFlowStorage.Bytes(store))
                         .IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
                     await StreamRecordKeyAuthorityAssertions.PagesFourAsync(database, fixture.Stream, fixture.Now, forward, backward, token);

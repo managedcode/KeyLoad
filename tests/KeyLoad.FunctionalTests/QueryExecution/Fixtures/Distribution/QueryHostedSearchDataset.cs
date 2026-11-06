@@ -1,4 +1,6 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core.ResourceExecution;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.FunctionalTests.QueryExecution;
 
@@ -22,6 +24,7 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
     internal PartitionRef Second => First with { PartitionKey = "customer-2" };
     internal ResourceLifetime Creation { get; private set; } = null!;
     internal PrincipalRecord Principal { get; private set; } = null!;
+    internal Dictionary<PartitionRef, long> LeafPositions { get; } = [];
     internal DistributedSearchRequest Request => new([First, Second],
         new(First, Collection, TextField: Title, Text: "source destination", Limit: Documents,
             FusionConstant: FusionConstant));
@@ -44,13 +47,27 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
             cancellationToken: token).Get<PrincipalRecord>();
         await WriteAsync(First, DestinationJson, token).ConfigureAwait(false);
         await WriteAsync(Second, SourceJson, token).ConfigureAwait(false);
+        await CaptureLeafPositionsAsync(token).ConfigureAwait(false);
+    }
+
+    private async Task CaptureLeafPositionsAsync(CancellationToken token)
+    {
+        foreach (var partition in new[] { First, Second })
+        {
+            var target = cluster.Nodes[0].Grains.GetGrain<IPartitionQueryGrain>(PartitionQueryGrainIdentity.For(partition));
+            var selected = await target.ResolveOwnerAsync(cluster.Nodes[0].Database.Store.Identity.Incarnation, token);
+            var physical = cluster.Nodes.Single(node => node.Services.GetRequiredService<ILocalSiloDetails>()
+                .SiloAddress.Equals(selected.Address)).Database.Store;
+            await Assert.That(selected.Owner.PhysicalShardId).IsEqualTo(physical.Identity.NodeId);
+            LeafPositions.Add(partition, physical.Position);
+        }
     }
 
     private async Task WriteAsync(PartitionRef partition, string json, CancellationToken token)
     {
         var owner = cluster.Nodes[0].Database;
         var commandId = Guid.NewGuid();
-        var expectedPosition = checked(owner.ReadCanonicalCut().AppliedPosition + Version);
+        var expectedPosition = checked(NativeStoreAssertions.Applied(owner.Store, partition) + Version);
         var receipt = owner.Submit(OperationKind.Batch,
             new CommandRequest(commandId, partition, [new PutDocument(Collection, DocumentId, json)]),
             id: commandId, cancellationToken: token).Get<CommitReceipt>();

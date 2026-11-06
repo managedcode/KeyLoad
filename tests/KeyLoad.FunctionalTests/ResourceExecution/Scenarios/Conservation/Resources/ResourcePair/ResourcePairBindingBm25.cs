@@ -23,7 +23,7 @@ internal static class ResourcePairBindingBm25
                 [new(source.Partition.DatabaseId, Corpus, Capability.Query | Capability.DocumentsRead)], []))).Get<PrincipalRecord>();
         }
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [new PutDocument(Corpus, CorpusDocument, CorpusJson)]);
-        var seedIndex = source.Database.LastApplied + One;
+        var seedIndex = ExpectedCanonicalCommit.Applied(source.Database, source.Partition) + One;
         var seeded = source.SubmitIssuedEmbedded(ResourcePairBindingBatch.Issue(source.Database, request), token);
         state.Remember(source.ReadStoredOutcome(request.CommandId).PreparedCommand, seeded);
         await ResourceIncarnationAssertions.EqualAsync(ResourcePairBindingAssertions.Receipt(source.Store, source.Partition,
@@ -42,11 +42,11 @@ internal static class ResourcePairBindingBm25
         var phase = ((Bm25CorpusPublicationPhaseCommand)original.Value!.Input);
         await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), phase.Current.Statistics);
         var expectedIndex = source.Store.Position + One;
-        var canonical = source.Database.LastApplied;
+        var canonical = ExpectedCanonicalCommit.Applied(source.Database, source.Partition);
         var result = source.SubmitIssuedEmbedded(original, token);
         await ResourceIncarnationAssertions.EqualAsync(ResourcePairBindingAssertions.Receipt(source.Store, source.Partition,
             original.CommandId, expectedIndex, []), result.Get<CommitReceipt>());
-        await Assert.That(source.Database.LastApplied).IsEqualTo(canonical);
+        await Assert.That(ExpectedCanonicalCommit.Applied(source.Database, source.Partition)).IsEqualTo(canonical);
         state.Remember(source.ReadStoredOutcome(original.CommandId).PreparedCommand, result);
         image = QueueWholeFlowStorage.Bytes(source.Store);
         position = source.Store.Position;
@@ -60,13 +60,13 @@ internal static class ResourcePairBindingBm25
     private static Command<DatabaseCommand> Capture(ResourcePairBindingState state, string publisher, CancellationToken token)
         => Bm25CorpusCapture.Create(state.Source.Database, publisher, CorpusSubject,
             new(state.Source.Partition, Corpus, CorpusField, CorpusTerm), Guid.NewGuid(), null,
-            state.Source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
+            TestDatabase.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
 
     internal static async Task HealthyAsync(ResourcePairBindingState state, DatabaseEngine database, CancellationToken token, bool expectedCurrent = true)
     {
         var current = database.WithQueryView(CorpusSubject, state.Source.Partition, Corpus,
             (view, principal, resource) => (database.ReadBm25CorpusCurrent(view, principal, resource, state.Source.Partition,
-                Corpus, CorpusField, TextProjectionProtocol.TokenizerVersion, [CorpusTerm], new ReadExecutionBudget(database.EvaluationClock, token))).Value);
+                Corpus, CorpusField, TextProjectionProtocol.TokenizerVersion, [CorpusTerm], new ReadExecutionBudget(token))).Value);
         if (expectedCurrent)
         {
             await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), current!);

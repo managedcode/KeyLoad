@@ -36,17 +36,17 @@ internal static class SearchWaitAuthorityTrial
         => RunAsync(async (fixture, search, request) =>
         {
             var database = fixture.Canonical;
-            var original = database.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
+            var original = database.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Applied(database.Partition)))
                 ?? throw new InvalidOperationException();
             database.Store.Commit((transaction, _) =>
             {
                 if (missing)
                 {
-                    transaction.Delete(KeySpace.AppliedBytes);
+                    transaction.Delete(StorageCommandKeys.Applied(database.Partition));
                 }
                 else
                 {
-                    transaction.Put(KeySpace.AppliedBytes, OrleansSerialization.Serialize(NegativeAppliedPosition));
+                    transaction.Put(StorageCommandKeys.Applied(database.Partition), OrleansSerialization.Serialize(new StoragePartitionPosition(database.Partition, NegativeAppliedPosition)));
                 }
                 return true;
             });
@@ -60,7 +60,7 @@ internal static class SearchWaitAuthorityTrial
             {
                 ServerFailureObserver.Observe(() => database.Store.Commit((transaction, _) =>
                 {
-                    transaction.Put(KeySpace.AppliedBytes, original);
+                    transaction.Put(StorageCommandKeys.Applied(database.Partition), original);
                     return true;
                 }), failures);
             }

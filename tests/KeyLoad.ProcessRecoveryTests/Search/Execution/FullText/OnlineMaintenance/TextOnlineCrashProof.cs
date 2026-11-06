@@ -50,7 +50,7 @@ internal static class TextOnlineCrashProof
         OnlineTextIndexMaintenanceRequest request, OnlineTextIndexMaintenanceResult receipt)
     {
         var database = runtime.Canonical.Database;
-        var budget = new ReadExecutionBudget(database.EvaluationClock);
+        var budget = new ReadExecutionBudget();
         var original = database.ReadOnlineTextOriginalPublication(CrashFixtureValues.Principal, request, budget)
             ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         var path = Path.Combine(runtime.PhysicalRoot, TextOnlineRoot.DirectoryName,

@@ -24,6 +24,7 @@ internal static class TargetInboxCapacityAuthorityFlow
         var original = QueueWholeFlowStorage.Bytes(source.Store);
         var position = source.Store.Position;
         TargetInboxCapacityAuthorityFixture.Change(source.Store, state, fault, repair: false);
+        position = await NativeStoreAssertions.AdvancedAsync(source.Store, position);
         var damaged = QueueWholeFlowStorage.Bytes(source.Store);
         var duplicate = state.Original with
         {
@@ -37,18 +38,21 @@ internal static class TargetInboxCapacityAuthorityFlow
         source.JoinOwnedResources();
         var continued = await TargetInboxCapacityAuthorityCold.RunAsync(source, async (database, store) =>
         {
-            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, damaged, position + 1L);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
+            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, damaged, position);
             await TargetInboxCapacityAuthorityAssertions.RefuseAsync(database, store, duplicate, token);
             await TargetInboxCapacityAuthorityAssertions.RefuseAsync(database, store, state.Healthy, token);
             await TargetInboxCapacityAuthorityAssertions.HistoryAsync(database, store, state, token);
             await TargetInboxCapacityAuthorityAssertions.SourceAsync(database, state);
             TargetInboxCapacityAuthorityFixture.Change(store, state, fault, repair: true);
-            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, original, position + 2L);
+            position = await NativeStoreAssertions.AdvancedAsync(store, position);
+            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, original, position);
             return await TargetInboxCapacityAuthorityContinuationFlow.RunAsync(database, store, state, duplicate, token);
         });
         await TargetInboxCapacityAuthorityCold.RunAsync(source, async (database, store) =>
         {
-            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, continued.Image, continued.Position);
+            var reopened = await NativeStoreAssertions.ReopenedAsync(store, continued.Position);
+            await TargetInboxCapacityAuthorityAssertions.SameAsync(store, continued.Image, reopened);
             await TargetInboxCapacityAuthorityHealthy.RequireAsync(database, store, state,
                 continued.Healthy.Get<CommitInboxResult>(), continued.HealthyPosition);
             await TargetInboxCapacityAuthorityAssertions.HistoryAsync(database, store, state, token);

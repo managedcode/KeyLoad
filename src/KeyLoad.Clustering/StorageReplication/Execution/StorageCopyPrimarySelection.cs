@@ -1,17 +1,29 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Prepares on the coordinator's selected local copy only when it has the same canonical cut.</summary>
+/// <summary>Requires one primary to cover both the partition sequence and the selected metadata authority.</summary>
 internal static class StorageCopyPrimarySelection
 {
-    internal static void PreferLocal(StorageCopyOwner[] owners, SiloAddress local)
+    internal static int Require(StorageCopyOwner[] owners, SiloAddress authorized)
     {
-        for (var index = 1; index < owners.Length; index++)
+        for (var index = 0; index < owners.Length; index++)
         {
-            if (owners[index].Address.Equals(local) && owners[index].Cut == owners[0].Cut)
+            if (owners[index].Address.Equals(authorized) && owners[index].Cut.Position == owners[0].Cut.Position)
             {
-                (owners[0], owners[index]) = (owners[index], owners[0]);
-                return;
+                return index;
             }
         }
+        throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.RecoveryRequired);
+    }
+
+    internal static StorageCopyOwner[] ForWrite(StorageCopyOwner[] owners, SiloAddress authorized)
+    {
+        var index = Require(owners, authorized);
+        if (index == 0)
+        {
+            return owners;
+        }
+        var ordered = owners.ToArray();
+        (ordered[0], ordered[index]) = (ordered[index], ordered[0]);
+        return ordered;
     }
 }

@@ -24,6 +24,14 @@ internal static class TextProviderAuditImages
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store)).IsEquivalentTo(expected.Rows, CollectionOrdering.Matching);
     }
 
+    internal static async Task<(StoreIdentity Identity, long Position, string[] Rows)> ReopenedAsync(
+        TextProtectedRebuildColdOwner owner, (StoreIdentity Identity, long Position, string[] Rows) expected)
+    {
+        expected.Position = await NativeStoreAssertions.ReopenedAsync(owner.Store, expected.Position);
+        await SameAsync(owner, expected);
+        return expected;
+    }
+
     internal static string[] RuntimeFiles(string root)
     {
         var result = new List<string>();

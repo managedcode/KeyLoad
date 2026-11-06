@@ -6,6 +6,19 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainRequestAuthority
 {
+    internal static void RequirePublicReadIdentity(string principalId)
+    {
+        try
+        {
+            RuntimeJournalIdentity.RequirePublicCredential(principalId);
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
+    }
+
     internal static PrincipalRecord Reload(DatabaseEngine database, string principalId, TimeProvider clock)
     {
         try

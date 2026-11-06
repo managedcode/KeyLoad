@@ -27,7 +27,7 @@ internal static class PartitionStoragePublicationBorrowFlow
             {
                 await fixture.OpenAsync().ConfigureAwait(false);
                 await BorrowThroughContainerAsync(fixture, token).ConfigureAwait(false);
-                var host = fixture.Owner.Borrow();
+                var host = fixture.Owner.Session.Host;
                 var before = host.Database.Store.Position;
                 var committed = host.Database.Store.Commit((transaction, position) =>
                 {
@@ -40,7 +40,9 @@ internal static class PartitionStoragePublicationBorrowFlow
                 for (var cold = FirstColdOwner; cold < ColdOwners; cold++)
                 {
                     await fixture.OpenAsync().ConfigureAwait(false);
-                    host = fixture.Owner.Borrow();
+                    host = fixture.Owner.Session.Host;
+                    var position = await NativeStoreAssertions.ReopenedAsync(host.Database.Store, image.Position);
+                    image = image with { Position = position };
                     var actual = host.Database.Store.Read(view => PartitionStorageImage.Capture(host, view, token));
                     await PartitionStorageImage.RequireAsync(image, actual).ConfigureAwait(false);
                     await RequireValueAsync(host.Database.Store).ConfigureAwait(false);

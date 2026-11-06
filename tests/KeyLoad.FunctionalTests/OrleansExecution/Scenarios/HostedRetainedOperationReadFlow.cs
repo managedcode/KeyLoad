@@ -10,7 +10,6 @@ internal static class HostedRetainedOperationReadFlow
     private const int First = 1;
     private const int Last = 65;
     private const int ColdOpens = 2;
-    private const int FaultAndRepairCommits = 2;
     private const string Root = "root";
     private const string Collection = "retained-commands";
     private const string Document = "retained-reader-";
@@ -31,7 +30,7 @@ internal static class HostedRetainedOperationReadFlow
             foreach (var _ in Enumerable.Range(First, ColdOpens))
             {
                 await fixture.ReopenAsync();
-                await cut.RequireAsync(DocumentPatchAtomicityState.Read(fixture));
+                cut = await cut.RequireReopenedAsync(DocumentPatchAtomicityState.Read(fixture));
                 await EqualAsync(original, Read(fixture, original, token));
                 await cut.RequireAsync(DocumentPatchAtomicityState.Read(fixture));
             }
@@ -63,7 +62,9 @@ internal static class HostedRetainedOperationReadFlow
                 transaction.Put(key, bytes);
                 return true;
             });
-            await (clean with { Position = clean.Position + FaultAndRepairCommits })
+            await NativeStoreAssertions.AdvancedAsync(fixture.Store, clean.Position);
+            var repaired = await NativeStoreAssertions.AdvancedAsync(fixture.Store, dirty.Position);
+            await (clean with { Position = repaired })
                 .RequireAsync(DocumentPatchAtomicityState.Read(fixture));
             await EqualAsync(entries.First(), Read(fixture, entries.First(), token));
             await EqualAsync(original, Read(fixture, original, token));

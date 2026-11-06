@@ -21,7 +21,7 @@ internal static class PreparationOwnershipFlow
             child.Delete(O.SeedKey);
             return (Position: proposed, Value: child.ReadOwnedValue(O.ChildKey), Absent: child.ReadOwnedValue(O.SeedKey));
         });
-        await Assert.That(result.Position).IsEqualTo(checked(position + 1));
+        await Assert.That(result.Position).IsEqualTo(position);
         await A.BytesAsync(O.ChildValue, result.Value);
         await Assert.That(result.Absent).IsNull();
         await A.ConservedAsync(owner, position, image);
@@ -39,6 +39,7 @@ internal static class PreparationOwnershipFlow
     internal static async Task InheritedAsync(O owner)
     {
         var position = owner.Store.Position;
+        var publications = owner.Publication.Count;
         byte[]? inherited = null;
         byte[]? resetParent = null;
         byte[]? resetSeed = null;
@@ -74,7 +75,9 @@ internal static class PreparationOwnershipFlow
         await Assert.That(resetChild).IsNull();
         await Assert.That(parentSeed).IsNull();
         await Assert.That(parentChild).IsNull();
-        await Assert.That(owner.Store.Position).IsEqualTo(checked(position + 1));
+        await Assert.That(owner.Publication.Count).IsEqualTo(publications + 1);
+        await Assert.That(owner.Store.Position).IsEqualTo(owner.Publication.Position);
+        await Assert.That(owner.Store.Position).IsGreaterThan(position);
         await A.BytesAsync(O.ParentValue, owner.Store.Read(view => view.ReadOwnedValue(O.ParentKey)));
         await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(O.SeedKey))).IsNull();
         await Assert.That(owner.Store.Read(view => view.ReadOwnedValue(O.ChildKey))).IsNull();

@@ -5,7 +5,6 @@ namespace KeyLoad.FunctionalTests.Messaging;
 
 internal static class QueueExhaustedNackCapacityFlow
 {
-    private const int FaultFailureRepairCommits = 3;
 
     internal static async Task RunAsync(CancellationToken token)
     {
@@ -14,7 +13,7 @@ internal static class QueueExhaustedNackCapacityFlow
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
         var lane = new QueueLaneRef(fixture.Partition, QueueLifecycleTestProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store))
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition))
         {
             RuntimeSubmit = recorder.Apply
         };
@@ -22,7 +21,6 @@ internal static class QueueExhaustedNackCapacityFlow
         var cancel = state.CancelledCommand!;
         state.Execute(fixture.Database, OperationKind.Batch, cancel, cancel.CommandId).Get<CommitReceipt>();
         var image = QueueLifecycleImage.Capture(fixture.Store, lane);
-        var position = fixture.Store.Position;
         var injected = QueueLifecycleCeilingInjection.Inject(fixture.Store, lane, QueueLifecycleTestProtocol.Held,
             QueueLifecycleCeilingFault.ParkSequence);
         var rows = injected with
@@ -31,12 +29,12 @@ internal static class QueueExhaustedNackCapacityFlow
         };
         var failed = await QueueLifecycleCeilingFailureAssertions.FailAsync(fixture.Database, rows,
             QueueLifecycleTestProtocol.Administrator, state.Time, token);
-        await ColdAsync(fixture, state, recorder, rows, failed, image, position, token);
+        await ColdAsync(fixture, state, recorder, rows, failed, image, token);
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueLifecycleTestState state,
         QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
-        string[] original, long originalPosition, CancellationToken token)
+        string[] original, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
@@ -45,12 +43,12 @@ internal static class QueueExhaustedNackCapacityFlow
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed,
             QueueLifecycleTestProtocol.Administrator, state.Time, token);
         QueueLifecycleCeilingInjection.Repair(cold, rows);
         await QueueLifecycleImage.SameAsync(cold, state.Lane, original);
-        await Assert.That(cold.Position).IsEqualTo(originalPosition + FaultFailureRepairCommits);
+        position = await NativeStoreAssertions.AdvancedAsync(cold, position);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed,
             QueueLifecycleTestProtocol.Administrator, state.Time, token);
         QueueLifecycleOperations.Complete(database, state, state.OriginalHeld!, DeliveryAction.Nack).Get<CommitReceipt>();

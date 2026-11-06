@@ -15,7 +15,7 @@ internal static class SharedDomainProcessingFlow
         var request = new ReceiveRequest(Guid.NewGuid(), lane);
         var operation = SharedDomainOperations.Operation(database, OperationKind.Receive, request.RequestId, request);
         var started = TimeProvider.System.GetUtcNow();
-        var expectedPosition = checked(database.LastApplied + FirstRevision);
+        var expectedPosition = checked(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, scope.Partition)) + FirstRevision);
         var received = SharedDomainOperations.Apply(database, operation, token);
         var ended = TimeProvider.System.GetUtcNow();
         var delivery = await Assert.That(received.Get<ReceiveResult>().Deliveries).HasSingleItem();
@@ -36,11 +36,11 @@ internal static class SharedDomainProcessingFlow
         var processing = SharedDomainCorpus.Processing(scope, delivery.Token, Guid.NewGuid());
         await SharedDomainRefusals.ConsumerAsync(database, state, processing, token);
         var processingOperation = SharedDomainOperations.Operation(database, OperationKind.Processing, processing.CommandId, processing);
-        var processingPosition = checked(database.LastApplied + FirstRevision);
+        var processingPosition = checked(database.Store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, scope.Partition)) + FirstRevision);
         var completed = SharedDomainOperations.Apply(database, processingOperation, token);
         await SharedDomainValueAssertions.ProcessingAsync(completed, processing, database.Store.Identity, processingPosition);
         state.Processed = true;
-        state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + Processed, SharedDomainImage.Clock(database.Store));
+        state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + Processed, SharedDomainImage.Clock(database.Store, scope.Partition));
         await SharedDomainHistoryOperations.SaveAsync(database.Store, state, scope.Partition, processingOperation, completed);
         foreach (var pair in other)
         {

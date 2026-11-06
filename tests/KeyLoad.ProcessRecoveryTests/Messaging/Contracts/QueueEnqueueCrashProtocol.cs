@@ -6,7 +6,7 @@ internal static class QueueEnqueueCrashProtocol
     internal const string OperationFile = "queue-enqueue-operation.execution";
     internal const string BaselineFile = "queue-enqueue-baseline.execution";
     internal const string TargetFile = "queue-enqueue-target.execution";
-    internal const string PhysicalTargetFile = "queue-enqueue-physical-target.execution";
+    internal const string SeedTimestampFile = "queue-enqueue-seed-timestamp.execution";
     internal const string Queue = "enqueue";
     internal const string Collection = "producer";
     internal const string Ready = "ready";

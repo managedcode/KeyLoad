@@ -5,18 +5,16 @@ namespace KeyLoad.FunctionalTests.Search;
 internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnation, long Position,
     long Applied, byte[] Rows)
 {
-    internal static (CommitToken Token, long Applied) BeforeLocalPublish(DatabaseEngine database, PartitionRef partition)
+    internal static (long Position, long Applied) BeforeLocalPublish(DatabaseEngine database, PartitionRef partition)
         => database.Store.Read(view =>
         {
-            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
-            return (new CommitToken(database.Store.Identity.Incarnation, partition.AtomicPartitionId,
-                checked(database.Store.Position + 1L)), applied);
+            var applied = NativeStoreAssertions.AppliedInView(view, partition);
+            return (database.Store.Position, applied);
         });
 
     internal static Bm25OriginalPhaseRecoveryState Read(Bm25OriginalPhaseRecoveryOwner owner)
     {
-        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var work = TestDatabase.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var image = owner.Store.Read(view =>
         {
             var rows = new List<string>();
@@ -43,6 +41,12 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.Position).IsEqualTo(Position);
         await Assert.That(actual.Applied).IsEqualTo(Applied);
         await ReplayResultAssertions.BytesAsync(Rows, actual.Rows);
+    }
+
+    internal async Task RequireReopenedAsync(Bm25OriginalPhaseRecoveryOwner owner)
+    {
+        var position = await NativeStoreAssertions.ReopenedAsync(owner.Store, Position);
+        await (this with { Position = position }).RequireAsync(Read(owner));
     }
 
     internal static async Task RequireRetainedAsync(Bm25OriginalPhaseRecoveryOwner owner,

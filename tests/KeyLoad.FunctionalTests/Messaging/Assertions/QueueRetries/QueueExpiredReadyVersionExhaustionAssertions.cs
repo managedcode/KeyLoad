@@ -17,7 +17,7 @@ internal static class QueueExpiredReadyVersionExhaustionAssertions
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueClaimVersionExhaustionProtocol.Root, lane.Partition);
         await Assert.That(placement.Partition).IsEqualTo(lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(database.LastApplied + 1));
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(database, lane.Partition) + 1));
     }
 
     internal static async Task EmptyAsync(Result<object> result, Guid id, CommitToken expected)

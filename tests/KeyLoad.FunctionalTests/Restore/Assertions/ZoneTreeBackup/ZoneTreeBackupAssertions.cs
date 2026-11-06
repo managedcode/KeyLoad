@@ -8,7 +8,6 @@ namespace KeyLoad.FunctionalTests.BackupRestore;
 /// <summary>Literal expectations for a ZoneTree backup, its restored store and the restored node's follow-up.</summary>
 internal static class ZoneTreeBackupAssertions
 {
-    internal const long RestoreCommits = 1;
     private const string TreeDirectoryName = "tree";
     private const string PlainTreeDirectoryName = "plain-tree";
 
@@ -36,12 +35,12 @@ internal static class ZoneTreeBackupAssertions
         await Assert.That(restored.Durability).IsEqualTo(source.Durability);
     }
 
-    internal static async Task RestoredCutAsync(string directory, StoreIdentity restored, long position)
+    internal static async Task<long> RestoredCutAsync(string directory, StoreIdentity restored)
     {
         using var store = ZoneTreeBackupFixture.Open(directory);
         await StoreFileFixture.AssertPreservedIdentity(restored, store.Identity);
-        await Assert.That(store.Position).IsGreaterThanOrEqualTo(position);
-        await Assert.That(store.Position).IsEqualTo(position + RestoreCommits);
+        var position = store.Position;
+        await Assert.That(position).IsGreaterThan(0);
         await Assert.That(ZoneTreeBackupFixture.Read(store, ZoneTreeBackupFixture.BeforeNamespace, 1))
             .IsEqualTo(ZoneTreeBackupFixture.BeforeNamespace + 1);
         await Assert.That(ZoneTreeBackupFixture.Read(store, ZoneTreeBackupFixture.BeforeNamespace, 2))
@@ -50,19 +49,25 @@ internal static class ZoneTreeBackupAssertions
         var paused = store.Read(view => view.ReadOwnedValue(StoreFileFixture.DispatchPausedKey));
         await Assert.That(paused).IsNotNull();
         await Assert.That(OrleansSerialization.Deserialize<bool>(paused!)).IsTrue();
+        await Assert.That(store.Position).IsEqualTo(position);
+        return position;
     }
 
     internal static async Task HealthyFollowUpAsync(string directory, StoreIdentity restored, long position)
     {
         using (var store = ZoneTreeBackupFixture.Open(directory))
         {
-            await Assert.That(ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.HealthyNamespace, 1))
-                .IsEqualTo(position + RestoreCommits + 1);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
+            var write = ZoneTreeBackupFixture.Commit(store, ZoneTreeBackupFixture.HealthyNamespace, 1);
+            await Assert.That(write).IsGreaterThan(position);
+            position = await NativeStoreAssertions.AdvancedAsync(store, position);
+            await Assert.That(write).IsLessThanOrEqualTo(position);
             await store.SyncAsync();
         }
         using var cold = ZoneTreeBackupFixture.Open(directory);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await StoreFileFixture.AssertPreservedIdentity(restored, cold.Identity);
-        await Assert.That(cold.Position).IsEqualTo(position + RestoreCommits + 1);
+        await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(ZoneTreeBackupFixture.Read(cold, ZoneTreeBackupFixture.HealthyNamespace, 1))
             .IsEqualTo(ZoneTreeBackupFixture.HealthyNamespace + 1);
         await Assert.That(ZoneTreeBackupFixture.Read(cold, ZoneTreeBackupFixture.BeforeNamespace, 2))

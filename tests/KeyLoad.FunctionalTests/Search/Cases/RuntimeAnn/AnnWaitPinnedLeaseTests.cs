@@ -19,7 +19,7 @@ internal sealed class AnnWaitPinnedLeaseTests
             {
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    var budget = new ReadExecutionBudget(database.Database.EvaluationClock);
+                    var budget = new ReadExecutionBudget();
                     held = database.Database.WithQueryView(AnnWaitWholeFlow.Root, request.Partition,
                         request.Collection, (view, principal, resource) =>
                         {

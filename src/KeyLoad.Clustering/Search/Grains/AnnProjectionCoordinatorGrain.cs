@@ -29,7 +29,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         RequireKey(consumer, generation, nodeId);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
         var token = linked.Token;
-        var budget = new ReadExecutionBudget(clock, token);
+        var budget = new ReadExecutionBudget(token);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(nodeId, token);
         var current = owner.Current;
@@ -83,7 +83,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
         var token = linked.Token;
-        var budget = new ReadExecutionBudget(clock, token);
+        var budget = new ReadExecutionBudget(token);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token);
         AnnMaintenanceResult result;

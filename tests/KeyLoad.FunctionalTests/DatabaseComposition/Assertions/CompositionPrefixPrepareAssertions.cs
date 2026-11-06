@@ -63,7 +63,8 @@ internal static class CompositionPrefixPrepareAssertions
             var cut = owner.Cut();
             await owner.ReopenAsync();
             await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-            await Assert.That(owner.Cut()).IsEqualTo(cut);
+            await Assert.That(owner.Cut().AppliedPosition).IsEqualTo(cut.AppliedPosition);
+            await NativeStoreAssertions.ReopenedAsync(owner.Store, cut.StorePosition);
             await models();
             await ReplayAsync(owner);
         }

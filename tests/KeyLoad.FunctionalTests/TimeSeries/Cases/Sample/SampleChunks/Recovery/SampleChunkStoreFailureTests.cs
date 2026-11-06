@@ -14,7 +14,7 @@ internal sealed class SampleChunkStoreFailureTests
         var ceiling = cut.Encoded.Length - 1;
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Encode(
-            cut.Source.AsSpan(), SampleChunkStoreFixture.NewBudget(database), UnitExecutionOptions.TimeSeriesExecution(), ceiling));
+            cut.Source.AsSpan(), new ReadExecutionBudget(), UnitExecutionOptions.TimeSeriesExecution(), ceiling));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await SampleChunkStoreFailureAssertions.AssertUnchangedAndReadableAsync(fixture, before);
     }
@@ -30,7 +30,7 @@ internal sealed class SampleChunkStoreFailureTests
         await cancellation.CancelAsync();
 
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => SampleChunkCodec.Encode(
-            cut.Source.AsSpan(), SampleChunkStoreFixture.NewBudget(database, cancellation.Token), UnitExecutionOptions.TimeSeriesExecution()));
+            cut.Source.AsSpan(), new ReadExecutionBudget(cancellation.Token), UnitExecutionOptions.TimeSeriesExecution()));
         await Assert.That(failure).IsNotNull();
         await SampleChunkStoreFailureAssertions.AssertUnchangedAndReadableAsync(fixture, before);
     }

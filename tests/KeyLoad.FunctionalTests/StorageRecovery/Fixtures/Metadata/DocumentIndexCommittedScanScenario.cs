@@ -83,7 +83,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
             new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.StableId,
                 DocumentIndexCommittedScanOracle.StableJson, DocumentIndexCommittedScanOperations.InitialDocumentRevision));
         oldPosition = database.Store.Position;
-        oldAppliedPosition = database.Database.LastApplied;
+        oldAppliedPosition = ExpectedCanonicalCommit.Applied(database.Database, database.Partition);
         scanTask = Task.Run(() => database.Store.Read(view => DocumentIndexCommittedScanOracle.ReadAndHold(
             view, database.Store, database.Partition, scanEntered, releaseScan, cancellation.Token)));
     }
@@ -112,7 +112,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         }
         await writerTask.WaitAsync(OperationDeadline, TimeProvider.System, cancellation.Token);
         await Assert.That(scanTask!.IsCompleted).IsFalse();
-        await Assert.That(database.Store.Position).IsEqualTo(oldPosition + 1);
+        await Assert.That(database.Store.Position).IsGreaterThan(oldPosition);
         releaseScan.Set();
     }
 
@@ -123,7 +123,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         var receipt = await writerTask!;
         await DocumentIndexCommittedScanReceiptAssertions.AssertWriterReceiptAsync(receipt, oldAppliedPosition + 1);
         await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
-            DocumentIndexCommittedScanOracle.ReadCut(database.Store, database.Partition), oldPosition + 1);
+            DocumentIndexCommittedScanOracle.ReadCut(database.Store, database.Partition), database.Store.Position);
     }
 
     private async Task ReopenAndVerifyHealthyCommandAsync()
@@ -132,7 +132,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         {
             SigningKey = database.Store.Identity.SigningKey.ToArray()
         };
-        var committedPosition = oldPosition + 1;
+        var committedPosition = database.Store.Position;
         database.Store.Dispose();
         originalStoreOpen = false;
         reopened = new(new(database.Directory), UnitExecutionOptions.StorageExecution());

@@ -1,6 +1,8 @@
+using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server.OrleansHosting;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Server;
 
@@ -60,15 +62,20 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         }
     }
 
-    internal PartitionHost Borrow() => Session.Host;
-
     /// <inheritdoc />
     public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
         IGrainContext context, CancellationToken cancellationToken)
-        => options.Node.Value.StorageMode == StorageAccessMode.SharedVolume
-            ? grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(envelope.Incarnation))
-                .ExecuteSharedAsync(envelope, actorKey, cancellationToken)
-            : Session.ExecuteAsync(envelope, actorKey, context, cancellationToken);
+        => Session.ExecuteAsync(envelope, actorKey, context, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<StorageCopyBatchAcknowledgement> CommitBatchAsync(Guid requestId,
+        ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence, bool retainReplication,
+        CancellationToken cancellationToken)
+        => Session.Batches.CommitAsync(requestId, operations, firstSequence, retainReplication, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<StorageCopyBatchAcknowledgement> ApplyReplicaBatchAsync(Guid requestId, StorageReplicaBatch batch, CancellationToken cancellationToken)
+        => Session.Batches.CopyAsync(requestId, batch, cancellationToken);
 
     internal Task OpenAsync(IGrainContext context)
     {

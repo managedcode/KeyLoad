@@ -19,7 +19,7 @@ public static class AnalyticsReads
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(cancellationToken);
         return engine.ReadAnalyticsEventsRead(principalId, request, work);
     }
 
@@ -71,7 +71,7 @@ public static class AnalyticsReads
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(cancellationToken);
         return engine.CaptureAnalyticsAggregateRead(principalId, request, work);
     }
 

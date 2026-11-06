@@ -9,16 +9,16 @@ internal static class ChunkSelectedIntegrityTrial
         var originalCut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         var original = ChunkSelectedIntegrityDamage.Inject(fixture, fault);
         var damaged = SampleRawIntegrityAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(originalCut.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(originalCut.Position);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, damaged);
+        damaged = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, damaged);
         await ChunkSelectedIntegrityDamage.Refuse(fixture);
         ChunkSelectedIntegrityDamage.Put(fixture, original);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, originalCut with
         {
-            Position = originalCut.Position + 2
+            Position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, damaged.Position)
         });
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
@@ -33,7 +33,7 @@ internal static class ChunkSelectedIntegrityTrial
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         var healthy = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, healthy);
+        healthy = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, healthy);
         await ChunkSelectedIntegrityAssertions.Healthy(fixture, final: true);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, healthy);

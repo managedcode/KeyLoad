@@ -71,7 +71,7 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         Source = new();
         CollectionLifetime = Source.ConfigureGraph();
         Original = Operation(Source.Database, SeedId);
-        var originalResult = Source.Database.ApplyStorageOperation(Original, checked(Source.Database.LastApplied + 1),
+        var originalResult = Source.Database.ApplyStorageOperation(Original, checked(ExpectedCanonicalCommit.Applied(Source.Database, AtomicPartitionRosterFixture.Source) + 1),
             CancellationToken.None).Result;
         BackupIndexedDocumentDedupFixture.RequireSuccess(originalResult);
         OriginalRoster = Source.ReadEntryBytes(AtomicPartitionRosterFixture.Source)!;

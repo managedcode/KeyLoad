@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
 
@@ -24,10 +23,9 @@ internal sealed class TextOrderedStageCancellationTests
                 var token = TestContext.Current!.Execution.CancellationToken;
                 _ = await TextMaintenanceSeed.CommitAsync(database, token);
                 var request = await TextMaintenanceRequestFixture.CreateAsync(database, token);
-                var clock = new QueryObservedWorkClock();
-                runtime = new(database, clock);
+                runtime = new(database);
                 var begin = await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.Begin, token: token);
-                await TextLaterStageCancellationAssertions.VerifyAsync(database, runtime, request, begin, clock, token);
+                await TextLaterStageCancellationAssertions.VerifyAsync(database, runtime, request, begin, token);
                 var healthy = await TextMaintenancePhaseFlow.FinishBeganAsync(database, runtime, request, begin, token);
                 await Assert.That(healthy.TrackedRecords).IsEqualTo(TrackedRecords);
                 await Assert.That(healthy.Checkpoint).IsEqualTo(healthy.ThroughSequence);

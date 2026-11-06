@@ -24,26 +24,25 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
     private PartitionStorageSession Isolated => !UsesSharedVolume ? owner.Session
         : throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
 
+    public Task<StorageCopyBatchAcknowledgement> CommitBatchAsync(Guid requestId,
+        ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence, bool retainReplication,
+        CancellationToken cancellationToken)
+        => owner.Session.Batches.CommitAsync(requestId, operations, firstSequence, retainReplication, cancellationToken);
+
+    public Task<StorageCopyBatchAcknowledgement> ApplyReplicaBatchAsync(Guid requestId, StorageReplicaBatch batch,
+        CancellationToken cancellationToken)
+        => Isolated.Batches.CopyAsync(requestId, batch, cancellationToken);
+
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
     {
         return UsesSharedVolume ? Shared.ReadCutAsync(cancellationToken) : Task.FromResult(Isolated.ReadCut(cancellationToken));
     }
 
-    public Task<ImmutableArray<Command<DatabaseCommand>>> PrepareBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
-        CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.PrepareStorageOperations(operations, cancellationToken));
+    public Task<SiloStorageCut> ReadPartitionCutAsync(PartitionRef? partition, CancellationToken cancellationToken)
+        => owner.Session.Batches.ReadCutAsync(partition, cancellationToken);
 
-    public Task<ImmutableArray<StoredCommand>> ReadLastCommittedCommandsAsync(CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommands(cancellationToken));
-
-    public async Task<StorageCopyBatchAcknowledgement> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
-        long firstSequence, bool includeOutcome, CancellationToken cancellationToken)
-    {
-        var database = Isolated.Host.Database;
-        // Each native commit has already published the data and outcomes into the process-persistent WAL.
-        var result = await database.ApplyStorageOperationsAsync(operations, firstSequence, cancellationToken);
-        return StorageCopyBatchAcknowledgements.Create(result, includeOutcome);
-    }
+    public Task<StorageReplicaBatch?> ReadReplicaBatchAsync(PartitionRef? partition, CancellationToken cancellationToken)
+        => Task.FromResult(Isolated.Host.Database.ReadReplicaBatch(partition, cancellationToken));
 
     public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId)
         => UsesSharedVolume ? Shared.AbortSharedMaintenanceAsync(kind, sessionId) : Isolated.AbortMaintenanceAsync(kind, sessionId);

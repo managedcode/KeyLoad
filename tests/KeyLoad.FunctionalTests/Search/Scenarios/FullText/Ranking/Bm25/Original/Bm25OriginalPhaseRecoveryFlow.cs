@@ -31,16 +31,14 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
             [new(owner.Source.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], []));
     }
 
-    private ReadExecutionBudget Work() => owner.Source.CreateReadWork(Token);
-
     internal Command<DatabaseCommand> Capture(Guid? expectedGeneration)
         => Bm25CorpusCapture.Create(owner.Database, Publisher, Subject,
             new(owner.Source.Partition, Collection, Field, Text), Guid.NewGuid(), expectedGeneration,
-            Work(), UnitExecutionOptions.QueryExecution());
+            TestDatabase.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal Command<DatabaseCommand> Reissue(Command<DatabaseCommand> original)
         => owner.Database.CreateVerifiedBm25CorpusPublication(Publisher,
-            ((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input), Work());
+            ((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input), TestDatabase.CreateReadWork(Token));
 
     internal Result<object> Publish(Command<DatabaseCommand> operation) => owner.Submit(operation);
 

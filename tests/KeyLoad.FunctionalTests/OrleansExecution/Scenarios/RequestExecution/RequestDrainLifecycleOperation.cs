@@ -132,7 +132,7 @@ internal static class RequestDrainLifecycleOperation
         await Assert.That(entry.CanonicalSequence).IsEqualTo(position);
         await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(commandId);
         await Assert.That(cut.AppliedPosition).IsEqualTo(position);
-        await Assert.That(state.Database.Database.LastApplied).IsEqualTo(position);
+        await Assert.That(NativeStoreAssertions.Applied(state.Database.Store, state.Database.Partition)).IsEqualTo(position);
     }
 
     internal static async Task DisposeAndVerifyAsync(RequestDrainLifecycleState state)

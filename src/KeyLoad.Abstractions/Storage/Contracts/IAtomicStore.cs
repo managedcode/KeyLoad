@@ -16,7 +16,8 @@ public interface IAtomicStore : IDisposable
     {
         get;
     }
-    /// <summary>Gets the last published local storage commit position.</summary>
+    /// <summary>Gets the native local MVCC snapshot timestamp. It is neither a commit count nor a cross-copy sequence,
+    /// and reopening may reserve a later timestamp without changing records.</summary>
     long Position
     {
         get;
@@ -35,14 +36,15 @@ public interface IAtomicStore : IDisposable
         CancellationToken cancellationToken = default);
     /// <summary>Runs synchronous discard-only preparation on a native read snapshot.</summary>
     /// <typeparam name="T">Independently owned result type.</typeparam>
-    /// <param name="prepare">Callback receiving a scoped child transaction and actual next local position.</param>
+    /// <param name="prepare">Callback receiving a discard-only child and the native snapshot timestamp.</param>
     /// <returns>The owned result; no journal, tree, cache publication or durable position is changed.</returns>
     /// <remarks>Nested store-operation entry is invalid. Inside a transaction callback use that transaction's Prepare.</remarks>
     T Prepare<T>(Func<IAtomicTransaction, long, T> prepare);
 
     /// <summary>Compiles and publishes one atomic set of staged writes.</summary>
     /// <typeparam name="T">Owned committed result type.</typeparam>
-    /// <param name="compile">Action receiving the staged transaction and proposed local position.</param>
+    /// <param name="compile">Action receiving the staged transaction and its native write identity. The identity is
+    /// covered by the publication's eventual MVCC cut; it is not a commit timestamp or a dense position.</param>
     /// <returns>The result after successful commit publication.</returns>
     T Commit<T>(Func<IAtomicTransaction, long, T> compile);
     /// <summary>Publishes compiled writes, ordering process-persistent plain data before transactional command outcomes.</summary>

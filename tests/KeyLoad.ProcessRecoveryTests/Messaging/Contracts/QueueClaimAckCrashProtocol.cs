@@ -7,7 +7,7 @@ internal static class QueueClaimAckCrashProtocol
     internal const string OperationFile = "queue-claim-ack-operation.execution";
     internal const string BaselineFile = "queue-claim-ack-baseline.execution";
     internal const string TargetFile = "queue-claim-ack-target.execution";
-    internal const string PhysicalTargetFile = "queue-claim-ack-physical-target.execution";
+    internal const string SeedTimestampFile = "queue-claim-ack-seed-timestamp.execution";
     internal const int AdjacentPosition = 1;
     internal const string DeliveryFile = "queue-claim-ack-delivery.execution";
     internal const string Queue = "claim-ack";

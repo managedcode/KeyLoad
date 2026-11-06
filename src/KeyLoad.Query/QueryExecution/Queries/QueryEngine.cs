@@ -49,7 +49,7 @@ public sealed partial class QueryEngine
     /// <returns>The same graph-search result produced by the direct request contract.</returns>
     public Task<GraphSearchResult> SearchSqlAsync(string principalId, SqlGraphSearchRequest request,
         CancellationToken cancellationToken = default)
-        => SqlGraphSearchExecutor.ExecuteAsync(database, graphSearch, principalId, request, execution, cancellationToken);
+        => SqlGraphSearchExecutor.ExecuteAsync(graphSearch, principalId, request, execution, cancellationToken);
     /// <summary>Executes a typed bounded query against one authorized read cut.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">Validated AST input and optional continuation.</param>
@@ -63,7 +63,7 @@ public sealed partial class QueryEngine
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = originalBudget ?? new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = originalBudget ?? new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

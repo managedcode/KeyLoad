@@ -33,8 +33,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
     {
         ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         work.AttachResourceLifetimeBinding(binding);
-        return AnnProjectionPublicationRead.ReadAsync(database, principal, request, configured,
-            clock, admitted, state.EnsureOwner, token, work, binding);
+        return AnnProjectionPublicationRead.ReadAsync(database, principal, request, configured, admitted, state.EnsureOwner, token, work, binding);
     }
 
     public async Task<AnnMaintenanceResult?> AdmitOriginalAsync(PrincipalRecord principal,
@@ -59,8 +58,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
 
     public Task<AnnProjectionPublication> ReadPublishedAsync(PrincipalRecord principal,
         AnnMaintenanceRequest request, CancellationToken cancellationToken)
-        => AnnProjectionPublicationRead.ReadAsync(database, principal, request, configured,
-            clock, admitted, state.EnsureOwner, cancellationToken);
+        => AnnProjectionPublicationRead.ReadAsync(database, principal, request, configured, admitted, state.EnsureOwner, cancellationToken);
 
     public IAnnProjectionLease Acquire(IKeyValueView view, AnnProjectionSelection request, ReadExecutionBudget budget)
     {
@@ -92,12 +90,12 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         }
         if (request.Kind == AnnMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(clock, shutdown.Token);
+            using var release = new MaintenanceSessionWork(shutdown.Token);
             using var releaseStage = release.EnterStage(binding, token);
             var released = await ExecuteCoreAsync(principal, request, release, token);
             return released;
         }
-        var work = admitted.RequireWork(principal.Id, request, clock, shutdown.Token);
+        var work = admitted.RequireWork(principal.Id, request, shutdown.Token);
         using var stage = work.EnterStage(binding, token);
         var result = await ExecuteCoreAsync(principal, request, work, token);
         return result;

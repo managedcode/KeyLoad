@@ -49,6 +49,7 @@ internal static class ProjectionEmptyTailFlow
         try
         {
             using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, timeProvider: database.Database.EvaluationClock);
+            state = state with { Position = await NativeStoreAssertions.ReopenedAsync(cold, state.Position) };
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => VerifyAsync(database.CreateConfiguredDatabase(cold), cold, state, token), failures);
         }

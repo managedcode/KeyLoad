@@ -24,6 +24,7 @@ internal static class RestoreColdContinuation
             transaction.PutRecord(key, HealthyValue);
             return true;
         });
+        restoredPosition = await NativeStoreAssertions.AdvancedAsync(store, restoredPosition);
         var expected = before.Append(Convert.ToHexString(key) + ":" + Convert.ToHexString(value))
             .Order(StringComparer.Ordinal).ToArray();
         for (var cold = 0; cold <= ColdOwners; cold++)
@@ -32,9 +33,10 @@ internal static class RestoreColdContinuation
             if (cold != 0)
             {
                 fixture.ReopenTarget(target);
+                restoredPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Target!, restoredPosition);
             }
             var current = fixture.Target!;
-            await Assert.That(current.Position).IsEqualTo(restoredPosition + 1L);
+            await Assert.That(current.Position).IsEqualTo(restoredPosition);
             await Assert.That(JsonSerializer.Serialize(current.Identity, JsonDefaults.Options)).IsEqualTo(identity);
             await Assert.That(current.Identity.DispatchPaused).IsTrue();
             await Assert.That(EventingArtifactState.FullBytes(current))

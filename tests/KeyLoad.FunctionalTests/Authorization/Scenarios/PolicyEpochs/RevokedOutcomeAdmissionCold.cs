@@ -36,6 +36,7 @@ internal static class RevokedOutcomeAdmissionCold
             store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             fixture.Store = store;
             fixture.Database = fixture.Harness.CreateConfiguredDatabase(store);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             await ServerFailureObserver.ObserveAsync(() => RevokedOutcomeAdmissionValues.ConservedAsync(fixture, image, identity, position), failures);
             await ServerFailureObserver.ObserveAsync(() => RevokedOutcomeAdmissionFlow.HealthyAsync(fixture, token), failures);
         }, failures);

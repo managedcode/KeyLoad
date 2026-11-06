@@ -5,11 +5,11 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal static class AnnProviderQualificationDamageCodec
 {
-    internal static byte[] Create(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
+    internal static byte[] Create(AnnProviderQualificationState state,
         AnnProviderQualificationDamage damage, CancellationToken token)
     {
         using var source = new MemoryStream(state.OriginalFile, writable: false);
-        var budget = AnnProviderQualificationCorpus.Budget(owner, token);
+        var budget = AnnProviderQualificationCorpus.Budget(token);
         var header = PackedAnnStorageFrames.Read<PackedAnnStorageHeader>(source, budget);
         var nodes = new PackedAnnStorageNode[header.Count];
         for (var ordinal = FirstNode; ordinal < nodes.Length; ordinal++)

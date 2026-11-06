@@ -7,7 +7,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal static class MetadataEntryOpenHealthy
 {
     private const int ColdCycles = 2;
-    private const long CommittedPosition = 1;
     private const int OneUnderByte = 1;
     private const string MissingSuffix = ".missing";
 
@@ -41,7 +40,7 @@ internal static class MetadataEntryOpenHealthy
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var result = await owner.InspectAsync();
-                await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
+                await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, files.Position);
             }, failures);
         }
         ZoneTreeStore? store = null;
@@ -55,7 +54,7 @@ internal static class MetadataEntryOpenHealthy
             {
                 await Assert.That(OrleansSerialization.Serialize(store.Identity))
                     .IsEquivalentTo(OrleansSerialization.Serialize(files.Identity), CollectionOrdering.Matching);
-                await Assert.That(store.Position).IsEqualTo(CommittedPosition);
+                await NativeStoreAssertions.ReopenedAsync(store, files.Position);
                 await Assert.That(store.Read(view => view.ReadOwnedValue(files.Key)))
                     .IsEquivalentTo(files.Value, CollectionOrdering.Matching);
             }, failures);

@@ -17,7 +17,7 @@ internal static class BoundLeaseDisposalFollowing
         {
             parent = previous.Owner.Acquire(previous.Parent.RequestId, RequestWorkKind.RequestProducer);
             parent.AttachResultRetention(ledger);
-            var budget = new ReadExecutionBudget(database.EvaluationClock, token);
+            var budget = new ReadExecutionBudget(token);
             budget.AttachResourceLifetimeBinding(parent);
             var operation = new BoundLeaseOperation(previous.Owner, ledger, parent, budget, token);
             var input = BoundLeaseQuery.Create(state, operation);

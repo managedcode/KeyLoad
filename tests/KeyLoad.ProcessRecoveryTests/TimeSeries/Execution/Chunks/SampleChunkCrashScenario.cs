@@ -22,7 +22,7 @@ internal static class SampleChunkCrashScenario
         var mode = args[ModeArgument];
         var root = args[DirectoryArgument];
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[StageArgument]),
-            int.Parse(args[MutationArgument], CultureInfo.InvariantCulture), false);
+            int.Parse(args[MutationArgument], CultureInfo.InvariantCulture));
         using var store = new ZoneTreeStore(new(root)
         {
             FaultObserver = boundary.Observe
@@ -63,7 +63,6 @@ internal static class SampleChunkCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile),
             OrleansSerialization.Serialize(operation)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
-        boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(database.Store);

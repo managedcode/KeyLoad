@@ -15,6 +15,7 @@ internal static class RemoteTransferCapacityAuthorityCold
         };
         var position = fixture.Store.Position;
         fixture.Reopen();
+        position = await NativeStoreAssertions.ReopenedAsync(RemoteTransferCapacityAuthorityStorage.Execution(fixture), position);
         await RemoteTransferCapacityAuthorityStorage.IdentityAsync(fixture, identity, position);
         await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, original, position);
         await RemoteTransferCapacityAuthorityImages.AllAsync(fixture, completed);

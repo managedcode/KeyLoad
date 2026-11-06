@@ -9,10 +9,22 @@ internal static class ChecksumProfileEvidence
     internal static Task SaveAsync(string root, ZoneTreeStore store)
         => CommandIdempotencyCrashData.SaveEvidenceAsync(root, ChecksumProfileProtocol.CutFile, Capture(store));
 
-    internal static async Task RequireAsync(string root, ZoneTreeStore store)
+    internal static async Task<ChecksumProfileCut> RequireReopenedAsync(string root, ZoneTreeStore store)
     {
         var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<ChecksumProfileCut>(root, ChecksumProfileProtocol.CutFile);
         var current = Capture(store);
+        if (current.Position < original.Position)
+        {
+            throw new InvalidOperationException(ChecksumProfileProtocol.Invalid);
+        }
+        Require(current with { Position = original.Position }, original);
+        return current;
+    }
+
+    internal static void Require(ZoneTreeStore store, ChecksumProfileCut original) => Require(Capture(store), original);
+
+    private static void Require(ChecksumProfileCut current, ChecksumProfileCut original)
+    {
         if (current.NodeId != original.NodeId || current.Incarnation != original.Incarnation
             || current.Position != original.Position || current.ReadGeneration < original.ReadGeneration
             || !OrleansSerialization.Serialize(current.Rows).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original.Rows)))

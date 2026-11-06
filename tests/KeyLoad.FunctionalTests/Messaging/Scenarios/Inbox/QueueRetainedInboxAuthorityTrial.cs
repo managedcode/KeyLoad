@@ -34,14 +34,14 @@ internal static class QueueRetainedInboxAuthorityTrial
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
+            damaged = await QueuePendingAuthorityHistory.ReopenedAsync(cold, damaged);
             await QueueRetainedInboxAuthorityAssertions.OnlySelectedRowChangedAsync(original,
                 QueuePendingAuthorityHistory.Capture(cold), key, malformed);
             await QueueRetainedInboxAuthorityAssertions.RefuseAsync(owner, cold, state, equivalent, damaged);
             Put(cold, key, exact);
             await QueuePendingAuthorityHistory.SameAsync(cold, original with
             {
-                Position = original.Position + 2
+                Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
             });
             await QueuePendingAuthorityImage.RequireAsync(owner, cold, state, QueuePendingAuthorityPhase.Pending);
             await QueueRetainedInboxAuthorityAssertions.EquivalentAsync(owner, cold, state, equivalent, history, key, exact);
@@ -60,7 +60,7 @@ internal static class QueueRetainedInboxAuthorityTrial
         }
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
-        await QueuePendingAuthorityHistory.SameAsync(second, terminal);
+        terminal = await QueuePendingAuthorityHistory.ReopenedAsync(second, terminal);
         await QueuePendingAuthorityImage.RequireAsync(reopened, second, state, QueuePendingAuthorityPhase.Terminal);
         await ReplayAsync(reopened, second, state, refusedGeneration, failedGeneration);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);

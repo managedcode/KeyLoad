@@ -8,7 +8,7 @@ internal static class ZoneTreeCommitPublication
 {
     private const int FirstMutationIndex = 0;
 
-    /// <summary>Stages mutations and position in the same native transaction. A failed physical publication
+    /// <summary>Stages mutations in the native transaction. A failed physical publication
     /// leaves an unknown outcome, so the store refuses work until it is reopened.</summary>
     internal static void Stage(ZoneTreeStoreRuntime runtime, ITransaction<Memory<byte>, Memory<byte>> transaction,
         StorageMutation[] changes, long nextPosition)
@@ -20,8 +20,6 @@ internal static class ZoneTreeCommitPublication
                 ZoneTreeStoreRuntime.Apply(transaction, changes[i]);
                 runtime.Options.FaultObserver?.Invoke(CommitStage.MutationApplied, nextPosition, i);
             }
-
-            ZoneTreeStorePosition.Stage(transaction, nextPosition);
         }
         catch (Exception original)
         {

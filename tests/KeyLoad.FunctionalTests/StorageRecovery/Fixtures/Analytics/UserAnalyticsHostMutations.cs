@@ -23,13 +23,12 @@ internal static class UserAnalyticsHostMutations
     internal static async Task<(Command<DatabaseCommand> Original, CommitReceipt Receipt)> ApplyAsync(PartitionHost host,
         Mutation mutation, string kind, string id, long generation)
     {
-        var work = new ReadExecutionBudget(host.Database.EvaluationClock,
-            TestContext.Current!.Execution.CancellationToken);
+        var work = new ReadExecutionBudget(TestContext.Current!.Execution.CancellationToken);
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
         var operation = host.Database.CreateCommand(OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), command, work);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
-            P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
+            P.Partition.AtomicPartitionId, checked(ExpectedCanonicalCommit.Applied(host.Database, P.Partition) + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
         var actual = host.Database.Apply(operation).Get<CommitReceipt>();
         await UserAnalyticsHostAssertions.SameAsync(expected, actual);
         await Assert.That(actual.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();

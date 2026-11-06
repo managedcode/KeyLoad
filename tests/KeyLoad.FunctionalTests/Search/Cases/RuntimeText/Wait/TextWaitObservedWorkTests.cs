@@ -1,5 +1,4 @@
 using KeyLoad.FunctionalTests.Messaging;
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
@@ -7,20 +6,16 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class TextWaitObservedWorkTests
 {
-    private const int ExpiredSeconds = 2;
     private const long InitialSchemaVersion = 1;
     private const long InitialPolicyEpoch = 1;
     private const string Root = "root";
     private const string TextField = "/text";
-    private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(true)]
-    public async Task ActualPublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(bool cancel)
+    public async Task ActualPublicationWorkCancellationSettlesWithoutPartialThenLiteralHealthy()
     {
-        var clock = new QueryObservedWorkClock();
         using var fixture = new CanonicalReadCutFixture(
-            new DatabaseLimits(), timeProvider: clock);
+            new DatabaseLimits());
         var database = fixture.Canonical;
         database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
         var receipt = await TextWaitSeed.CommitAsync(fixture, TestContext.Current!.Execution.CancellationToken);
@@ -31,31 +26,16 @@ internal sealed class TextWaitObservedWorkTests
         var cut = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        clock.Arm(() => database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes,
-            () => { if (cancel) { cancellation.Cancel(); } else { clock.Advance(TimeSpan.FromSeconds(ExpiredSeconds)); } });
+        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
+            static progress => progress.RangeExaminedBytes);
+        await observed.Ready;
         WaitForIndexResult? partial = null;
-        try
-        {
-            if (cancel)
+        var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
             {
-                var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-                    {
-                        partial = await search.WaitForIndexAsync(Root, request, cancellation.Token);
-                    }) ?? throw new InvalidOperationException();
-                await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-            }
-            else
-            {
-                var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
-                    {
-                        partial = await search.WaitForIndexAsync(Root, request, cancellation.Token);
-                    }) ?? throw new InvalidOperationException();
-                await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-                await Assert.That(failure.Message).IsEqualTo(DeadlineDetail);
-            }
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+                partial = await search.WaitForIndexAsync(Root, request, cancellation.Token);
+            }) ?? throw new InvalidOperationException();
+        await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);

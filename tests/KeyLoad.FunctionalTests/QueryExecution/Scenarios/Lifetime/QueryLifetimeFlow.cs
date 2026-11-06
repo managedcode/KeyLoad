@@ -66,7 +66,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
     internal PartitionQueryLifetimeMetadata Capture()
     {
         var database = fixture.Source.Database;
-        var work = new ReadExecutionBudget(database.EvaluationClock, CancellationToken.None);
+        var work = new ReadExecutionBudget(CancellationToken.None);
         return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(QueryFixture.Reader,
             QueryFixture.Partition, QueryFixture.Collection,
             (view, principal, resource, _) => new(resource,
@@ -105,7 +105,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
         var roundTrip = runtimeRoundTrip
             ? OrleansSerialization.Deserialize<PartitionQueryOwnedLeafRequest>(OrleansSerialization.Serialize(input)) : input;
         return PartitionQueryLifetimeLeafExecution.Execute(engine, QueryFixture.Reader, roundTrip,
-            fixture.DestinationOwner, database.EvaluationClock, cancellationToken);
+            fixture.DestinationOwner, cancellationToken);
     }
 
     internal DistributedSearchLeafResult Statistics(PartitionQueryLifetimeMetadata? captured = null,
@@ -122,8 +122,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
         var roundTrip = runtimeRoundTrip
             ? OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(OrleansSerialization.Serialize(input)) : input;
         return DistributedSearchOwnedLeafExecution.Execute(database, QueryFixture.Reader,
-            roundTrip, fixture.DestinationOwner, UnitExecutionOptions.QueryExecution(),
-            database.EvaluationClock, CancellationToken.None);
+            roundTrip, fixture.DestinationOwner, UnitExecutionOptions.QueryExecution(), CancellationToken.None);
     }
 
     private static void Principal(DocumentPatchAtomicityOwner owner, long epoch, bool narrow, bool restrictedRows)

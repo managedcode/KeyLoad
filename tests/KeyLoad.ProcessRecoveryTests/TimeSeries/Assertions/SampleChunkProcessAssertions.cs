@@ -40,7 +40,12 @@ internal static class SampleChunkProcessAssertions
         }
         var final = await ReadAsync(root, SampleChunkCrashContract.FinalFile, token);
         var originalHealthy = await ReadAsync(root, SampleChunkCrashContract.HealthyFile, token);
-        await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(final)))
+        await Assert.That(final.NativePosition).IsGreaterThanOrEqualTo(originalHealthy.NativePosition);
+        await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(final with
+        {
+            NativePosition = originalHealthy.NativePosition,
+            Window = final.Window with { CutPosition = originalHealthy.Window.CutPosition }
+        })))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(originalHealthy)));
         await LiteralAsync(final, true, SampleChunkCrashContract.MergedRevision, SampleChunkCrashContract.MergedGeneration);
     }
@@ -55,7 +60,7 @@ internal static class SampleChunkProcessAssertions
                new(SampleChunkCrashContract.Series, SampleChunkCrashContract.Equal, InitialSequence, SampleChunkCrashContract.Tags)];
         var expected = new SampleChunkWindowResult(SampleChunkCrashContract.WindowId,
             SampleChunkCrashContract.From, SampleChunkCrashContract.Until, generation, revision,
-            merge ? CorrectedSequence : InitialSequence, null, [.. rows], snapshot.Position);
+            merge ? CorrectedSequence : InitialSequence, null, [.. rows], snapshot.NativePosition);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(snapshot.Window)))
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected)));
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(snapshot.RawRows)))

@@ -17,7 +17,7 @@ internal static class EventAppendRecoveryOracle
         var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root,
             EventAppendCrashContract.OperationFile, cancellationToken);
         var seedPosition = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root,
-            EventAppendCrashContract.SeedPositionFile, cancellationToken);
+            EventAppendCrashContract.SeedSequenceFile, cancellationToken);
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root,
             EventAppendCrashContract.SeedTailFile, cancellationToken);
         var target = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitToken>(root,
@@ -26,7 +26,7 @@ internal static class EventAppendRecoveryOracle
         var database = Open(store);
         var recovered = OutcomeStoreOracle.Read(store, original);
         var committed = recovered is not null;
-        await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? PositionStep : 0));
+        await Assert.That(CrashDatabase.AppliedPosition(store, EventAppendCrashContract.Partition)).IsEqualTo(seedPosition + (committed ? PositionStep : 0));
         if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();

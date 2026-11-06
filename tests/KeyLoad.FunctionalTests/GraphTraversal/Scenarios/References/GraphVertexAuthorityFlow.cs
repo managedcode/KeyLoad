@@ -36,12 +36,13 @@ internal static class GraphVertexAuthorityFlow
         using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await GraphTraversalIntegrityAssertions.Image(cold, corruptImage, corruptPosition);
+            corruptPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(cold, corruptImage, corruptPosition);
             await GraphVertexAuthorityAssertions.ReadsRefuse(owner, cold, state, token);
             await GraphVertexAuthorityAssertions.ReplayFailure(owner, cold, upsert, upsertFailure);
             await GraphVertexAuthorityAssertions.ReplayFailure(owner, cold, remove, removeFailure);
             GraphTraversalIntegrityFaultRows.Repair(cold, fault);
-            await GraphTraversalIntegrityAssertions.Image(cold, GraphVertexAuthorityFault.RepairedImage(corruptImage, fault), corruptPosition + 1L);
+            await GraphTraversalIntegrityAssertions.Image(cold, GraphVertexAuthorityFault.RepairedImage(corruptImage, fault),
+                await NativeStoreAssertions.AdvancedAsync(cold, corruptPosition));
             await GraphVertexAuthorityAssertions.Healthy(owner, cold, state, null, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             recovered = GraphStorageReferenceFixture.Submit(owner, upsert).Get<CommitReceipt>();
@@ -62,7 +63,7 @@ internal static class GraphVertexAuthorityFlow
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
-        await GraphTraversalIntegrityAssertions.Image(secondCold, continuedImage, continuedPosition);
+        continuedPosition = await GraphTraversalIntegrityAssertions.ReopenedImage(secondCold, continuedImage, continuedPosition);
         await GraphVertexAuthorityAssertions.Healthy(secondOwner, secondCold, state, continuation, token);
         await GraphVertexAuthorityAssertions.RepairedReceipt(secondOwner, state, upsert, recovered);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, upsert, recovered);

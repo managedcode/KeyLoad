@@ -34,8 +34,7 @@ internal sealed class AnnProviderQualificationOwner : IDisposable
         => OutcomeStoreOracle.ReadStored(Store, command) ?? throw new InvalidOperationException(MissingOriginal);
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, Source.Partition), Store.Position));
 
     internal void Reopen()
     {

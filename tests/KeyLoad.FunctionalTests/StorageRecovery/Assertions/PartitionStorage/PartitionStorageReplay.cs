@@ -11,8 +11,8 @@ internal static class PartitionStorageReplay
     internal static byte[] ReadBytes(IServiceProvider source,
         CancellationToken token)
     {
-        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
-        var work = new ReadExecutionBudget(source.GetRequiredService<TimeProvider>(), token);
+        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host.Database;
+        var work = new ReadExecutionBudget(token);
         work.Check();
         byte[]? bytes = null;
         database.Store.Read(view => view.ReadValue(KeySpace.PartitionOutcome(P.Partition, P.Root, P.Command),
@@ -24,7 +24,7 @@ internal static class PartitionStorageReplay
     internal static async Task RequireOriginalAsync(IServiceProvider source,
         PartitionStorageCommit original, CancellationToken token)
     {
-        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host;
         await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         var database = owner.Database;
         var request = database.CreateCommand(OperationKind.Batch, P.Command, P.Root,
@@ -46,15 +46,15 @@ internal static class PartitionStorageReplay
     internal static async Task RequireUnchangedCutAsync(IServiceProvider source,
         (long AppliedPosition, long StorePosition) expected, CancellationToken token)
     {
-        await source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Coordinator
+        await source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host.Coordinator
             .ReadBarrierAsync(token).ConfigureAwait(false);
         await Assert.That(ReadCut(source)).IsEqualTo(expected);
     }
 
     internal static (long AppliedPosition, long StorePosition) ReadCut(IServiceProvider source)
     {
-        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
-        return database.Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), database.Store.Position));
+        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Session.Host.Database;
+        return database.Store.Read(view => (view.ReadOwnedValue(StorageCommandKeys.Applied(P.Partition)) is { } bytes
+            ? OrleansSerialization.Deserialize<StoragePartitionPosition>(bytes).Position : default(long), database.Store.Position));
     }
 }

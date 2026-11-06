@@ -34,7 +34,7 @@ internal static class SqlEventReferenceJoinCold
                     var owner = database.CreateConfiguredDatabase(reopened);
                     await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
                     await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-                    await Assert.That(reopened.Position).IsEqualTo(position);
+                    position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
                     var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
                     await ModelJoinAliasAdmissionFlow.RunAsync(engine, reopened, database.Partition, events: true, repaired: true);
                     await SqlEventReferenceJoinAssertions.PageAsync(engine.Execute("root",

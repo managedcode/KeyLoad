@@ -1,6 +1,4 @@
-using System.Collections.Immutable;
 using KeyLoad.Clustering;
-using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.FunctionalTests.StorageReplication;
 
@@ -8,8 +6,7 @@ namespace KeyLoad.FunctionalTests.StorageReplication;
 internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallFilter
 {
     private const int FirstRefusal = 1;
-    private const int OperationsArgument = 0;
-    private const int CancellationArgument = 3;
+    private const int CancellationArgument = 2;
     private int sends;
     private int refused;
     internal SiloAddress? InterruptedSilo { get; set; }
@@ -26,11 +23,12 @@ internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallF
             return;
         }
         Interlocked.Increment(ref sends);
-        if (!SystemTargetGrainId.TryParse(context.TargetId, out var target) || InterruptedSilo is null)
+        var target = StorageBatchCallSelection.Target(context);
+        if (InterruptedSilo is null)
         {
             throw new InvalidOperationException("The copy interruption requires its actual target silo.");
         }
-        var selectedTarget = target.GetSiloAddress().Equals(InterruptedSilo);
+        var selectedTarget = target.Equals(InterruptedSilo);
         if (selectedTarget && Interlocked.CompareExchange(ref refused, FirstRefusal, 0) == 0)
         {
             throw new IOException("The selected original storage copy transport was interrupted.");
@@ -56,9 +54,8 @@ internal sealed class StorageCopyCallFault(Guid commandId) : IOutgoingGrainCallF
 
     private bool Selects(IOutgoingGrainCallContext context)
         => context.InterfaceMethod.DeclaringType == typeof(ISiloDatabaseService)
-            && context.MethodName == nameof(ISiloDatabaseService.ApplyBatchAsync)
-            && context.Request.GetArgument(OperationsArgument) is ImmutableArray<Command<DatabaseCommand>> operations
-            && operations.Any(operation => operation.CommandId == commandId);
+            && context.MethodName == nameof(ISiloDatabaseService.ApplyReplicaBatchAsync)
+            && StorageBatchCallSelection.Selects(context, commandId);
 
     internal void ReleaseRepair() => Release.TrySetResult();
 }

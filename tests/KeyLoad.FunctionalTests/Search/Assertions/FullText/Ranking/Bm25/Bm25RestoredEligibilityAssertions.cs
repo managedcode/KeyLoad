@@ -14,7 +14,7 @@ internal static class Bm25RestoredEligibilityAssertions
         IAtomicStore store, DatabaseEngine database,
         (long AppliedPosition, long StorePosition) canonicalCut, CancellationToken token)
         => (OrleansSerialization.Serialize(store.Identity), store.Position, database.LastApplied, canonicalCut,
-            Bm25PortableFamilyBytes.Complete(store, database.EvaluationClock, token));
+            Bm25PortableFamilyBytes.Complete(store, token));
 
     internal static async Task SameAsync(
         (byte[] Identity, long Position, long Applied, (long, long) CanonicalCut, string[] Rows) expected,
@@ -31,7 +31,7 @@ internal static class Bm25RestoredEligibilityAssertions
         => fixture.Database.WithQueryView(subject, fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection,
             (view, principal, resource) => (fixture.Database.ReadBm25CorpusCurrent(view, principal, resource,
                 fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection, Bm25PortableFamilyBackupSeed.Field,
-                TextProjectionProtocol.TokenizerVersion, ["needle"], fixture.Source.CreateReadWork(Token))).Value);
+                TextProjectionProtocol.TokenizerVersion, ["needle"], TestDatabase.CreateReadWork(Token))).Value);
 
     private static CancellationToken Token => TestContext.Current!.Execution.CancellationToken;
 

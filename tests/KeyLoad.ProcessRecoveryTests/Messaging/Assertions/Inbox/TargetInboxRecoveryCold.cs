@@ -34,6 +34,6 @@ internal static class TargetInboxRecoveryCold
         {
             throw new InvalidOperationException("Target inbox recovery exceeded its fixture row bound.");
         }
-        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

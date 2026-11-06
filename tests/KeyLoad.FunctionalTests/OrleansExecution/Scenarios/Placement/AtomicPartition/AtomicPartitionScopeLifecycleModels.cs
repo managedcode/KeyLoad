@@ -47,7 +47,7 @@ internal static class AtomicPartitionScopeLifecycleModels
         await Assert.That(page.Stream).IsEqualTo(stream);
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Cursor).IsNull();
-        await Assert.That(page.CutPosition).IsGreaterThan(0);
+        await Assert.That(page.CutPosition).IsEqualTo(NativeStoreAssertions.Applied(database.Store, partition));
         if (!present)
         {
             await Assert.That(document).IsNull();

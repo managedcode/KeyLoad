@@ -68,6 +68,7 @@ internal static class ProjectionDigestImage
         var identity = OrleansSerialization.Serialize(fixture.Harness.Store.Identity);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(fixture.Harness.Reopen, failures);
+        cut = await NativeStoreAssertions.ReopenedAsync(fixture.Harness.Store, cut);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(OrleansSerialization.Serialize(fixture.Harness.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(() => ClassificationLineageWholeAssertions.UnchangedAsync(

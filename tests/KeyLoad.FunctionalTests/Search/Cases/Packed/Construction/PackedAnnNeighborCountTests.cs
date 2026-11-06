@@ -157,7 +157,7 @@ internal sealed class PackedAnnNeighborCountTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var canceled = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var canceled = new AnnWorkBudget(new ReadExecutionBudget(cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() => PackedAnnBuilder.Build(space, records,
             UnitExecutionOptions.PackedAnn(options), canceled));
         await Assert.That(canceled.WorkUnits).IsEqualTo(0L);

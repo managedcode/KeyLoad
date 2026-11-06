@@ -12,7 +12,7 @@ internal static class TopicPurgeCrashContract
     internal const string SeedReceiptFile = "purge-seed-receipt.bin";
     internal const string PublishOperationFile = "purge-publish-operation.bin";
     internal const string PublishReceiptFile = "purge-publish-receipt.bin";
-    internal const string PositionFile = "purge-position.bin";
+    internal const string SequenceFile = "purge-sequence.bin";
     internal const string ProtectedFile = "purge-protected.bin";
     internal const string PinnedFile = "purge-pinned.bin";
     internal const string CursorFile = "purge-cursor.bin";

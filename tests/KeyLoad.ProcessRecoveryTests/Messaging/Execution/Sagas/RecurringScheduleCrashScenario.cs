@@ -93,9 +93,7 @@ internal static class RecurringScheduleCrashScenario
 
     private static async Task ArmBoundaryAsync(ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        const int PositionStep = 1;
 
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
     }
 }

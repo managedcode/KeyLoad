@@ -16,6 +16,7 @@ internal sealed class SafeProjectorOperationDatabase
 
     internal CancellationToken CallerToken { get; }
     internal TestDatabase Source { get; }
+    internal NativePublicationObservation OriginalPublications { get; } = new();
     internal ZoneTreeStore Store => originalJoined ? coldStore ?? throw new InvalidOperationException(MissingOwner) : Source.Store;
 
     [AllowNull]
@@ -25,7 +26,7 @@ internal sealed class SafeProjectorOperationDatabase
     {
         CallerToken = callerToken;
         callerToken.ThrowIfCancellationRequested();
-        Source = new(directory: directory);
+        Source = new(directory: directory, storeFaultObserver: OriginalPublications.Observe);
         canonicalIdentity = Source.Store.Identity;
     }
 
@@ -61,12 +62,11 @@ internal sealed class SafeProjectorOperationDatabase
         => OutcomeStoreOracle.ReadStored(Store, operation) ?? throw new InvalidOperationException(MissingOwner);
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (NativeStoreAssertions.AppliedInView(view, Source.Partition), Store.Position));
 
     internal CommitToken NextToken()
         => new(Store.Identity.Incarnation, Source.Partition.AtomicPartitionId,
-            checked(Database.LastApplied + SafeProjectorOperationProtocol.NextJournalIndex));
+            checked(ReadCanonicalCut().AppliedPosition + SafeProjectorOperationProtocol.NextJournalIndex));
 
     internal async Task ReopenAsync()
     {

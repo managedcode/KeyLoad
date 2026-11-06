@@ -27,7 +27,7 @@ internal static class AnnPublicReservationFlow
                 var pin = AnnMaintenanceTestData.Pin(database);
                 var options = new AnnExecutionOptions { MaximumResidentBytes = ResidentBytes };
                 var policy = Options.Create(new PackedAnnOptions());
-                var read = Read(database);
+                var read = new ReadExecutionBudget(TestContext.Current!.Execution.CancellationToken);
                 var seeds = Options.Create(new AnnSeedOptions());
                 var source = AnnSeedCollector.CapturePinned(database.Database, AnnWaitWholeFlow.Root, pin, seeds, read);
                 var page = database.Database.ReadProjectionBatch(AnnWaitWholeFlow.Root,
@@ -47,7 +47,7 @@ internal static class AnnPublicReservationFlow
                         Mode = AnnMaintenanceMode.Restore
                     };
                     var current = AnnSeedCollector.CapturePinned(database.Database, AnnWaitWholeFlow.Root,
-                        restore, seeds, Read(database));
+                        restore, seeds, new ReadExecutionBudget(TestContext.Current!.Execution.CancellationToken));
                     var index = owner.Acquire(restore, current);
                     try
                     {
@@ -61,10 +61,6 @@ internal static class AnnPublicReservationFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static ReadExecutionBudget Read(TestDatabase database)
-        => new(database.Database.EvaluationClock,
-            TestContext.Current!.Execution.CancellationToken);
-
     private static async Task RequireAsync(TestDatabase database, AnnGenerationOwner owner,
         AnnIndexLease index, AnnExecutionOptions options)
     {
@@ -74,6 +70,7 @@ internal static class AnnPublicReservationFlow
         await Assert.That(free > NoBytes).IsTrue();
         var image = AnnMaintenanceTestData.Snapshot(database);
         var cut = database.Store.Position;
+        await MaintenanceAsync(owner, free);
         using (var full = owner.ReserveRead(long.MaxValue))
         {
             await Assert.That(full.Bytes).IsEqualTo(free);
@@ -90,12 +87,24 @@ internal static class AnnPublicReservationFlow
         {
             await Assert.That(following.Bytes).IsEqualTo(free);
             var actual = index.Index.Search(new float[] { QueryXAxis, QueryUnusedAxis, QueryUnusedAxis }, AnnPublicWholeFlow.Count, null,
-                new AnnWorkBudget(Read(database), new AnnSeedOptions().MaxWorkUnits));
+                new AnnWorkBudget(new ReadExecutionBudget(TestContext.Current!.Execution.CancellationToken), new AnnSeedOptions().MaxWorkUnits));
             await Assert.That(actual.Candidates.Select(row => row.DocumentId).ToArray()).IsEquivalentTo(
                 ExpectedDocumentIds, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(actual.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
         }
         await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+    }
+
+    private static async Task MaintenanceAsync(AnnGenerationOwner owner, long free)
+    {
+        using var maintenance = owner.MaintenanceMemory.Reserve();
+        await Assert.That(maintenance.Bytes).IsEqualTo(free);
+        await RefuseAsync(owner);
+        var retained = free / Split;
+        owner.MaintenanceMemory.Retain(maintenance, retained);
+        using var concurrent = owner.ReserveRead(long.MaxValue);
+        await Assert.That(concurrent.Bytes + maintenance.Bytes).IsEqualTo(free);
+        await RefuseAsync(owner);
     }
 
     private static async Task RefuseAsync(AnnGenerationOwner owner)

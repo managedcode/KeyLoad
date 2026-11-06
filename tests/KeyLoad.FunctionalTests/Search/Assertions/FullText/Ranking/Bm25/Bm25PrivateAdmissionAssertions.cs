@@ -9,18 +9,20 @@ internal static class Bm25PrivateAdmissionAssertions
 {
     internal static async Task RequirePublicationAsync(TestDatabase database,
         Bm25CorpusPublicationPhaseCommand phase, Result<object> result, PrincipalRecord subject, long totalLength,
-        (CommitToken Token, long Applied) expected)
+        (long Position, long Applied) expected, long writeIdentity)
     {
         await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(phase.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token).IsEqualTo(expected.Token);
+        var expectedToken = new CommitToken(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId, writeIdentity);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
+        await Assert.That(writeIdentity).IsGreaterThan(expected.Position);
         await Assert.That(database.ReadStoredOutcome(phase.CommandId).CanonicalSequence).IsEqualTo(0L);
-        await Assert.That(database.Database.LastApplied).IsEqualTo(expected.Applied);
-        await Assert.That(database.Store.Position).IsEqualTo(expected.Token.Position);
-        var expectedReceipt = new CommitReceipt(phase.CommandId, expected.Token, [],
+        await Assert.That(NativeStoreAssertions.Applied(database.Store, database.Partition)).IsEqualTo(expected.Applied);
+        await Assert.That(database.Store.Position).IsGreaterThanOrEqualTo(writeIdentity);
+        var expectedReceipt = new CommitReceipt(phase.CommandId, expectedToken, [],
             database.Database.Durability, database.Database.AcknowledgedPersistedCopies);
         await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expectedReceipt), OrleansSerialization.Serialize(receipt));
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);

@@ -1,4 +1,3 @@
-using System.Buffers.Binary;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -21,21 +20,9 @@ internal sealed class StoreFileFixture : IDisposable
         DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFileName);
 
-    /// <summary>Gets the store position record committed with every transaction.</summary>
-    internal static byte[] PositionKey => KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-        ZoneTreePersistenceFormat.PositionKey);
-
     /// <summary>Gets the dispatch-paused record that a restore commits into the restored store.</summary>
     internal static byte[] DispatchPausedKey => KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
         DispatchPausedName);
-
-    /// <summary>Encodes the store position record value for an exact committed position.</summary>
-    internal static byte[] PositionValue(long position)
-    {
-        var value = new byte[sizeof(long)];
-        BinaryPrimitives.WriteInt64LittleEndian(value, position);
-        return value;
-    }
 
     internal StoreIdentity Initialize()
     {

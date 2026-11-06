@@ -20,7 +20,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task LeaseAsync(TestDatabase fixture, RequestWorkOwner owner, Guid requestId,
+    internal static async Task LeaseAsync(RequestWorkOwner owner, Guid requestId,
         Func<RequestWorkLease, ReadExecutionBudget, Task> body, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -37,7 +37,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
             {
                 lease = owner.Acquire(requestId, RequestWorkKind.CommandCapability);
                 ledger = pending.TransferTo(lease);
-                var work = fixture.CreateReadWork(token);
+                var work = TestDatabase.CreateReadWork(token);
                 work.AttachResourceLifetimeBinding(lease);
                 await body(lease, work);
             }, failures);

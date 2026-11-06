@@ -9,7 +9,7 @@ internal static class EventProjectionCrashScenario
 {
     internal const string Mode = "event-projection-process";
     internal const string OperationFile = "event-projection-operation.bin";
-    internal const string PositionFile = "event-projection-before-position.bin";
+    internal const string SequenceFile = "event-projection-before-sequence.bin";
     internal const string TargetTokenFile = "event-projection-target-token.bin";
     internal const string OutboxHeadFile = "event-projection-before-outbox-head.bin";
     internal const string SourceDocumentFile = "event-projection-before-source-document.bin";
@@ -71,7 +71,6 @@ internal static class EventProjectionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        const int PositionStep = 1;
 
         var database = CrashDatabase.Create(store);
         Seed(database);
@@ -80,7 +79,6 @@ internal static class EventProjectionCrashScenario
         var command = new CommandRequest(commandId, Partition, [request]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, commandId);
         await PreserveBeforeCutAsync(directory, store, database, operation);
-        boundary.Position = store.Position + PositionStep;
         await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
         await RecoveryProcessPause.WaitForKillAsync(store);
@@ -156,7 +154,7 @@ internal static class EventProjectionCrashScenario
         const string PreserveBeforeCutAsyncMessageText = "The projection target unexpectedly had a vector before the crash cut.";
 
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
-        await File.WriteAllBytesAsync(Path.Combine(directory, PositionFile), OrleansSerialization.Serialize(store.Position));
+        await File.WriteAllBytesAsync(Path.Combine(directory, SequenceFile), OrleansSerialization.Serialize(CrashDatabase.AppliedPosition(store, Partition)));
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetTokenFile),
             OrleansSerialization.Serialize(CrashDatabase.NextCommitToken(database, Partition)));
         await SaveRecordAsync(directory, store, OutboxHeadFile, OutboxHeadKey());

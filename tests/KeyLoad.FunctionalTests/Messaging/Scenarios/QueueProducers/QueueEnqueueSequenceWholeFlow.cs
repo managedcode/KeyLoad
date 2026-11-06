@@ -27,7 +27,7 @@ internal static class QueueEnqueueSequenceWholeFlow
             tx.PutRecord(key, counters);
             return true;
         });
-        var now = QueueWholeFlowStorage.Clock(fixture.Store);
+        var now = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var due = scheduled ? now.AddHours(QueueEnqueueColdProtocol.FutureScheduledHours) : (DateTimeOffset?)null;
         var message = new EnqueueMessage(lane.Queue, QueueEnqueueAuthorityProtocol.SequenceOriginal, QueueEnqueueColdProtocol.ReadyJson, QueueEnqueueColdProtocol.EmptyHeaders, NotBefore: due, OrderingKey: strict ? QueueEnqueueAuthorityProtocol.OrderingKey : null);
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition,
@@ -50,6 +50,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position, image);
         await QueueStoredCapacityReceipts.FailureAsync(owner, cold, fixture.Partition, operation, result);
@@ -61,6 +62,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         cold.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var restored = fixture.CreateConfiguredDatabase(second);
+        finalPosition = await NativeStoreAssertions.ReopenedAsync(second, finalPosition);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, final);
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, operation, result);
@@ -84,7 +86,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         var message = new EnqueueMessage(lane.Queue, QueueEnqueueColdProtocol.Healthy, QueueEnqueueAuthorityProtocol.SequenceHealthyJson, QueueEnqueueColdProtocol.EmptyHeaders, OrderingKey: strict ? QueueEnqueueAuthorityProtocol.OrderingKey : null);
         var fresh = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Healthy, QueueEnqueueAuthorityProtocol.SequenceHealthyJson), message]);
-        var time = QueueWholeFlowStorage.Clock(store);
+        var time = QueueWholeFlowStorage.Clock(store, lane.Partition);
         var operation = QueueStoredCapacitySetup.Operation(owner, OperationKind.Batch, fresh, fresh.CommandId, time);
         var expected = await QueueStoredCapacityReceipts.NextAsync(owner, store, lane.Partition);
         var produced = owner.Apply(operation);

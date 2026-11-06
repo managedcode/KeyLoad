@@ -37,8 +37,8 @@ internal static class AnalyticsMapColdFlow
                 await owner.ReopenAsync();
                 await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
-                await Assert.That(owner.Store.Position).IsEqualTo(position);
-                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
+                position = await NativeStoreAssertions.ReopenedAsync(owner.Store, position);
+                await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((journal.AppliedPosition, position));
                 await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 await AnalyticsMapColdReads.VerifyAsync(owner, events, token);
                 await AnalyticsMapColdReads.UnchangedAsync(owner, async () =>

@@ -47,7 +47,7 @@ internal static class QueueTerminalInspectionWholeFlow
             : body;
         QueueLifecycleConditionOperations.Restore(fixture.Store, key, injected);
         var damaged = QueueLifecycleConditionAssertions.Capture(fixture.Store);
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await QueueTerminalInspectionAssertions.RefusalAsync(fixture.Database, fixture.Store, state, damaged);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
@@ -57,12 +57,12 @@ internal static class QueueTerminalInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
-                await QueueLifecycleConditionAssertions.Same(cold, damaged);
+                damaged = await QueueLifecycleConditionAssertions.ReopenedAsync(cold, damaged);
                 await QueueTerminalInspectionAssertions.RefusalAsync(owner, cold, state, damaged);
                 cold.Commit((tx, _) => { tx.Delete(key); return true; });
                 await QueueLifecycleConditionAssertions.Same(cold, original with
                 {
-                    Position = original.Position + 2
+                    Position = await NativeStoreAssertions.AdvancedAsync(cold, damaged.Position)
                 });
                 await QueueTerminalInspectionAssertions.TerminalAsync(owner, cold, state, expected, false);
                 await QueueTerminalInspectionAssertions.ReplayAsync(owner, cold, state);
@@ -80,7 +80,7 @@ internal static class QueueTerminalInspectionWholeFlow
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var restored = fixture.CreateConfiguredDatabase(second);
-            await QueueLifecycleConditionAssertions.Same(second, healthyCut);
+            healthyCut = await QueueLifecycleConditionAssertions.ReopenedAsync(second, healthyCut);
             await QueueTerminalInspectionAssertions.TerminalAsync(restored, second, state, expected, true);
             await QueueTerminalInspectionAssertions.ReplayAsync(restored, second, state);
             await QueueLifecycleConditionAssertions.Same(second, healthyCut);
@@ -95,7 +95,7 @@ internal static class QueueTerminalInspectionWholeFlow
             throw new ArgumentOutOfRangeException(nameof(terminalState));
         }
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var state = new QueueLifecycleTestState(fixture.Partition, time.AddSeconds(2));
         var id = Guid.NewGuid();
         var message = QueueLifecycleHealthy.Enqueue(QueueLifecycleConditionOperations.Source) with

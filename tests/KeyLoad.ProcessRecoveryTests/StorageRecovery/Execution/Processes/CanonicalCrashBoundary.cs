@@ -3,23 +3,23 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.ProcessRecoveryTests;
 
-internal sealed class CanonicalCrashBoundary(CommitStage stage, int mutationIndex, bool initiallyArmed)
+internal sealed class CanonicalCrashBoundary(CommitStage stage, int mutationIndex)
 {
-    internal bool Armed { get; set; } = initiallyArmed;
+    private bool armed;
 
     /// <summary>Makes the seeded state durable, as an acknowledgement would, and then arms the crash boundary.</summary>
     internal async Task ArmAsync(IAtomicStore store)
     {
         await store.SyncAsync();
-        Armed = true;
+        armed = true;
     }
-    internal long Position { get; set; } = CrashFixtureValues.InitialCrashPosition;
 
-    internal void Observe(CommitStage observed, long position, int index)
+    internal void Observe(CommitStage observed, long _, int index)
     {
-        if (Armed && position == Position && observed == stage
+        if (armed && observed == stage
             && (stage != CommitStage.MutationApplied || index == mutationIndex))
         {
+            armed = false;
             RecoveryProcessPause.AtBoundary();
         }
     }

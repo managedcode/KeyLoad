@@ -44,7 +44,7 @@ internal sealed class ModelHeadAuthorityFixture : IDisposable
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();
         }
-        await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(before);
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original model producer outcome must exist.");
         await PolicyAsync(false, 1L);

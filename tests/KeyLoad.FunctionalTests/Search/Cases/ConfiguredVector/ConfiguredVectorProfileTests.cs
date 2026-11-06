@@ -58,6 +58,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
+        position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
         var owner = QueueWholeFlowStorage.Open(reopened);
         await ConfiguredVectorProfileFlow.HealthyAsync(owner, database, token);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
@@ -105,7 +106,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(Errors.Code(error.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(error.Problem?.Detail).IsEqualTo(Denied);
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
-        await Assert.That(database.Store.Position).IsEqualTo(position + 1);
+        await Assert.That(database.Store.Position).IsGreaterThan(position);
 
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);

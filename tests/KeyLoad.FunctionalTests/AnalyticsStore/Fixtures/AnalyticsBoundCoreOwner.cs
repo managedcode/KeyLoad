@@ -22,7 +22,7 @@ internal static class AnalyticsBoundCoreOwner
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task LeaseAsync(TestDatabase fixture, RequestWorkOwner owner,
+    internal static async Task LeaseAsync(RequestWorkOwner owner,
         Func<RequestWorkLease, ResourceLifetimeWorkResultRetention, ReadExecutionBudget, Task> body,
         CancellationToken token)
     {
@@ -42,7 +42,7 @@ internal static class AnalyticsBoundCoreOwner
                 {
                     await ServerFailureObserver.ObserveAsync(async () =>
                     {
-                        var work = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
+                        var work = new ReadExecutionBudget(token);
                         work.AttachResourceLifetimeBinding(lease);
                         await body(lease, ledger, work);
                     }, failures);

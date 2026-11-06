@@ -86,10 +86,10 @@ internal static class BackupPersistedPolicyAssertions
     internal static async Task ReceiptAsync(DatabaseEngine database, PartitionRef partition, Guid id, CommitReceipt receipt)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.LastApplied);
+        await Assert.That(receipt.Token.Position).IsEqualTo(ExpectedCanonicalCommit.Applied(database, partition));
         var owner = database.Store.Read(view => database.ReadPlacementWitness(view, partition));
         await SameAsync(new CommitToken(owner.Incarnation, partition.AtomicPartitionId,
-            database.LastApplied), receipt.Token);
+            ExpectedCanonicalCommit.Applied(database, partition)), receipt.Token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Store.Identity.Durability);
     }

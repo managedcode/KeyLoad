@@ -24,7 +24,7 @@ internal static class UserAnalyticsProcessState
                 throw new InvalidOperationException(P.Invalid);
             }
 
-            return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + Separator
+            return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + Separator
                 + Convert.ToHexString(row.Value.Span)).ToArray();
         });
         return new(identity with

@@ -20,6 +20,7 @@ internal static class AuthorizationCredentialColdAssertions
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var store = new ZoneTreeStore(new(fixture.Database.Directory), fixture.Database.StorageExecution);
+            original.Position = await NativeStoreAssertions.ReopenedAsync(store, original.Position);
             await ServerFailureObserver.ObserveAsync(() => VerifyAsync(fixture, repair,
                 original, identity, applied, store, cancellationToken), failures);
         }, failures);

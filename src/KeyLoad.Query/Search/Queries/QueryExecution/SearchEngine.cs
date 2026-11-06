@@ -35,7 +35,7 @@ public sealed partial class SearchEngine
     public RankedDocument[] Search(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return SearchCore(principalId, request, budget);
@@ -49,7 +49,7 @@ public sealed partial class SearchEngine
     public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await SearchCoreAsync(principalId, request, budget);
@@ -64,7 +64,7 @@ public sealed partial class SearchEngine
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request GraphSearchRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return GraphSearchAsync(principalId, request, budget, cancellationToken);
     }
 

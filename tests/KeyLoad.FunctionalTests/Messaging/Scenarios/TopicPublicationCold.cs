@@ -19,6 +19,7 @@ internal static class TopicPublicationCold
         {
             using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             var owner = fixture.CreateConfiguredDatabase(store);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
             var earliest = owner.EvaluationClock.GetUtcNow() + lifetime;
             var page = owner.ReadEventSource("root", request);
@@ -28,7 +29,7 @@ internal static class TopicPublicationCold
             await Assert.That(cursor.ExpiresAt).IsGreaterThanOrEqualTo(earliest);
             await Assert.That(cursor.ExpiresAt).IsLessThanOrEqualTo(latest);
             await Assert.That(JsonDefaults.Serialize(page).AsSpan()
-                .SequenceEqual(JsonDefaults.Serialize(expected with { Cursor = page.Cursor }))).IsTrue();
+                .SequenceEqual(JsonDefaults.Serialize(expected with { Cursor = page.Cursor, CutPosition = position }))).IsTrue();
             var replay = owner.Apply(command).Get<CommitReceipt>();
             await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
             await QueueStoredCapacityAssertions.ImageAsync(store, position, image);

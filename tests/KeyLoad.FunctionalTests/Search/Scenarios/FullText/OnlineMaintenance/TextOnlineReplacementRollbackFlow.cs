@@ -117,7 +117,7 @@ internal static class TextOnlineReplacementRollbackFlow
 
     private static byte[] ReadCurrent(TestDatabase fixture, OnlineTextIndexMaintenanceRequest request, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         return fixture.Store.Read(view =>
         {
             var principal = fixture.Database.Principal(view, TextMaintenanceTestValues.Principal,

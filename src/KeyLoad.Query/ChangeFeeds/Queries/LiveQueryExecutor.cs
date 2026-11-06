@@ -17,7 +17,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request StartLiveQueryRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -32,11 +32,10 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 timeProvider ?? database.EvaluationClock), budget);
     }
 
-    internal LiveQueryPage Read(string principalId, ReadLiveQueryRequest request,
-        TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
+    internal LiveQueryPage Read(string principalId, ReadLiveQueryRequest request, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReadLiveQueryRequest reference through its object parameter. */;
-        var budget = new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);

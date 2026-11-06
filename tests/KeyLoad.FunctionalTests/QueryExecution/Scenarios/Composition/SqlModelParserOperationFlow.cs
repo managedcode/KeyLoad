@@ -30,6 +30,7 @@ internal static class SqlModelParserOperationFlow
             var before = SqlModelParserConservation.Capture(fixture);
             fixture.Reopen();
             var after = SqlModelParserConservation.Capture(fixture);
+            before = before with { Position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, before.Position) };
             await Assert.That(after.Image).IsEqualTo(before.Image);
             await Assert.That(after.Position).IsEqualTo(before.Position);
             await ModelSourceArgumentRefusals.RequireAsync(fixture);

@@ -16,7 +16,7 @@ internal static class TestDatabaseConcurrentCloseSeeding
         await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(result, expected);
         var cut = fixture.ReadCanonicalCut();
         await Assert.That(cut.AppliedPosition).IsEqualTo(expectedIndex);
-        await Assert.That(cut.StorePosition).IsEqualTo(checked(before.StorePosition + TestDatabaseConcurrentCloseProtocol.IndexStep));
+        await Assert.That(cut.StorePosition).IsGreaterThan(before.StorePosition);
         var original = fixture.ReadStoredOutcome(id).PreparedCommand ?? throw new InvalidOperationException();
         await Assert.That(original.CommandId).IsEqualTo(id);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Batch);

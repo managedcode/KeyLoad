@@ -22,6 +22,15 @@ internal static class QueueViewLeaseIsolationImages
         await Assert.That(cut.StorePosition).IsEqualTo(expected.StorePosition);
     }
 
+    internal static async Task<QueueViewLeaseIsolationImage> ReopenedAsync(DocumentPatchAtomicityOwner owner,
+        QueueViewLeaseIsolationImage expected)
+    {
+        var position = await NativeStoreAssertions.ReopenedAsync(owner.Store, expected.Position);
+        var current = expected with { Position = position, StorePosition = position };
+        await SameAsync(owner, current);
+        return current;
+    }
+
     internal static void RequireRoots(DocumentPatchAtomicityOwner owner)
     {
         foreach (var directory in new[] { owner.Source.Directory })

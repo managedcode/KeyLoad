@@ -129,7 +129,8 @@ internal static class CommandObservedReturnEdgeFlow
                 + CommandObservedPolicyProtocol.Step));
             var cut = scenario.Fixture.Database.ReadCanonicalCut();
             await Assert.That(cut.AppliedPosition).IsEqualTo(expected.Token.Position);
-            await Assert.That(scenario.Fixture.Database.Database.LastApplied).IsEqualTo(expected.Token.Position);
+            await Assert.That(NativeStoreAssertions.Applied(scenario.Fixture.Database.Store,
+                scenario.Fixture.Database.Partition)).IsEqualTo(expected.Token.Position);
         }
         else
         {

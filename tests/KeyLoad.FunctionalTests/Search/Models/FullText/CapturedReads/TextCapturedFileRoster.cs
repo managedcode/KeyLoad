@@ -7,7 +7,7 @@ internal sealed record TextCapturedFileRoster(string Path, TextIncrementalManife
     internal static TextCapturedFileRoster Capture(TestDatabase fixture, TextOnlineTestRuntime runtime,
         OnlineTextIndexMaintenanceRequest request, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         var publication = fixture.Database.ReadOnlineTextOriginalPublication(TextMaintenanceTestValues.Principal, request, budget)
             ?? throw new InvalidOperationException("The actual original canonical online publication is absent.");
         var root = System.IO.Path.Combine(fixture.Directory, TextOnlineRoot.DirectoryName);
@@ -32,7 +32,7 @@ internal sealed record TextCapturedFileRoster(string Path, TextIncrementalManife
     internal void RequireCurrent(TestDatabase fixture, TextOnlineTestRuntime runtime,
         OnlineTextIndexMaintenanceRequest request, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         var publication = fixture.Store.Read(raw =>
         {
             var view = budget.CreateView(raw);
@@ -46,12 +46,12 @@ internal sealed record TextCapturedFileRoster(string Path, TextIncrementalManife
         {
             throw new InvalidOperationException("The actual successor canonical online publication changed.");
         }
-        RequireOriginal(fixture, runtime, token);
+        RequireOriginal(runtime, token);
     }
 
-    internal void RequireOriginal(TestDatabase fixture, TextOnlineTestRuntime runtime, CancellationToken token)
+    internal void RequireOriginal(TextOnlineTestRuntime runtime, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(token);
         var actual = TextIncrementalMetadata.ReadManifest(Path, runtime.Options.RuntimeText.Value.MaximumDiskBytes, budget);
         if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(Manifest)))
         {

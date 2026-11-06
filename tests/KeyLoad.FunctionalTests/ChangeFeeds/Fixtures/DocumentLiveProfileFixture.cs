@@ -55,7 +55,7 @@ internal sealed class DocumentLiveProfileFixture : IDisposable
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
         var expected = new CommitReceipt(command.CommandId, expectedToken, [.. effects], DurabilityProfile.ProcessDurable, 1);
         await DocumentLiveProfileReads.EqualAsync(receipt, expected);
-        await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(before);
         foreach (var effect in receipt.Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();

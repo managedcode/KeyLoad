@@ -98,7 +98,7 @@ internal sealed class GrainRequestIdentityScope : IDisposable
         disposed = true;
     }
 
-    private static void Restore(string key, bool present, object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ value)
+    internal static void Restore(string key, bool present, object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ value)
     {
         if (present)
         {

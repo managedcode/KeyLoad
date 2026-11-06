@@ -17,8 +17,8 @@ internal static class ResourcePairBindingAssertions
             .SequenceEqual(KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId))).IsTrue();
         var allowed = new HashSet<string>(StringComparer.Ordinal)
         {
-            Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes),
-            Convert.ToHexString(KeySpace.LastCommandBytes), Convert.ToHexString(locator),
+            Convert.ToHexString(StorageCommandKeys.Clock(partition)), Convert.ToHexString(StorageCommandKeys.Applied(partition)),
+            Convert.ToHexString(locator),
             Convert.ToHexString(KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId))
         };
         await Assert.That(KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(store)
@@ -51,7 +51,7 @@ internal static class ResourcePairBindingAssertions
                 new(value.Id, EventType, EventJson), value.Time), page.Events.Single());
             await ResourceIncarnationAssertions.EqualAsync(new StreamPage(stream, new(FirstRevision, FirstRevision, FirstRevision),
                 [new(stream, FirstRevision, value.Sequence, new(value.Id, EventType, EventJson), value.Time)],
-                database.LastApplied, false, null, database.LastApplied), page);
+                ExpectedCanonicalCommit.Applied(database, state.Source.Partition), false, null, ExpectedCanonicalCommit.Applied(database, state.Source.Partition)), page);
             await ResourceIncarnationAssertions.EqualAsync(new MessageInspection(new(value.Id, MessageState.Ready, Zero, FirstRevision, value.Sequence, null, null),
                 QueueJson, Headers), database.InspectMessage(Root, new(state.Source.Partition, Queue), value.Id)!);
         }

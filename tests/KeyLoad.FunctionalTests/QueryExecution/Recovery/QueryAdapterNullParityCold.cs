@@ -15,6 +15,7 @@ internal static class QueryAdapterNullParityCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+            before.Position = await NativeStoreAssertions.ReopenedAsync(store, before.Position);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = fixture.CreateConfiguredDatabase(store);

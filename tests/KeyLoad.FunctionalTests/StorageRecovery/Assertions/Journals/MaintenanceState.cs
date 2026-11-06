@@ -25,8 +25,6 @@ internal static class MaintenanceState
         var expected = new[] { "alpha:updated", "gamma:original", healthy ? "omega:healthy" : null }
             .Where(item => item is not null).Select(item => item!.Split(':'))
             .Select(item => Convert.ToHexString(Key(item[0])) + ":" + Convert.ToHexString(Value(item[1])))
-            .Append(Convert.ToHexString(StoreFileFixture.PositionKey) + ":"
-                + Convert.ToHexString(StoreFileFixture.PositionValue(store.Position)))
             .Order(StringComparer.Ordinal).ToArray();
         await Assert.That(Image(store)).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }

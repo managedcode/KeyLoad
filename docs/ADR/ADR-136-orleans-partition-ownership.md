@@ -17,6 +17,13 @@ caller. Logical atomic partition identity is independent of activation placement
 and physical copy identity. A connection owns its response stream and independent
 request lifetimes; storage services expose self-contained typed Task calls.
 
+Each atomic partition's command owner orders its own batches. Metadata has a
+separate owner, and exact-effect copies preserve their causal dependency prefixes.
+Local primary publication borrows storage through DI; remote publication and
+copies use typed silo Grain Services. Per-batch apply activations are not part of
+the execution contract. See [ADR-146](ADR-146-group-commit.md) for ordering,
+acknowledgements and the full-copy qualification limits.
+
 ## Storage modes
 
 | Mode | Physical files | Execution and copies |

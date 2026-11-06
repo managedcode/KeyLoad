@@ -43,16 +43,18 @@ internal static class SqlModelEventRecordIntegrityFlow
         try
         {
             database.Store.Commit((transaction, _) => { transaction.Put(key, damaged); return true; });
-            await UnchangedAsync(database, expected, checked(position + 1));
+            position = await NativeStoreAssertions.AdvancedAsync(database.Store, position);
+            await UnchangedAsync(database, expected, position);
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
-            await QueriesAsync(database.Store, database.Database, database.Partition, expected, checked(position + 1));
+            await QueriesAsync(database.Store, database.Database, database.Partition, expected, position);
         }
         catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
-            await UnchangedAsync(database, before, checked(position + 2));
+            position = await NativeStoreAssertions.AdvancedAsync(database.Store, position);
+            await UnchangedAsync(database, before, position);
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             await SqlEventReferenceJoinOperation.VerifyAsync(database, repaired: true);
         }

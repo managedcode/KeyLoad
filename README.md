@@ -164,14 +164,14 @@ Details: [composition guide](docs/Features/DatabaseComposition.md) · [transacti
 
 ```mermaid
 flowchart LR
-    Callers["SDK · MCP · SQL · HTTP"] --> Request["One Orleans grain<br/>per connection"]
+    Callers["SDK · MCP · SQL · HTTP"] --> Request["One Orleans request grain<br/>per admitted operation"]
     Request --> Partition["Partition grains"]
     Partition --> N1[("Node 1<br/>ZoneTree")]
     Partition --> N2[("Node 2<br/>ZoneTree")]
     Partition --> N3[("Node 3<br/>ZoneTree")]
 ```
 
-Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests deactivation.
+The transport owns each connection and dispatches every admitted operation to its own ordinary Orleans request grain. Each operation has a server-issued identity, fresh persisted authorization, cancellation and joined cleanup. Commands are ordered per atomic partition; metadata has a separate owner. Local execution borrows the physical session through DI, and remote execution uses typed Orleans calls. Disconnect closes admission and joins the original work. The current redesign and its open qualification gates are recorded in the [execution review](docs/implementation/document-keyvalue-performance-review.md).
 
 Orleans owns membership, discovery, placement, activation migration, communication
 between silos and scaling. `IsolatedVolumes` keeps separate files on each silo;

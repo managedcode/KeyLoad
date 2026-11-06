@@ -25,16 +25,18 @@ internal static class ProjectionPartitionIsolationFlow
         var healthy = await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, state.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, state.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, reopenedPosition);
             await ProjectionPartitionIsolationAssertions.VerifyAsync(owner, cold, state, token);
             return await ProjectionPartitionIsolationHealthy.RunAsync(owner, cold, state, token);
         });
         await ColdAsync(database, async cold =>
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, healthy.Image, healthy.Position);
+            var reopenedPosition = await NativeStoreAssertions.ReopenedAsync(cold, healthy.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, healthy.Image, reopenedPosition);
             await ProjectionPartitionIsolationAssertions.VerifyAsync(owner, cold, healthy, token);
-            await ProjectionConsumerIdentityAssertions.SameAsync(cold, healthy.Image, healthy.Position);
+            await ProjectionConsumerIdentityAssertions.SameAsync(cold, healthy.Image, reopenedPosition);
             return healthy;
         });
     }

@@ -42,6 +42,7 @@ internal static class ModelRootPolicyLifetime
             {
                 cold = new(new(db.Directory), db.StorageExecution,
                     timeProvider: db.Database.EvaluationClock);
+                cut = await NativeStoreAssertions.ReopenedAsync(cold, cut);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut, identity), failures);
                 var database = db.CreateConfiguredDatabase(cold);
                 await ServerFailureObserver.ObserveAsync(() => ModelRootPolicyAssertions.WaveAsync(fixture, database, cold, true, true, token), failures);

@@ -22,7 +22,7 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         await ConflictsAsync(owner, sharedId, first, second);
         var warm = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
-        await warm.RequireAsync(DocumentPatchAtomicityState.Read(owner));
+        await warm.RequireReopenedAsync(DocumentPatchAtomicityState.Read(owner));
         await DocumentCommandPrincipalColdReplayAssertions.IndependentAsync(owner, first, second, tail + 2L);
         await ConflictsAsync(owner, sharedId, first, second);
         await DocumentCommandPrincipalColdReplayAssertions.DocumentsAsync(owner, healthy: false);
@@ -33,7 +33,7 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         await ConflictsAsync(owner, sharedId, first, second);
         var continued = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
-        await continued.RequireAsync(DocumentPatchAtomicityState.Read(owner));
+        continued = await continued.RequireReopenedAsync(DocumentPatchAtomicityState.Read(owner));
         await DocumentCommandPrincipalColdReplayAssertions.DocumentsAsync(owner, healthy: true);
         await DocumentCommandPrincipalColdReplayAssertions.IndependentAsync(owner, first, second, tail + 3L);
         await DocumentCommandPrincipalColdReplayAssertions.ReplayAsync(owner, healthy);

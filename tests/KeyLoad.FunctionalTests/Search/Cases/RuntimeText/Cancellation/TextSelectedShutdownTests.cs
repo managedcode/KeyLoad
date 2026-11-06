@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.FunctionalTests.Search;
@@ -11,8 +10,7 @@ internal sealed class TextSelectedShutdownTests
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var clock = new QueryObservedWorkClock();
-            using var database = new TestDatabase(timeProvider: clock);
+            using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
@@ -21,7 +19,7 @@ internal sealed class TextSelectedShutdownTests
                 var request = await TextMaintenanceRequestFixture.CreateAsync(database, token);
                 await using var runtime = new TextMaintenanceTestRuntime(database);
                 await ServerFailureObserver.ObserveAsync(
-                    () => TextSelectedShutdownAssertions.VerifyAsync(database, runtime, request, clock, token), failures);
+                    () => TextSelectedShutdownAssertions.VerifyAsync(database, runtime, request, token), failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

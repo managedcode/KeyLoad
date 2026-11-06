@@ -16,7 +16,7 @@ public static class GraphIncomingEdges
     public static GraphIncomingEdgesPage ReadIncomingGraphEdges(this DatabaseEngine engine, string principalId, ReadIncomingGraphEdgesRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken);
         return engine.ReadIncomingGraphEdgesRead(principalId, request, timeProvider ?? engine.Clock, budget);
     }
 

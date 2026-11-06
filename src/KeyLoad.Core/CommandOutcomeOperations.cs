@@ -47,10 +47,13 @@ public static class CommandOutcomeOperations
         return engine.Store.Read(view => (engine.ReadValidatedSubmissionOutcome(view, normalized) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */)) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
     }
 
-    internal static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ReadValidatedSubmissionOutcome(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation, CommandOutcomeSelection? verifiedSelection = null)
+    internal static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ReadValidatedSubmissionOutcome(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation, CommandOutcomeSelection? verifiedSelection = null, PrincipalRecord? verifiedPrincipal = null)
     {
-        var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-        _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
+        var principal = verifiedPrincipal ?? engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
+        if (verifiedPrincipal is null)
+        {
+            _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
+        }
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
         var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);

@@ -8,7 +8,7 @@ internal static class AnalyticsBoundCoreCancellation
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
             using var caller = CancellationTokenSource.CreateLinkedTokenSource(original);
-            await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
+            await AnalyticsBoundCoreOwner.LeaseAsync(owner, async (lease, ledger, work) =>
                 await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                 {
                     await caller.CancelAsync();

@@ -28,12 +28,8 @@ public static class DocumentStorageValidation
             throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenInvalidPosition);
         }
 
-        var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
-        var applied = OrleansSerialization.Deserialize<long>(bytes);
-        if (applied < DocumentTokenInitialPosition)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
-        }
+        var bytes = view.ReadOwnedValue(StorageCommandKeys.Applied(partition)) ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
+        var applied = StorageOperationApply.ReadCanonicalSequence(bytes, partition, DocumentTokenCorruptPosition);
 
         if (token.Position > applied)
         {

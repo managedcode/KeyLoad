@@ -48,6 +48,7 @@ internal static class ProjectionClassificationRepairFlow
         await ClassificationLineageWholeAssertions.UnchangedAsync(fixture, image, cut);
         var identity = fixture.Harness.Store.Identity;
         fixture.Harness.Reopen();
+        cut = await NativeStoreAssertions.ReopenedAsync(fixture.Harness.Store, cut);
         await Assert.That(fixture.Harness.Store.Identity.NodeId).IsEqualTo(identity.NodeId);
         await Assert.That(fixture.Harness.Store.Identity.Incarnation).IsEqualTo(identity.Incarnation);
         await Assert.That(fixture.Harness.Store.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);

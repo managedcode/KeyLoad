@@ -13,7 +13,7 @@ internal static class QueueLeaseAuthoritySetup
         fixture.Configure(QueueLeaseAuthorityProtocol.Queue, ResourceKind.WorkQueue);
         fixture.Configure(QueueLeaseAuthorityProtocol.Collection, ResourceKind.Collection);
         var lane = new QueueLaneRef(fixture.Partition, QueueLeaseAuthorityProtocol.Queue);
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var message = new EnqueueMessage(lane.Queue, QueueLeaseAuthorityProtocol.Message,
             QueueLeaseAuthorityProtocol.Payload, QueueLeaseAuthorityProtocol.Headers);
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition, [message]);

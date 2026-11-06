@@ -7,7 +7,7 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
     internal static DocumentPatchAtomicityState Read(DocumentPatchAtomicityOwner owner)
     {
         var partition = owner.Source.Partition;
-        var work = owner.Source.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
+        var work = TestDatabase.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
         var image = owner.Store.Read(view =>
         {
             var rows = Scan(view, [], work, view.MaximumRangeRecords);
@@ -19,9 +19,10 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
                 Scan(view, KeySpace.Partition("outbox", partition), work, view.MaximumRangeRecords),
                 Scan(view, KeySpace.Partition("outbox-head", partition), work, view.MaximumRangeRecords)
             ];
-            return (Rows: rows, Domain: domain);
+            return (Rows: rows, Domain: domain, Position: owner.Store.Position,
+                Applied: StorageOperationApply.ReadCanonicalSequence(view, partition));
         });
-        return new(owner.Store.Position, owner.Database.LastApplied, image.Rows,
+        return new(image.Position, image.Applied, image.Rows,
             OrleansSerialization.Serialize(owner.Store.Identity), image.Domain);
     }
 
@@ -48,8 +49,20 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
     internal async Task RequireAsync(DocumentPatchAtomicityState actual)
     {
         await Assert.That(actual.Position).IsEqualTo(Position);
+        await RequireContentsAsync(actual);
+    }
+
+    internal async Task<DocumentPatchAtomicityState> RequireReopenedAsync(DocumentPatchAtomicityState actual)
+    {
+        await Assert.That(actual.Position).IsGreaterThanOrEqualTo(Position);
+        await RequireContentsAsync(actual);
+        return actual;
+    }
+
+    private async Task RequireContentsAsync(DocumentPatchAtomicityState actual)
+    {
         await Assert.That(actual.Applied).IsEqualTo(Applied);
-        await DocumentPatchAtomicityAssertions.BytesAsync(StorageRecovery.NativeStorePositionOracle.AtPosition(Rows, Position), actual.Rows);
+        await DocumentPatchAtomicityAssertions.BytesAsync(Rows, actual.Rows);
         await DocumentPatchAtomicityAssertions.BytesAsync(Identity, actual.Identity);
         await RequireDomainAsync(actual);
     }

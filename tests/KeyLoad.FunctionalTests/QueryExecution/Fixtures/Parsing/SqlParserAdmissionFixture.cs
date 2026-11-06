@@ -34,8 +34,8 @@ timeProvider: new ControlledReadClock(Epoch));
     } = null!;
     internal async Task InitializeAsync()
     {
-        const long ResourceConfigurationsAndSeed = 3L;
-        var next = Harness.ReadCanonicalCut().AppliedPosition + ResourceConfigurationsAndSeed;
+        const long SeedCommands = 1L;
+        var next = Harness.ReadCanonicalCut().AppliedPosition + SeedCommands;
         var seeded = SqlOffsetFixture.Seed(Harness);
         Seed = seeded.Seed;
         Receipt = new(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, next), [.. Seed.Mutations.Cast<PutDocument>().Select(value => new MutationReceipt("putDocument", value.Collection, value.Id, 1L))], DurabilityProfile.ProcessDurable, 1);

@@ -1,7 +1,3 @@
-using System.Collections.Immutable;
-using KeyLoad.Clustering;
-using ManagedCode.Communication.Commands;
-
 namespace KeyLoad.FunctionalTests.StorageReplication;
 
 internal enum StorageBatchAcknowledgementFailure
@@ -20,16 +16,13 @@ internal sealed class StorageBatchAcknowledgementFault(Guid commandId, StorageBa
 
     public async Task Invoke(IOutgoingGrainCallContext context)
     {
-        var selected = context.InterfaceMethod.DeclaringType == typeof(ISiloDatabaseService)
-            && context.MethodName == nameof(ISiloDatabaseService.ApplyBatchAsync)
-            && context.Request.GetArgument(0) is ImmutableArray<Command<DatabaseCommand>> operations
-            && operations.Any(operation => operation.CommandId == commandId);
+        var selected = StorageBatchCallSelection.Selects(context, commandId);
         await context.Invoke();
         if (!selected)
         {
             return;
         }
-        var reply = (StorageCopyBatchAcknowledgement)context.Result! /* KLD0041: The selected ApplyBatchAsync transport response has the exact generated StorageCopyBatchAcknowledgement contract. */;
+        var reply = (StorageCopyBatchAcknowledgement)context.Result! /* KLD0041: The selected publication transport response has the exact generated StorageCopyBatchAcknowledgement contract. */;
         var original = failure == StorageBatchAcknowledgementFailure.MissingOutcome;
         if ((reply.Outcome is not null) != original || Interlocked.CompareExchange(ref changed, 1, 0) != 0)
         {

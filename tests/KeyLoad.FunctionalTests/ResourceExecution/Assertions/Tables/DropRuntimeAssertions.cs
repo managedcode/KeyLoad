@@ -58,8 +58,7 @@ internal static class DropRuntimeAssertions
         var key = OutcomeStoreOracle.GlobalKey(PartitionStoreProtocol.AdministratorId, commandId);
         var allowed = new HashSet<string>(StringComparer.Ordinal)
         {
-            Convert.ToHexString(key), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes),
-            Convert.ToHexString(KeySpace.LastCommandBytes)
+            Convert.ToHexString(key), Convert.ToHexString(StorageCommandKeys.Clock(null)), Convert.ToHexString(StorageCommandKeys.Applied(null))
         };
         await Assert.That(after.Length).IsEqualTo(DropRuntimeProtocol.RuntimeNodes);
         for (var index = DropRuntimeProtocol.FirstCold; index < after.Length; index++)

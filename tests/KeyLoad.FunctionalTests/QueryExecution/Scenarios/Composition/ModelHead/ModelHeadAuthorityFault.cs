@@ -24,18 +24,19 @@ internal static class ModelHeadAuthorityFault
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             store.Commit((transaction, _) => { transaction.Put(key, damaged); return true; });
-            await GraphLabelUseOperations.ConserveAsync(store, expected, cut + 1L, identity);
+            cut = await NativeStoreAssertions.AdvancedAsync(store, cut);
+            await GraphLabelUseOperations.ConserveAsync(store, expected, cut, identity);
             await ModelHeadAuthorityOperations.RefuseAsync(database, store, fixture.Harness.Partition, ModelHeadAuthorityFixture.Denied,
                 ErrorCode.PermissionDenied, "The principal cannot perform this operation in this scope.", 1L, token);
             await ModelHeadAuthorityOperations.RefuseAsync(database, store, fixture.Harness.Partition, ModelHeadAuthorityFixture.Reader,
                 ErrorCode.Corruption, "The retained event source is inconsistent.", 1L, token);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() =>
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
             store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
-            return Task.CompletedTask;
+            cut = await NativeStoreAssertions.AdvancedAsync(store, cut);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut + 2L, identity), failures);
+        await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store, image, cut, identity), failures);
         await ServerFailureObserver.ObserveAsync(() => ModelHeadAuthorityOperations.HealthyAsync(fixture, database, store, token), failures);
         await ServerFailureObserver.ObserveAsync(() => ModelHeadAuthorityOperations.ReplayAsync(fixture, database, store, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);

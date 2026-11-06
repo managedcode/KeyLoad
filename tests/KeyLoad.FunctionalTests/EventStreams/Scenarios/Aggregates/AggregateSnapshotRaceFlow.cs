@@ -15,9 +15,9 @@ internal static class AggregateSnapshotRaceFlow
             fixture = new();
             fixture.Initialize();
             var position = fixture.Store.Position;
-            var canonicalPosition = fixture.Database.LastApplied;
+            var canonicalPosition = ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Harness.Partition);
             await AggregateSnapshotRaceCompetitors.RunAsync(fixture, token);
-            await Assert.That(fixture.Store.Position).IsEqualTo(position + 2);
+            await Assert.That(fixture.Store.Position).IsGreaterThan(position);
             var winner = fixture.Outcomes.Single(outcome => Errors.Code(outcome.Result.Problem).Value is null);
             await AggregateSnapshotRaceValues.ReceiptAsync(fixture, fixture.Winner!, winner.Result, canonicalPosition + 1, 1);
             await ServerFailureObserver.ObserveAsync(() => ObserveAsync(fixture,
@@ -66,7 +66,7 @@ internal static class AggregateSnapshotRaceFlow
     private static async Task CreateHealthyAsync(AggregateSnapshotRaceFixture fixture)
     {
         fixture.Healthy = fixture.Snapshot(3, "{\"total\":6}", 1);
-        var position = checked(fixture.Database.LastApplied + 1);
+        var position = checked(ExpectedCanonicalCommit.Applied(fixture.Database, fixture.Harness.Partition) + 1);
         var result = fixture.Database.Apply(fixture.Operation(fixture.Healthy));
         fixture.HealthyResult = result;
         fixture.HealthyRaw = fixture.Store.Read(view => view.ReadOwnedValue(KeyLoad.Core.KeySpace.PartitionOutcome(

@@ -19,6 +19,8 @@ internal static class SchemaVisibleProjectionCold
                 var journal = owner.ReadCanonicalCut();
                 var applied = owner.Database.LastApplied;
                 await owner.ReopenAsync();
+                cut = await NativeStoreAssertions.ReopenedAsync(owner.Store, cut);
+                journal = (journal.AppliedPosition, cut);
                 var checks = new List<Exception>();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {

@@ -44,6 +44,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                     Incarnation = identity.Incarnation
                 },
                 identity.NodeId, source.Fixture.StorageExecution);
+            source.ColdPosition = await NativeStoreAssertions.ReopenedAsync(store, source.ColdPosition);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan()
@@ -56,7 +57,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                     [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.ReversePrefix)]),
                     new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(1));
-                var nextPosition = checked(engine.LastApplied + 1);
+                var nextPosition = checked(ExpectedCanonicalCommit.Applied(engine, source.Fixture.Partition) + 1);
                 var receipt = engine.Apply(reverse).Get<CommitReceipt>();
                 await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.CommandId, receipt, nextPosition);
                 var continuation = store.Read(view => DatabaseCompositionExpectedReferences.Capture(view,

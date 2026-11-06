@@ -48,7 +48,7 @@ internal static class QueueRetryColdTrial
     private static async Task<QueueRetryColdState> SeedAsync(TestDatabase fixture, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var start = QueueWholeFlowStorage.Clock(fixture.Store);
+        var start = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var lane = new QueueLaneRef(fixture.Partition, QueueRetryColdProtocol.Queue);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EnqueueMessage(lane.Queue, QueueRetryColdProtocol.Retry, QueueRetryColdProtocol.Payload,

@@ -59,7 +59,9 @@ internal static class UserAnalyticsProcessScenario
 
     private static async Task RecoverAsync(string root, PartitionHost host, CancellationToken token)
     {
-        var cut = await UserAnalyticsProcessState.ReadAsync(root, token);
+        var original = await UserAnalyticsProcessState.ReadAsync(root, token);
+        var position = await NativeStoreAssertions.ReopenedAsync(host.Database.Store, original.Position);
+        var cut = original with { Position = position };
         UserAnalyticsProcessState.Require(host, cut);
         UserAnalyticsRuntime? runtime = null;
         var failures = new List<Exception>();

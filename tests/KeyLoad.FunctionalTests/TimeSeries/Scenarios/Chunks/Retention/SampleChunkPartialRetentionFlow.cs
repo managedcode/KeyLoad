@@ -84,7 +84,7 @@ internal static class SampleChunkPartialRetentionFlow
     {
         var cut = SampleRawIntegrityAssertions.Capture(fixture.Store);
         fixture.Reopen();
-        await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
+        cut = await SampleRawIntegrityAssertions.ReopenedAsync(fixture.Store, cut);
         await SampleChunkPartialRetentionAssertions.Healthy(fixture, merged: true, fresh: fresh);
         await SampleChunkRetainedBudgetTrial.RunAsync(fixture, merged: true, fresh: fresh);
         await SampleChunkPartialRetentionAssertions.Replay(fixture);

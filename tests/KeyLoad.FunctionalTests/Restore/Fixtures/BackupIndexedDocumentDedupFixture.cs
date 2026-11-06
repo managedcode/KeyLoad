@@ -79,7 +79,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         var metadata = new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
             new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId));
         var operation = Source.Database.CreateCommand(OperationKind.ConfigureResource, MetadataCommandId, RootPrincipal, Source.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(metadata, JsonDefaults.Options));
-        expectedApplied = checked(Source.Database.LastApplied + 1);
+        expectedApplied = checked(NativeStoreAssertions.Applied(Source.Store, null) + 1);
         return Source.Database.Apply(operation);
     }
 
@@ -103,11 +103,11 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
 
     internal void AssertSourceAuthority()
     {
-        var applied = Source.Store.Read(view => view.ReadOwnedValue(KeySpace.Applied.ToArray()));
-        var clock = Source.Store.Read(view => view.ReadOwnedValue(KeySpace.Clock.ToArray()));
+        var applied = Source.Store.Read(view => view.GetRecord<StoragePartitionPosition>(StorageCommandKeys.Applied(null)));
+        var clock = Source.Store.Read(view => view.ReadOwnedValue(StorageCommandKeys.Clock(null)));
         var metadata = Source.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             Partition.TenantId, Partition.DatabaseId, AuthorityResource)));
-        if (applied is null || OrleansSerialization.Deserialize<long>(applied) != expectedApplied
+        if (applied is null || applied.Partition is not null || applied.Position != expectedApplied
             || clock is null || JsonSerializer.Serialize(metadata, JsonDefaults.Options) != JsonSerializer.Serialize(
                 new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId), JsonDefaults.Options))
         {

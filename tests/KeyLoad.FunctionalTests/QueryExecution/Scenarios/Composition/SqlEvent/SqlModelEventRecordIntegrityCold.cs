@@ -33,6 +33,7 @@ internal static class SqlModelEventRecordIntegrityCold
             identity = JsonDefaults.Serialize(store.Identity);
             await Assert.That(before.Single(row => row.StartsWith(prefix, StringComparison.Ordinal))).IsEqualTo(originalRow);
             store.Commit((transaction, _) => { transaction.Put(key, damaged); return true; });
+            position = await NativeStoreAssertions.AdvancedAsync(store, position);
             committed = true;
         }, failures);
         if (!committed)
@@ -47,19 +48,22 @@ internal static class SqlModelEventRecordIntegrityCold
             await InOwnerAsync(database, async cold =>
             {
                 await Assert.That(JsonDefaults.Serialize(cold.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
+                position = await NativeStoreAssertions.ReopenedAsync(cold, position);
                 await SqlModelEventRecordIntegrityFlow.QueriesAsync(cold, database.CreateConfiguredDatabase(cold),
-                    database.Partition, expected, checked(position + 1));
+                    database.Partition, expected, position);
             }, failures);
         }
-        await InOwnerAsync(database, repair =>
+        await InOwnerAsync(database, async repair =>
         {
+            position = await NativeStoreAssertions.ReopenedAsync(repair, position);
             repair.Commit((transaction, _) => { transaction.Put(key, original); return true; });
-            return Task.CompletedTask;
+            position = await NativeStoreAssertions.AdvancedAsync(repair, position);
         }, failures);
         await InOwnerAsync(database, async healthy =>
         {
+            position = await NativeStoreAssertions.ReopenedAsync(healthy, position);
             await Assert.That(QueueWholeFlowStorage.Bytes(healthy)).IsEquivalentTo(before, CollectionOrdering.Matching);
-            await Assert.That(healthy.Position).IsEqualTo(checked(position + 2));
+            await Assert.That(healthy.Position).IsEqualTo(position);
             await Assert.That(JsonDefaults.Serialize(healthy.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             var engine = new QueryEngine(database.CreateConfiguredDatabase(healthy), UnitExecutionOptions.QueryExecution());
             await SqlEventReferenceJoinAssertions.PageAsync(engine.Execute("root",
@@ -67,7 +71,7 @@ internal static class SqlModelEventRecordIntegrityCold
             await SqlEventReferenceJoinAssertions.PageAsync(engine.ExecuteAst("root",
                 SqlEventReferenceJoinFixture.Ast(database.Partition)), healthy.Position, repaired: true);
             await Assert.That(QueueWholeFlowStorage.Bytes(healthy)).IsEquivalentTo(before, CollectionOrdering.Matching);
-            await Assert.That(healthy.Position).IsEqualTo(checked(position + 2));
+            await Assert.That(healthy.Position).IsEqualTo(position);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

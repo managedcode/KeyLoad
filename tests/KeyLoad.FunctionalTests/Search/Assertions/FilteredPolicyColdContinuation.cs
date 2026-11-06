@@ -61,6 +61,7 @@ internal static class FilteredPolicyColdContinuation
         (long Position, KeyValueRecord[] Records) expected, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
+        expected.Position = await NativeStoreAssertions.ReopenedAsync(store, expected.Position);
         await Assert.That(store.Identity.NodeId).IsEqualTo(identity.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(identity.Incarnation);
         await UnchangedAsync(store, expected);

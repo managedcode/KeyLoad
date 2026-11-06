@@ -16,13 +16,13 @@ internal static class QueueDeadlineColdHealthyContinuation
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, bytes, position, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Apply(database,
             OperationKind.Delivery, ack, ack.CommandId, due), acked);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Batch(database,
             producer, due, "root"), produced);
         await Assert.That(database.InspectMessage("root", lane, "input")).IsEqualTo(terminal);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(second, bytes, position, identity);
         var healthy = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [new EnqueueMessage(lane.Queue, "healthy", "{\"work\":2}", "{\"kind\":\"healthy\"}")]);
         QueueDeadlineOperations.Batch(database, healthy, due, "root").Get<CommitReceipt>();

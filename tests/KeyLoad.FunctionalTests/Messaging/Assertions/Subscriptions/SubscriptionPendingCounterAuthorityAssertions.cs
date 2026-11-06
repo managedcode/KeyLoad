@@ -19,11 +19,11 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
         {
             token.ThrowIfCancellationRequested();
             Failure(() => QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, fresh, fresh.RequestId, due));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, empty, empty.RequestId, due));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
             Failure(() => db.GetSubscription(Subject, fresh.Subscription));
-            await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
+            await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, image, position, identity);
         }
     }
 

@@ -32,7 +32,7 @@ internal static class QueueDeadlinePoisonPrefixAssertions
         await cancelled.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() => Task.FromResult(
             QueueDeadlineDiscovery.ReadPage(database, null, due, cancelled.Token)));
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, original, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, original, position, identity);
     }
 
     internal static async Task FinalAsync(DatabaseEngine database, QueueLaneRef lane, DateTimeOffset due, bool leased)

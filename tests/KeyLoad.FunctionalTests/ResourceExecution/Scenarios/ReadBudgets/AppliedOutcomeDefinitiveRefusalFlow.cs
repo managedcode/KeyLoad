@@ -68,7 +68,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, bytes, position, identity);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, false);
         await AppliedOutcomeDefinitiveRefusalAssertions.ConflictAsync(db, cold, original, changed, committed);
         await HealthyAsync(db, lane, token);
@@ -87,7 +87,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, bytes, position, identity);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, true);
         await AppliedOutcomeDefinitiveRefusalAssertions.ConflictAsync(db, cold, original, changed, committed);
     }

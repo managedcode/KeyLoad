@@ -32,7 +32,6 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         var saved = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine completed receive slot is absent.");
         var originalBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var originalPosition = fixture.Store.Position;
         var row = OrleansSerialization.Deserialize<GroupDelivery>(saved);
         fixture.Store.Commit((tx, _) => { tx.PutRecord(key, row with { Position = 99, State = completedState }); return true; });
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
@@ -44,11 +43,12 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(first, bytes, position, identity);
         await SubscriptionReceiveSlotAuthorityAssertions.RefusalAsync(db, first, request, token);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
         first.Commit((tx, _) => { tx.Put(key, saved); return true; });
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
+        position = await NativeStoreAssertions.AdvancedAsync(first, position);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(first, originalBytes, position, identity);
         var result = Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, token);
         await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
@@ -80,7 +80,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(cold, second, group.Source, source);
         await SubscriptionReceiveSlotAuthorityAssertions.SettledAsync(cold, second, group, request, result,
             claimRequest, original, receipts, token);

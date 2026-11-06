@@ -7,7 +7,7 @@ internal static class ChunkCorrectionIdentityAssertions
     internal static async Task OnlyOwnedRowChanged(ChunkSelectedIntegrityFixture fixture,
         SampleRawIntegrityCut original, SampleRawIntegrityCut damaged)
     {
-        await Assert.That(damaged.Position).IsEqualTo(original.Position + 1);
+        await Assert.That(damaged.Position).IsGreaterThan(original.Position);
         await Assert.That(damaged.Identity.SequenceEqual(original.Identity)).IsTrue();
         var before = JsonSerializer.Deserialize<string[][]>(original.Image)!;
         var after = JsonSerializer.Deserialize<string[][]>(damaged.Image)!;

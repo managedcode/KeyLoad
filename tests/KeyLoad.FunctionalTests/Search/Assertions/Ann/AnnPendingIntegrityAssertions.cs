@@ -27,7 +27,8 @@ internal static class AnnPendingIntegrityAssertions
             .IsEquivalentTo(files, CollectionOrdering.Matching);
     }
 
-    internal static async Task ResumeAsync(TestDatabase database, AnnMaintenanceRequest request, long upper)
+    internal static async Task ResumeAsync(TestDatabase database, AnnMaintenanceRequest request, long upper,
+        int pageLimit = AnnMaintenanceTestData.PageLimit)
     {
         string? digest = null;
         await WithOwnerAsync(database, async runtime =>
@@ -35,7 +36,7 @@ internal static class AnnPendingIntegrityAssertions
             var began = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Begin);
             _ = await AnnMaintenancePhaseAssertions.CommitReplayAsync(database, began.OriginalCheckpointIntent!);
             _ = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, request, AnnMaintenanceCapabilityKind.Load);
-            var healthy = await AnnMaintenancePhaseAssertions.FinishAsync(database, runtime, request, upper);
+            var healthy = await AnnMaintenancePhaseAssertions.FinishAsync(database, runtime, request, upper, pageLimit);
             await Assert.That(healthy.Count).IsEqualTo(Count);
             await Assert.That(healthy.Pending).IsFalse();
             digest = healthy.IndexSha256;

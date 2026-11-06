@@ -37,7 +37,7 @@ internal static class ResourcePairBindingBatch
     private static async Task HealthyAsync(ResourcePairBindingState state, string id, CancellationToken token)
     {
         var request = Request(state.Source.Partition, id);
-        var expectedIndex = state.Source.Database.LastApplied + One;
+        var expectedIndex = ExpectedCanonicalCommit.Applied(state.Source.Database, state.Source.Partition) + One;
         var issued = Issue(state.Source.Database, request);
         var result = state.Source.SubmitIssuedEmbedded(issued, token);
         var entry = state.Source.ReadStoredOutcome(issued);

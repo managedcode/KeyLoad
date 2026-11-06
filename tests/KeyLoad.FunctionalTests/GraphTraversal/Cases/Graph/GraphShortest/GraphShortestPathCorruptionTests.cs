@@ -29,7 +29,7 @@ internal sealed class GraphShortestPathCorruptionTests
 
         using var reopened = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var owner = database.CreateConfiguredDatabase(reopened);
-        await Assert.That(reopened.Position).IsEqualTo(corruptPosition);
+        corruptPosition = await NativeStoreAssertions.ReopenedAsync(reopened, corruptPosition);
         await Assert.That(CanonicalStoreImage.Bytes(reopened).SequenceEqual(corruptImage)).IsTrue();
         await GraphShortestPathCorruptionFlow.RefuseAsync(owner, reopened, request, token);
         GraphShortestPathCorruptionFlow.Repair(reopened, expected, testCase);

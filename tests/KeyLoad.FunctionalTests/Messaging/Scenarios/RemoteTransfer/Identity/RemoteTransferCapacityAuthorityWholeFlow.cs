@@ -37,16 +37,19 @@ internal static class RemoteTransferCapacityAuthorityWholeFlow
         var original = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var position = fixture.Store.Position;
         var damage = RemoteTransferCapacityAuthorityStorage.Damage(fixture, source, fault);
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
         var damaged = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         await RemoteTransferCapacityAuthorityRefusal.RequireAsync(fixture, source, fault, completed.First(),
-            applicationReplay, fresh, damaged, position + First);
+            applicationReplay, fresh, damaged, position);
         fixture.Reopen();
-        await RemoteTransferCapacityAuthorityStorage.IdentityAsync(fixture, identity, position + First);
-        await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, damaged, position + First);
+        position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
+        await RemoteTransferCapacityAuthorityStorage.IdentityAsync(fixture, identity, position);
+        await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, damaged, position);
         await RemoteTransferCapacityAuthorityRefusal.RequireAsync(fixture, source, fault, completed.First(),
-            applicationReplay, fresh, damaged, position + First);
+            applicationReplay, fresh, damaged, position);
         RemoteTransferCapacityAuthorityStorage.Repair(fixture, damage);
-        await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, original, position + SecondValue);
+        position = await NativeStoreAssertions.AdvancedAsync(fixture.Store, position);
+        await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, original, position);
         var reconciled = await RemoteTransferCapacityAuthorityValues.SubmitAsync(fixture, applicationReplay,
             source ? null : completed.First().Proof.TargetCommit.Position);
         await ContinueAsync(fixture, source, completed, pending, fresh, (applicationReplay, reconciled), new(lifetime.Incarnation.Value), token);

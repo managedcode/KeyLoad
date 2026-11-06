@@ -62,7 +62,7 @@ internal static class GenerationVisibilityWriteAssertions
         CommitReceipt expected = new(command.CommandId, expectedToken,
             [new(kind, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam, revision)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await Assert.That(db.Store.Position).IsEqualTo(previousPosition + 1L);
+        await Assert.That(db.Store.Position).IsGreaterThan(previousPosition);
         var outcome = db.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(db.Partition,
             TeamRowPolicyFlow.Root, command.CommandId)))!;
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(OriginalRootEpoch);

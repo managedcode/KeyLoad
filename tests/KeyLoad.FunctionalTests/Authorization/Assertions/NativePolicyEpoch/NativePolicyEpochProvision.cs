@@ -12,7 +12,7 @@ internal static class NativePolicyEpochProvision
             [new(state.Partition.DatabaseId, P.Collection, Capability.DocumentsRead)], []);
         await PrincipalAsync(state, state.Reader, token);
         state.Seed = new(Guid.NewGuid(), state.Partition, [new PutDocument(P.Collection, P.Document, P.Original, 0)]);
-        var before = state.Database.LastApplied;
+        var before = NativeStoreAssertions.Applied(state.Store, state.Partition);
         state.SeedReceipt = state.Submit(OperationKind.Batch, state.Seed, token, state.Seed.CommandId).Get<CommitReceipt>();
         await NativePolicyEpochAssertions.ReceiptAsync(state, state.Seed, state.SeedReceipt, before, "putDocument", P.FirstRevision);
         state.SeedOutcome = state.Outcome(state.Seed);
@@ -44,7 +44,7 @@ internal static class NativePolicyEpochProvision
     {
         state.Healthy = new(Guid.NewGuid(), state.Partition,
             [new PatchDocument(P.Collection, P.Document, [new("/public", PatchKind.Set, "\"changed\"")], P.FirstRevision)]);
-        var before = state.Database.LastApplied;
+        var before = NativeStoreAssertions.Applied(state.Store, state.Partition);
         state.HealthyReceipt = state.Submit(OperationKind.Batch, state.Healthy, token, state.Healthy.CommandId).Get<CommitReceipt>();
         await NativePolicyEpochAssertions.ReceiptAsync(state, state.Healthy, state.HealthyReceipt,
             before, "patchDocument", P.UpdatedRevision);

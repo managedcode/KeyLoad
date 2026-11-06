@@ -6,9 +6,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class CapturedReadSelectedCancellationFlow
 {
-    private const long ChangedCommitCount = 1;
-    private const long HealthyCommitCount = 2;
-
     internal static async Task RunAsync()
     {
         ReadCutFixture? fixture = null;
@@ -23,12 +20,14 @@ internal static class CapturedReadSelectedCancellationFlow
             var originalPosition = fixture.Store.Position;
             lease = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, MaximumBytes));
             Change(fixture.Store);
+            var currentPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, originalPosition);
             frozen = Capture(lease);
             await RequireCutAsync(lease.Cut, identity, originalPosition);
             lease.Dispose();
             lease = null;
             fixture.Reopen();
-            await RequireCurrentAsync(fixture.Store, identity, originalPosition + ChangedCommitCount, changed: true, healthy: false);
+            currentPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, currentPosition);
+            await RequireCurrentAsync(fixture.Store, identity, currentPosition, changed: true, healthy: false);
             await RequireFrozenAsync(frozen);
             foreach (var reverse in new[] { false, true })
             {
@@ -36,15 +35,18 @@ internal static class CapturedReadSelectedCancellationFlow
                 await CapturedReadSelectedCancellationAssertions.ObserverAsync(frozen, reverse);
                 await CapturedReadSelectedCancellationAssertions.VisitorAsync(frozen, reverse, keepGoing: false);
                 await CapturedReadSelectedCancellationAssertions.VisitorAsync(frozen, reverse, keepGoing: true);
-                await RequireCurrentAsync(fixture.Store, identity, originalPosition + ChangedCommitCount, changed: true, healthy: false);
+                await RequireCurrentAsync(fixture.Store, identity, currentPosition, changed: true, healthy: false);
                 await RequireFrozenAsync(frozen);
             }
             CommitHealthy(fixture.Store);
+            currentPosition = await NativeStoreAssertions.AdvancedAsync(fixture.Store, currentPosition);
             fixture.Reopen();
-            await RequireCurrentAsync(fixture.Store, identity, originalPosition + HealthyCommitCount, changed: true, healthy: true);
+            currentPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, currentPosition);
+            await RequireCurrentAsync(fixture.Store, identity, currentPosition, changed: true, healthy: true);
             await RequireFrozenAsync(frozen);
             fixture.Reopen();
-            await RequireCurrentAsync(fixture.Store, identity, originalPosition + HealthyCommitCount, changed: true, healthy: true);
+            currentPosition = await NativeStoreAssertions.ReopenedAsync(fixture.Store, currentPosition);
+            await RequireCurrentAsync(fixture.Store, identity, currentPosition, changed: true, healthy: true);
             await RequireFrozenAsync(frozen);
         }, failures);
         if (lease is not null)

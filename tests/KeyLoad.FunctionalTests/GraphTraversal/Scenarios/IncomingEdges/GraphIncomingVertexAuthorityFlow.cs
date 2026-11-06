@@ -29,10 +29,11 @@ internal static class GraphIncomingVertexAuthorityFlow
         using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
-            await GraphTraversalIntegrityAssertions.Image(cold, dirtyImage, dirtyCut);
+            dirtyCut = await GraphTraversalIntegrityAssertions.ReopenedImage(cold, dirtyImage, dirtyCut);
             await GraphIncomingVertexAuthorityAssertions.Refuse(owner, cold, state, token);
             GraphTraversalIntegrityFaultRows.Repair(cold, fault);
-            await GraphTraversalIntegrityAssertions.Image(cold, GraphVertexAuthorityFault.RepairedImage(dirtyImage, fault), dirtyCut + 1L);
+            var repairedPosition = await NativeStoreAssertions.AdvancedAsync(cold, dirtyCut);
+            await GraphTraversalIntegrityAssertions.Image(cold, GraphVertexAuthorityFault.RepairedImage(dirtyImage, fault), repairedPosition);
             await GraphIncomingVertexAuthorityAssertions.Healthy(owner, cold, state, null, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             receipt = GraphStorageReferenceFixture.Submit(owner, command).Get<CommitReceipt>();
@@ -44,7 +45,7 @@ internal static class GraphIncomingVertexAuthorityFlow
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
-        await GraphTraversalIntegrityAssertions.Image(secondCold, finalImage, finalCut);
+        finalCut = await GraphTraversalIntegrityAssertions.ReopenedImage(secondCold, finalImage, finalCut);
         await GraphIncomingVertexAuthorityAssertions.Healthy(secondOwner, secondCold, state, next, token);
         await GraphIncomingVertexAuthorityAssertions.Continuation(secondOwner, command, receipt, next);
         await GraphTraversalIntegrityAssertions.Replay(secondOwner, secondCold, state.SeedCommand, state.SeedReceipt);

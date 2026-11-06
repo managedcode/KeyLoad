@@ -30,13 +30,15 @@ internal static class DocumentIndexCommittedScanOperations
         StoreIdentity identity, long physicalPosition, long appliedPosition)
     {
         var engine = CreateEngine(store);
-        await Assert.That(engine.LastApplied).IsEqualTo(appliedPosition);
+        physicalPosition = await NativeStoreAssertions.ReopenedAsync(store, physicalPosition);
+        await Assert.That(ExpectedCanonicalCommit.Applied(engine, partition)).IsEqualTo(appliedPosition);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, physicalPosition);
         await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
             DocumentIndexCommittedScanOracle.ReadCut(store, partition), physicalPosition);
         var healthy = ApplyHealthyCommand(engine, partition);
         await Assert.That(healthy.Token.Position).IsEqualTo(appliedPosition + 1);
         await DocumentIndexCommittedScanOracle.AssertHealthyCutAsync(
-            DocumentIndexCommittedScanOracle.ReadCut(store, partition), physicalPosition + 1);
+            DocumentIndexCommittedScanOracle.ReadCut(store, partition),
+            await NativeStoreAssertions.AdvancedAsync(store, physicalPosition));
     }
 }

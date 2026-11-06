@@ -39,25 +39,21 @@ internal static class AnnPartialWriteAssertions
     }
 
     internal static async Task CancelAsync(TestDatabase database, AnnMaintenanceTestRuntime runtime,
-        AnnMaintenanceRequest request, AnnPublicObservedWorkClock clock)
+        AnnMaintenanceRequest request)
     {
         var image = AnnMaintenanceTestData.Snapshot(database);
         var cut = database.Store.Position;
         var files = AnnFixtureFileSnapshot.Capture(database.Directory);
         using var child = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        clock.Arm(() => runtime.Owner.ObserveWork(runtime.SessionId) is { } observed
-            && observed.SessionId == runtime.SessionId && observed.Stage == AnnMaintenanceCapabilityKind.Publish
-            && observed.WrittenBytes > Empty, child.Cancel);
+        await using var observed = new ObservedWorkCancellation(
+            () => runtime.Owner.ObserveWork(runtime.SessionId)?.WrittenBytes ?? Empty, child);
+        await observed.Ready;
         AnnMaintenanceCapabilityResult? partial = null;
-        try
-        {
-            var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => partial =
-                await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.Publish, token: child.Token))
-                ?? throw new InvalidOperationException("The actual execution frame writer did not observe current-child cancellation.");
-            await Assert.That(error.CancellationToken).IsEqualTo(child.Token);
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+        var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => partial =
+            await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.Publish, token: child.Token))
+            ?? throw new InvalidOperationException("The actual execution frame writer did not observe current-child cancellation.");
+        await Assert.That(error.CancellationToken).IsEqualTo(child.Token);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         var actual = runtime.Owner.ObserveWork(runtime.SessionId)
             ?? throw new InvalidOperationException("The actual canceled execution writer observation is missing.");
         await Assert.That(actual.Stage).IsEqualTo(AnnMaintenanceCapabilityKind.Publish);

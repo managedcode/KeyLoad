@@ -70,7 +70,8 @@ internal sealed class TimeSeriesChunkQualificationFixture : IDisposable
     {
         var db = Harness;
         var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation,
-            command.Partition.AtomicPartitionId, db.ReadCanonicalCut().AppliedPosition + TimeSeriesChunkQualificationData.NextJournalIndex), mutations, DurabilityProfile.ProcessDurable, 1);
+            command.Partition.AtomicPartitionId, NativeStoreAssertions.Applied(db.Store, command.Partition)
+                + TimeSeriesChunkQualificationData.NextJournalIndex), mutations, DurabilityProfile.ProcessDurable, 1);
         var actual = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         Originals.Add((command, expected, RequiredProcessingPolicyAssertions.Outcome(db.Store, command.Partition, TimeSeriesChunkQualificationData.RootPrincipal, command.CommandId)));
         Phase = phase ?? Phase;

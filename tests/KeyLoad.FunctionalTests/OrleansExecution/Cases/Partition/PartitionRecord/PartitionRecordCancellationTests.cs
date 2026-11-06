@@ -41,6 +41,7 @@ internal sealed class PartitionRecordCancellationTests
         for (var cold = 0; cold < 2; cold++)
         {
             fixture.Reopen();
+            position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
             await PartitionRecordCancellationStateAssertions.VerifyHealthyAsync(fixture.Store, Partition, Family,
                 rows, position, MaximumPageBytes);
         }

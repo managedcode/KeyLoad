@@ -50,7 +50,7 @@ internal sealed class EventQueueStateEnvelopeFixture : IDisposable
         Configure(Streams, ResourceKind.StreamSet, classified: true);
         Configure(Queue, ResourceKind.WorkQueue, classified: true);
         Configure(Topic, ResourceKind.Topic, classified: true);
-        At = QueueWholeFlowStorage.Clock(Store).AddTicks(AfterConfigurationTick);
+        At = QueueWholeFlowStorage.Clock(Store, Partition).AddTicks(AfterConfigurationTick);
     }
 
     internal void Reopen()

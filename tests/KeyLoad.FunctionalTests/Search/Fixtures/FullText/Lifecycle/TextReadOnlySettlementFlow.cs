@@ -27,6 +27,7 @@ internal static class TextReadOnlySettlementFlow
         database.JoinOwnedResources();
         using var cold = ZoneTreeExistingStore.Open(new(database.Directory) { Incarnation = identity.Incarnation },
             identity.NodeId, database.StorageExecution);
+        position = await NativeStoreAssertions.ReopenedAsync(cold, position);
         var options = UnitTextOptions.Execution();
         using (var projection = new RuntimeTextProjection(root, identity.NodeId, options, new TextResourceOwnership(options)))
         {

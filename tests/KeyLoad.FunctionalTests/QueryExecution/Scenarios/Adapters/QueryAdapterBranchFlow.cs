@@ -50,6 +50,7 @@ internal static class QueryAdapterBranchFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SqlOffsetRefusals.UnchangedAsync(store, image, position, identity);

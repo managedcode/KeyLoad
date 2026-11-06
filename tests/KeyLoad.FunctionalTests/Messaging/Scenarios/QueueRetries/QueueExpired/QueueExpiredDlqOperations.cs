@@ -10,7 +10,7 @@ internal static class QueueExpiredDlqOperations
     {
         token.ThrowIfCancellationRequested();
         QueueLifecycleProvisioning.Seed(fixture, false);
-        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store));
+        var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition));
         var expiry = state.Time.AddSeconds(1);
         state.Batch(fixture.Database, new PutDocument(QueueLifecycleTestProtocol.Collection, Witness, QueueLifecycleTestProtocol.Payload),
             QueueLifecycleHealthy.Enqueue(QueueLifecycleTestProtocol.Parked) with

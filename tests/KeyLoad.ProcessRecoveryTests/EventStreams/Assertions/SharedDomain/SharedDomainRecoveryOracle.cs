@@ -13,10 +13,11 @@ internal static class SharedDomainRecoveryOracle
             (database, store) => RecoverAsync(database, store, input, stage, token));
         _ = await SharedDomainRecoveryOwner.UseAsync(root, state.IdentityDigest, async (database, store) =>
         {
-            await SharedDomainRecoveryImage.SameAsync(store, state.Image, state.Position);
+            var openedPosition = await NativeStoreAssertions.ReopenedAsync(store, state.Position);
+            await SharedDomainRecoveryImage.SameAsync(store, state.Image, openedPosition);
             await SharedDomainRecoveryModels.RequireAsync(database, input, committed: true, healthy: true, token);
             await SharedDomainRecoveryHistoryAssertions.AllAsync(database, store, state.History);
-            await SharedDomainRecoveryImage.SameAsync(store, state.Image, state.Position);
+            await SharedDomainRecoveryImage.SameAsync(store, state.Image, openedPosition);
             return state;
         });
     }
@@ -35,8 +36,8 @@ internal static class SharedDomainRecoveryOracle
         {
             await Assert.That(committed).IsFalse();
         }
-        await Assert.That(store.Position).IsEqualTo(input.SeedPosition + (committed ? FirstRevision : NoRevision));
-        await Assert.That(database.LastApplied).IsEqualTo(SharedDomainRecoverySeed.AppliedPosition(input)
+        await Assert.That(store.Position).IsGreaterThanOrEqualTo(input.SeedPosition);
+        await Assert.That(store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, original.Partition))).IsEqualTo(SharedDomainRecoverySeed.AppliedPosition(input)
             + (committed ? FirstRevision : NoRevision));
         await SharedDomainRecoveryModels.RequireAsync(database, input, committed, healthy: false, token);
         await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input, committed);
@@ -70,7 +71,7 @@ internal static class SharedDomainRecoveryOracle
                 candidate => SharedDomainStoredImage.Capture(store, candidate.Partition));
             var command = SharedDomainCorpus.Producer(scope, id, Healthy);
             var operation = SharedDomainCrashOperations.Create(database, OperationKind.Batch, id, command, new DateTimeOffset(input.Original.Timestamp));
-            var position = database.LastApplied + FirstRevision;
+            var position = store.Read(view => StorageOperationApply.ReadCanonicalSequence(view, scope.Partition)) + FirstRevision;
             var result = database.Apply(operation);
             await SharedDomainRecoveryValues.ProducerAsync(result, scope, id, Healthy, store.Identity.Incarnation, position);
             history.Add(SharedDomainRecoverySeed.Capture(store, operation, result, scope.Partition));

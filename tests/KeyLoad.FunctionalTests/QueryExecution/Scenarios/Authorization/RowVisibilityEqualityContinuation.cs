@@ -28,7 +28,7 @@ internal static class RowVisibilityEqualityContinuation
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(db.Database.LastApplied);
+        await Assert.That(receipt.Token.Position).IsEqualTo(ExpectedCanonicalCommit.Applied(db.Database, db.Partition));
 
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] mutations = [new(PutKind, EqualityAccessPathSupport.Collection,

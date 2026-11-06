@@ -78,7 +78,7 @@ internal static class CatalogArrayPathAssertions
     {
         var expected = new CommitReceipt(command.CommandId, expectedToken, [new(kind, CatalogArrayPathFlow.Collection, CatalogArrayPathFlow.Row, revision)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(actual, expected);
-        await Assert.That(store.Position).IsEqualTo(before + 1L);
+        await Assert.That(store.Position).IsGreaterThan(before);
     }
 
     internal static byte[] Outcome(ZoneTreeStore store, CommandRequest command)

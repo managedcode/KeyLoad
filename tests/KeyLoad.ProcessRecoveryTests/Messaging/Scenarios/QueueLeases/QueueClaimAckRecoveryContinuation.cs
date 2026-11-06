@@ -70,7 +70,7 @@ internal static class QueueClaimAckRecoveryContinuation
         store.Dispose();
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        _ = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         var restored = QueueLifecycleRecoveryAssertions.Open(cold);
         await Assert.That(TimeProvider.System.GetUtcNow()).IsLessThan(delivery.LeaseUntil);
@@ -104,7 +104,7 @@ internal static class QueueClaimAckRecoveryContinuation
         store.Dispose();
         using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
-        await Assert.That(cold.Position).IsEqualTo(position);
+        _ = await NativeStoreAssertions.ReopenedAsync(cold, position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
         var restored = QueueLifecycleRecoveryAssertions.Open(cold);
         await QueueClaimAckRecovery.ReplayAsync(restored, cold, enqueue, created, token);

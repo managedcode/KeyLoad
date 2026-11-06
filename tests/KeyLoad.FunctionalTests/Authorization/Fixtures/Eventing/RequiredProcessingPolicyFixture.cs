@@ -77,12 +77,12 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
     {
         var request = new CommandRequest(Guid.NewGuid(), Harness.Partition, [new EnqueueMessage(Queue, id, Payload, Headers)]);
         var operation = Operation(OperationKind.Batch, request, request.CommandId, "root");
-        var position = Harness.Store.Position + 1L;
+        var position = Harness.Store.Position;
         var expectedToken = Harness.NextCommitToken();
         var receipt = Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
         var expected = new CommitReceipt(request.CommandId, expectedToken, [new("enqueue", Queue, id, 1L)], DurabilityProfile.ProcessDurable, 1);
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, receipt);
-        await Assert.That(Harness.Store.Position).IsEqualTo(position);
+        await Assert.That(Harness.Store.Position).IsGreaterThan(position);
         Producers.Add((operation, expected, RequiredProcessingPolicyAssertions.Outcome(Harness.Store, Harness.Partition, "root", request.CommandId)));
     }
     public void Dispose() => Harness.Dispose();

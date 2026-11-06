@@ -51,7 +51,6 @@ internal static class SubscriptionFilterCrashScenario
                 ExpectedGeneration: OriginalGeneration), CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, OldTokenFile), JsonDefaults.Serialize(received.Deliveries[1].Token));
-        boundary.Position = checked(store.Position + OriginalGeneration);
         await boundary.ArmAsync(store);
         db.Apply(operation).Get<SubscriptionInfo>();
         await RecoveryProcessPause.WaitForKillAsync(store);

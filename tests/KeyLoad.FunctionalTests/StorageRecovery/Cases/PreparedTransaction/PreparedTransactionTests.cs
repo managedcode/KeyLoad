@@ -17,16 +17,19 @@ internal sealed class PreparedTransactionTests
         byte[] replacedKey = [0x30];
         byte[] finalValue = [0x40, 0x41, 0x42];
         byte[] finalDeleteKey = [0x50];
+        var publications = new NativePublicationObservation();
+        long position = 0;
 
         try
         {
-            using (var store = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution()))
+            using (var store = new ZoneTreeStore(new(root) { FaultObserver = publications.Observe }, UnitExecutionOptions.StorageExecution()))
             {
                 store.Commit((transaction, _) =>
                 {
                     transaction.Put(finalDeleteKey, discardedValue);
                     return true;
                 });
+                var first = store.Position;
                 store.Commit((transaction, _) =>
                 {
                     transaction.Put(discardedKey, discardedValue);
@@ -42,12 +45,13 @@ internal sealed class PreparedTransactionTests
                     return true;
                 });
 
-                await Assert.That(store.Position).IsEqualTo(2L);
+                position = await NativeStoreAssertions.AdvancedAsync(store, first);
+                await Assert.That(publications.Count).IsEqualTo(2);
                 await AssertFinalRecordsAsync(store);
             }
 
             using var reopened = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution());
-            await Assert.That(reopened.Position).IsEqualTo(2L);
+            await NativeStoreAssertions.ReopenedAsync(reopened, position);
             await AssertFinalRecordsAsync(reopened);
         }
         finally
@@ -76,7 +80,7 @@ internal sealed class PreparedTransactionTests
             }
 
             using var reopened = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution());
-            await Assert.That(reopened.Position).IsEqualTo(0L);
+            await NativeStoreAssertions.ReopenedAsync(reopened, 0L);
             await Assert.That(reopened.Read(view => view.Scan([], AllRecords)).Records).IsEmpty();
         }
         finally
@@ -90,12 +94,7 @@ internal sealed class PreparedTransactionTests
         var page = store.Read(view => view.Scan([], AllRecords));
         var rows = page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":"
             + Convert.ToHexString(record.Value.Span)).ToArray();
-        string[] expected =
-        [
-            "30:404142",
-            Convert.ToHexString(StoreFileFixture.PositionKey) + ":"
-                + Convert.ToHexString(StoreFileFixture.PositionValue(store.Position))
-        ];
+        string[] expected = ["30:404142"];
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
     }

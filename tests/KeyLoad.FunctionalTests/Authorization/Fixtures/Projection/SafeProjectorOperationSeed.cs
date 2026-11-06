@@ -35,9 +35,10 @@ internal static class SafeProjectorOperationSeed
         var operation = owner.Database.CreateCommand(kind, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(), request);
         var expected = owner.NextToken();
+        var sequence = NativeStoreAssertions.Applied(owner.Store, kind == OperationKind.Batch ? owner.Source.Partition : null) + 1;
         var result = owner.Submit(operation);
         var image = SafeProjectorOperationHistoryImages.Capture(owner, operation);
-        return new(operation, owner.ReadOutcome(operation), result, expected, creatorEpoch, image);
+        return new(operation, owner.ReadOutcome(operation), result, expected, sequence, creatorEpoch, image);
     }
 
     internal static PrincipalRecord Principal(SafeProjectorOperationDatabase owner, long epoch,

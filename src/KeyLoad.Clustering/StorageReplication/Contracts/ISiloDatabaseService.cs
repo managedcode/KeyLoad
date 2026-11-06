@@ -7,19 +7,19 @@ namespace KeyLoad.Clustering;
 /// <summary>Typed Orleans access to one silo's exclusively owned ZoneTree database.</summary>
 public partial interface ISiloDatabaseService : IGrainService
 {
+    /// <summary>Joins one primary publication to the addressed silo's original physical session.</summary>
+    Task<StorageCopyBatchAcknowledgement> CommitBatchAsync(Guid requestId,
+        ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence, bool retainReplication,
+        CancellationToken cancellationToken);
+    /// <summary>Publishes the primary's exact effects without preparing commands again.</summary>
+    Task<StorageCopyBatchAcknowledgement> ApplyReplicaBatchAsync(Guid requestId, StorageReplicaBatch batch,
+        CancellationToken cancellationToken);
     /// <summary>Reads the durable local cut without changing storage.</summary>
     Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken);
-    /// <summary>Reads the commands of the last committed batch for completing an interrupted storage copy.</summary>
-    Task<ImmutableArray<StoredCommand>> ReadLastCommittedCommandsAsync(CancellationToken cancellationToken);
-    /// <summary>Returns retained originals of exact admitted retries and evaluates business time and deterministic
-    /// command decisions at the selected store for the prefix that one commit can apply.</summary>
-    Task<ImmutableArray<Command<DatabaseCommand>>> PrepareBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
-        CancellationToken cancellationToken);
-    /// <summary>Applies the prepared prefix through one native commit and confirms its actual decisions.
-    /// Only the selected result copy includes the original outcomes.</summary>
-    Task<StorageCopyBatchAcknowledgement> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
-        long firstSequence, bool includeOutcome,
-        CancellationToken cancellationToken);
+    /// <summary>Reads the independent sequence of one command owner.</summary>
+    Task<SiloStorageCut> ReadPartitionCutAsync(PartitionRef? partition, CancellationToken cancellationToken);
+    /// <summary>Reads the last retained primary effects for an interrupted partition copy.</summary>
+    Task<StorageReplicaBatch?> ReadReplicaBatchAsync(PartitionRef? partition, CancellationToken cancellationToken);
     /// <summary>Joins a server-owned maintenance session's actual cleanup after cancellation or revocation.</summary>
     Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId);
     /// <summary>Observes the exact addressed silo after the caller verified current administrator authority.</summary>

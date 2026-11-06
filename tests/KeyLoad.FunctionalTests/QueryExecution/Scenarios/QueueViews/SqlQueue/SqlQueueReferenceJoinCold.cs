@@ -38,7 +38,7 @@ internal static class SqlQueueReferenceJoinCold
                 var owner = database.CreateConfiguredDatabase(reopened);
                 await Assert.That(reopened.Identity.NodeId).IsEqualTo(nodeId);
                 await Assert.That(reopened.Identity.Incarnation).IsEqualTo(incarnation);
-                await Assert.That(reopened.Position).IsEqualTo(position);
+                position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
                 var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
                 await ModelJoinAliasAdmissionFlow.RunAsync(engine, reopened, database.Partition, events: false, repaired: true);
                 await SqlQueueReferenceJoinAssertions.PageAsync(engine.Execute("root",

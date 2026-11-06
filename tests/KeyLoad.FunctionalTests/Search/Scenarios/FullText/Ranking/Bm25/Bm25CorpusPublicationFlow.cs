@@ -50,7 +50,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
     internal Command<DatabaseCommand> Capture(Guid id, Guid? expected, string text = Term, string subject = Subject)
         => Bm25CorpusCapture.Create(database.Database, Root, subject,
             new(database.Partition, Collection, Field, text), id, expected,
-            database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
+            TestDatabase.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
         => ((Bm25CorpusPublicationPhaseCommand)(operation).Value!.Input);
@@ -60,7 +60,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
     internal KeyLoad.Query.QueryExecution.DistributedTextStatistics? Current(string term = Term)
         => database.Database.WithQueryView(Subject, database.Partition, Collection,
             (view, principal, resource) => (database.Database.ReadBm25CorpusCurrent(view, principal, resource,
-                database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], database.CreateReadWork(Token))).Value);
+                database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], TestDatabase.CreateReadWork(Token))).Value);
 
     internal Task<RankedDocument[]> SearchAsync()
         => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Subject,

@@ -65,7 +65,7 @@ internal static class QueueGraphReplayAssertions
 
     internal static async Task ContinueAsync(QueueGraphReplayState state, DatabaseEngine engine, ZoneTreeStore store)
     {
-        var nextPosition = checked(engine.LastApplied + 1);
+        var nextPosition = checked(ExpectedCanonicalCommit.Applied(engine, state.Source.Fixture.Partition) + 1);
         var receipt = engine.Apply(state.Next).Get<CommitReceipt>();
         var expected = new CommitReceipt(state.Next.CommandId, new(store.Identity.Incarnation, state.Source.Fixture.Partition.AtomicPartitionId,
                 nextPosition), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation, 1),

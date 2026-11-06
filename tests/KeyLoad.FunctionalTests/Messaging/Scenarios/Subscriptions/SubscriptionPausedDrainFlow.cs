@@ -17,7 +17,7 @@ internal static class SubscriptionPausedDrainFlow
             MaxWindow = 3
         });
         var history = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
-        var time = QueueWholeFlowStorage.Clock(fixture.Store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}"),
                 new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")])]);
@@ -60,7 +60,7 @@ internal static class SubscriptionPausedDrainFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, cold, group.Source, source);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
         await SubscriptionPausedDrainAssertions.OriginalClaimAsync(db, cold, request, original, claimSaved, token);
@@ -72,7 +72,7 @@ internal static class SubscriptionPausedDrainFlow
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 1, false);
         Add(db, cold, group, Create(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId,
-            QueueWholeFlowStorage.Clock(cold).AddSeconds(1)), history).Get<SubscriptionInfo>();
+            QueueWholeFlowStorage.Clock(cold, group.Source.Partition).AddSeconds(1)), history).Get<SubscriptionInfo>();
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, 3, 3, false);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
         var fourth = await HealthyAsync(db, cold, group, 4, history, token);
@@ -92,7 +92,7 @@ internal static class SubscriptionPausedDrainFlow
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, cut, position, identity);
         var retained = original.Get<ReceiveSubscriptionResult>().Deliveries.Select(delivery => delivery.Event).Append(fourth).ToArray();
         await SubscriptionPausedDrainAssertions.SourceAsync(db, cold, group.Source, source, retained);
         await SubscriptionPausedDrainAssertions.ReplayAsync(db, cold, group, history);
@@ -110,7 +110,7 @@ internal static class SubscriptionPausedDrainFlow
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var time = QueueWholeFlowStorage.Clock(store).AddSeconds(1);
+        var time = QueueWholeFlowStorage.Clock(store, group.Source.Partition).AddSeconds(1);
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic("topic", [new("event" + number, "Created", "{\"n\":" + number + "}")])]);
         Add(db, store, group, Create(db, OperationKind.Batch, publish, publish.CommandId, time), history).Get<CommitReceipt>();
@@ -136,7 +136,7 @@ internal static class SubscriptionPausedDrainFlow
     {
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var result = Add(db, store, group, Create(db, OperationKind.SubscriptionDelivery, command, command.CommandId,
-            QueueWholeFlowStorage.Clock(store).AddSeconds(1)), history);
+            QueueWholeFlowStorage.Clock(store, group.Source.Partition).AddSeconds(1)), history);
         await SubscriptionPausedDrainAssertions.ReceiptAsync(result, command, delivery.Event.Position);
     }
 

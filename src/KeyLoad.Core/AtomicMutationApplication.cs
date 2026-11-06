@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.DatabaseComposition;
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
@@ -94,7 +93,7 @@ public static class AtomicMutationApplication
                 continue;
             }
 
-            budget ??= new ReadExecutionBudget(CompositionTimeProvider.Instance);
+            budget ??= new ReadExecutionBudget();
             foreach (var effect in engine.ExpandComposition(tx, principal, partition, requested, now, budget))
             {
                 yield return (effect, true);

@@ -36,7 +36,8 @@ internal static class AnnProcessAssertions
             await Assert.That(verified.IndexSha256).IsEqualTo(healthy.IndexSha256);
             await Assert.That(verified.Receipt).IsEqualTo(healthy.Receipt);
             await Assert.That(verified.CanonicalImage).IsEqualTo(healthy.CanonicalImage);
-            await Assert.That(verified.Position).IsEqualTo(healthy.Position);
+            await Assert.That(verified.Position).IsGreaterThanOrEqualTo(healthy.Position);
+            await Assert.That(verified.Source.AppliedPosition).IsEqualTo(healthy.Source.AppliedPosition);
             await Assert.That(verified.Source.CorpusSha256).IsEqualTo(healthy.Source.CorpusSha256);
             await Assert.That(verified.Source.ThroughSequence).IsEqualTo(healthy.Source.ThroughSequence);
         }

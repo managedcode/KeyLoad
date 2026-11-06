@@ -12,7 +12,6 @@ internal static class AnnPinnedLifetimeAssertions
     private static readonly string[] LiteralIds = ["seed-00002", "seed-00001", "seed-00000"];
     private static readonly float[][] LiteralVectors = [[2.25f, 1f, -0.5f], [1.25f, 1f, -0.5f], [0.25f, 1f, -0.5f]];
     private static readonly long[] LiteralRevisions = [1, 1, 1];
-    private static readonly float[] Query = [1, 0, 0];
 
     internal static async Task AssertAsync(AnnGenerationOwner owner,
         AnnMaintenanceRequest request, AnnSeed seed)
@@ -29,14 +28,14 @@ internal static class AnnPinnedLifetimeAssertions
             var second = concurrent;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await AssertLiteralSearchAsync(second);
+                await AssertLiteralSearchAsync(second, request.Space.Dimension);
                 disposal = owner.DisposeAsync().AsTask();
                 await Assert.That(disposal.IsCompleted).IsFalse();
                 _ = Assert.ThrowsExactly<ObjectDisposedException>(() => AcquireUnexpected(owner, request, seed));
                 second.Dispose();
                 concurrent = null;
                 await Assert.That(disposal.IsCompleted).IsFalse();
-                await AssertLiteralSearchAsync(actual);
+                await AssertLiteralSearchAsync(actual, request.Space.Dimension);
             }, failures);
         }
         finally
@@ -54,13 +53,17 @@ internal static class AnnPinnedLifetimeAssertions
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task AssertLiteralSearchAsync(AnnIndexLease actual)
+    private static async Task AssertLiteralSearchAsync(AnnIndexLease actual, int dimensions)
     {
-        var result = actual.Index.Search(Query, Count, null, PackedAnnIndexTestSupport.Budget());
+        var query = new float[dimensions];
+        query[0] = 1;
+        var result = actual.Index.Search(query, Count, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(result.Candidates.Select(row => row.DocumentId).ToArray()).IsEquivalentTo(LiteralIds, CollectionOrdering.Matching);
         for (var index = 0; index < Count; index++)
         {
-            await Assert.That(result.Candidates[index].Score).IsEqualTo(SearchEngine.Similarity(Query, LiteralVectors[index], DistanceMetric.Cosine));
+            var expected = new float[dimensions];
+            LiteralVectors[index].CopyTo(expected, 0);
+            await Assert.That(result.Candidates[index].Score).IsEqualTo(SearchEngine.Similarity(query, expected, DistanceMetric.Cosine));
         }
         await Assert.That(result.Candidates.Select(row => row.DocumentRevision).ToArray()).IsEquivalentTo(LiteralRevisions, CollectionOrdering.Matching);
     }

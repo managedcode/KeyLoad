@@ -24,7 +24,7 @@ internal static class SampleChunkMinimumEnvelopeCold
                 token.ThrowIfCancellationRequested();
                 stores = owner.OpenStores();
                 var reopened = stores.Canonical;
-                await SampleRawIntegrityAssertions.UnchangedAsync(reopened, expected);
+                expected = await SampleRawIntegrityAssertions.ReopenedAsync(reopened, expected);
                 var database = owner.CreateDatabase(reopened);
                 var codec = new GrainRequestCodec(database.Store.Identity.Incarnation, owner.Clock);
                 await SampleChunkMinimumEnvelopeAssertions.ObserveAsync(reopened, () =>

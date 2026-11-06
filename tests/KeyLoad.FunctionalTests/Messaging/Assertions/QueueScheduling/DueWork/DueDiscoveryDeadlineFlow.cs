@@ -48,6 +48,7 @@ internal static class DueDiscoveryDeadlineFlow
         await Assert.That(page.Rejected.IsEmpty).IsTrue();
         await UnchangedAsync(fixture, image, identity, position);
         fixture.Reopen();
+        position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);
         var replay = fixture.Apply(OperationKind.Batch, request, id: commandId).Get<CommitReceipt>();
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(receiptBytes)).IsTrue();
         await UnchangedAsync(fixture, image, identity, position);

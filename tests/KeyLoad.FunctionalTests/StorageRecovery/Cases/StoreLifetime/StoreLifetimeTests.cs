@@ -23,10 +23,12 @@ internal sealed class StoreLifetimeTests
         var expected = Encoding.UTF8.GetBytes(StoreValueText);
 
         var atomicStore = store.Read(static view => (IAtomicStore)view);
+        var before = store.Position;
         var (actual, position) = CommitAndReadThroughAtomicStore(atomicStore, store, store, key, expected);
 
         await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
-        await Assert.That(position).IsEqualTo(1);
+        await Assert.That(position).IsGreaterThan(before);
+        await Assert.That(position).IsEqualTo(store.Position);
     }
 
     [Test]
@@ -50,13 +52,14 @@ internal sealed class StoreLifetimeTests
         });
         await Assert.That(lockFailure).IsNotNull();
 
+        var position = store.Position;
         store.Dispose();
         store.Dispose();
         using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution());
         await AssertIdentityMatches(identity, reopened.Identity);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(key)))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
-        await Assert.That(reopened.Position).IsEqualTo(1);
+        await NativeStoreAssertions.ReopenedAsync(reopened, position);
     }
 
     private static async Task AssertIdentityMatches(StoreIdentity expected, StoreIdentity actual)

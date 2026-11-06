@@ -6,28 +6,28 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 
 internal sealed class QueryObservedWorkBudgetTests
 {
-    private const int ExpiredSeconds = 2;
-    private const string DeadlineDetail = "The read execution deadline is exceeded.";
     private const string IndexSql = "SELECT * FROM orders WHERE status = 'open' ORDER BY id";
     private const string ScanSql = "SELECT * FROM orders ORDER BY id";
     private const string Principal = EqualityAccessPathSupport.Root;
+    private const int PaddingCharacters = 262_144;
+    private static readonly string PrimaryJson = Padded(EqualityAccessPathSupport.PrimaryJson);
+    private static readonly string SecondaryJson = Padded(EqualityAccessPathSupport.SecondaryJson);
 
     [Test]
-    [Arguments(false, false, true)]
-    [Arguments(false, true, true)]
-    [Arguments(true, false, true)]
-    [Arguments(true, true, true)]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
     public async Task AcMp003ObservedQueryWorkRejectsWithoutPartialPageThenReturnsCompleteHealthyPage(
-        bool typed, bool indexed, bool cancel)
+        bool typed, bool indexed)
     {
-        var clock = new QueryObservedWorkClock();
-        using var database = new TestDatabase(new DatabaseLimits(), timeProvider: clock);
+        using var database = new TestDatabase();
         database.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])]);
         database.Commit(new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.PrimaryId,
-                EqualityAccessPathSupport.PrimaryJson),
+                PrimaryJson),
             new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.SecondaryId,
-                EqualityAccessPathSupport.SecondaryJson));
+                SecondaryJson));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sql = indexed ? IndexSql : ScanSql;
         var request = new QueryRequest(database.Partition, sql, AllowFullScan: !indexed);
@@ -35,45 +35,36 @@ internal sealed class QueryObservedWorkBudgetTests
             UnitExecutionOptions.QueryExecution()).Parse();
         var ast = QueryAdapterTestSupport.RoundTrip(new(database.Partition, query, AllowFullScan: !indexed));
         using var cancellation = new CancellationTokenSource();
-        QueryPage Execute() => typed ? engine.ExecuteAst(Principal, ast, clock, cancellationToken: cancellation.Token)
-            : engine.Execute(Principal, request, clock, cancellationToken: cancellation.Token);
+        QueryPage Execute() => typed ? engine.ExecuteAst(Principal, ast, cancellationToken: cancellation.Token)
+            : engine.Execute(Principal, request, cancellationToken: cancellation.Token);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
-        clock.Arm(() => database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes,
-            () => { if (cancel) { cancellation.Cancel(); } else { clock.Advance(TimeSpan.FromSeconds(ExpiredSeconds)); } });
+        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
+            static progress => progress.RangeExaminedBytes);
+        await observed.Ready;
         QueryPage? partial = null;
-        try
-        {
-            if (cancel)
-            {
-                var error = Assert.ThrowsExactly<OperationCanceledException>(() => partial = Execute());
-                await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
-            }
-            else
-            {
-                var error = Assert.ThrowsExactly<KeyLoadException>(() => partial = Execute());
-                await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-                await Assert.That(error.Message).IsEqualTo(DeadlineDetail);
-            }
-        }
-        finally { clock.Disarm(); }
-        await Assert.That(clock.Triggered).IsTrue();
+        var error = Assert.ThrowsExactly<OperationCanceledException>(() => partial = Execute());
+        await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        var healthy = typed ? engine.ExecuteAst(Principal, ast, clock) : engine.Execute(Principal, request, clock);
+        var healthy = typed ? engine.ExecuteAst(Principal, ast) : engine.Execute(Principal, request);
         await AssertHealthyAsync(healthy, indexed, position);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }
 
+    private static string Padded(string json)
+        => json[..^1] + ",\"padding\":\"" + new string('x', PaddingCharacters) + "\"}";
+
     private static async Task AssertHealthyAsync(QueryPage healthy, bool indexed, long position)
     {
         var expected = new QueryRow[] {
-            new(EqualityAccessPathSupport.PrimaryId, 1, EqualityAccessPathSupport.PrimaryJson, RedactedFields: []),
-            new(EqualityAccessPathSupport.SecondaryId, 1, EqualityAccessPathSupport.SecondaryJson, RedactedFields: []) };
+            new(EqualityAccessPathSupport.PrimaryId, 1, PrimaryJson, RedactedFields: []),
+            new(EqualityAccessPathSupport.SecondaryId, 1, SecondaryJson, RedactedFields: []) };
         await Assert.That(JsonDefaults.Serialize(healthy.Rows).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(healthy.Cursor).IsNull();
         await Assert.That(healthy.CutPosition).IsEqualTo(position);

@@ -37,11 +37,10 @@ internal static class AnnProviderQualificationCorpus
 
     internal static PackedAnnIndex Build(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
         CancellationToken token)
-        => PackedAnnIndex.Build(Space(state.Metric), Read(owner), UnitExecutionOptions.PackedAnn(state.Policy), Budget(owner, token));
+        => PackedAnnIndex.Build(Space(state.Metric), Read(owner), UnitExecutionOptions.PackedAnn(state.Policy), Budget(token));
 
-    internal static AnnWorkBudget Budget(AnnProviderQualificationOwner owner, CancellationToken token)
-        => new(new KeyLoad.Core.ReadExecutionBudget(
-            owner.Database.EvaluationClock, token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+    internal static AnnWorkBudget Budget(CancellationToken token)
+        => new(new KeyLoad.Core.ReadExecutionBudget(token), PackedAnnIndexTestSupport.GenerousWorkLimit);
 
     internal static AnnCandidate[] Candidates(AnnProviderQualificationState state)
     {

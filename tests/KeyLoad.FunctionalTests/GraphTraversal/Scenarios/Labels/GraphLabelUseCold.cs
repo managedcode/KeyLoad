@@ -22,6 +22,7 @@ internal static class GraphLabelUseCold
                     Incarnation = identity.Incarnation
                 },
                     identity.NodeId, fixture.StorageExecution);
+                position = await NativeStoreAssertions.ReopenedAsync(store, position);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = fixture.CreateConfiguredDatabase(store);

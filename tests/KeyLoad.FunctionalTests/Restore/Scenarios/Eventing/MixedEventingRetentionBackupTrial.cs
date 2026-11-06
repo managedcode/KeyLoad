@@ -17,6 +17,7 @@ internal static class MixedEventingRetentionBackupTrial
         var signingFingerprint = SHA256.HashData(identity.SigningKey.Span);
         var cut = fixture.Target.Position;
         fixture.ReopenTarget(Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Target));
+        cut = await NativeStoreAssertions.ReopenedAsync(fixture.Target!, cut);
         await Assert.That(fixture.Target!.Identity with
         {
             SigningKey = ReadOnlyMemory<byte>.Empty

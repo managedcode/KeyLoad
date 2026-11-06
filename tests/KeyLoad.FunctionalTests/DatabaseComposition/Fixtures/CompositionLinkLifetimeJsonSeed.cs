@@ -40,7 +40,7 @@ internal static class CompositionLinkLifetimeJsonSeed
         CancellationToken token)
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
-        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, P.Root,
             owner.Database.EvaluationClock.GetUtcNow(), request, work);
     }

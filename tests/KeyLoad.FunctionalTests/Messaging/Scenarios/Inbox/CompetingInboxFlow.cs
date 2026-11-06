@@ -57,6 +57,7 @@ internal static class CompetingInboxFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             store = new(new(path), UnitExecutionOptions.StorageExecution());
+            position = await NativeStoreAssertions.ReopenedAsync(store, position);
             var database = QueueWholeFlowStorage.Open(store);
             await SubscriptionOldCutAssertions.ConservedAsync(store, bytes, position, identity);
             await CompetingInboxAssertions.ReplayAsync(database, store, state);

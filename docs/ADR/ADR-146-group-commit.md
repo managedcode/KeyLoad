@@ -4,86 +4,90 @@ Status: Accepted. Current source; exact-source distributed qualification remains
 
 ## Context
 
-Concurrent commands can share the physical transaction work on every required
-copy while retaining their individual outcomes and canonical order. A public
-document batch is one command containing several mutations; the commit queue can
-combine several such commands into one physical transaction per copy.
+Concurrent commands in one atomic partition can share physical transaction work
+while retaining individual outcomes and canonical order. A public document batch
+is one command containing several mutations. Unrelated partitions must remain
+able to publish while another partition waits for a copy.
 
 ## Decision
 
-Concurrent canonical commands share one native process-persistent commit per copy.
-The acknowledgement boundary and explicit disk barriers are specified by
-[ADR-003](ADR-003-durability-ack-barrier.md); group commit does not add a disk sync
-per document or command.
+`PartitionCommitGrain` owns one logical atomic partition's command queue.
+`DatabaseCommitGrain` owns metadata commands and, in shared-volume mode, the
+physical session acquisition. These ordinary grains are reentrant so submissions
+and read barriers can interleave while one joined drain waits for publication.
+Each queue has one drain; a partition's next batch follows its preceding batch.
+A batch is the commands already queued when that drain takes them. Commands which
+arrive during publication enter the next batch.
 
-- `DatabaseCommitGrain` is `[Reentrant]`. `ApplyAsync` queues the command and
-  returns when its batch decides it. One drain at a time takes every queued
-  command, in submission order, as one batch. Commands that arrive while a batch
-  persists form the next batch. Nothing limits the queue or the batch.
-- `ISiloDatabaseService.PrepareBatchAsync` prepares the batch at a selected owner
-  after completing retained gaps to the highest canonical cut. At equal cuts the
-  commit grain prefers its selected local copy, avoiding a full-batch remote
-  preparation round trip. This changes neither the selected copy set nor the
-  requirement for all copies to persist the batch. For a command that already committed it
-  returns the retained original, as `ReadStoredCommandAsync` did. Business time never
-  decreases along a batch. Preparation reads the committed state, which does not yet
-  hold the effects of the earlier commands in the batch. So the prepared prefix stops
-  before a later command that repeats an identity already in the batch, whose
-  preparation records queue retry decisions, or whose preparation fails. That command
-  is then prepared first in the next batch, exactly as it would be alone.
-- `ISiloDatabaseService.ApplyBatchAsync` applies the prepared commands, in order, as
-  one ZoneTree transaction on every owner. The current `ProcessDurable` path
-  publishes through ZoneTree's process-persistent WAL; disk sync remains
-  engine-owned periodic work. Explicit `IAtomicStore.SyncAsync` awaits the native
-  WAL APIs when a caller requests that disk barrier. Each command is one
-  action of that commit (`IAtomicActionStaging`):
-  - It sees the writes of the actions before it.
-  - Its `Reset` covers only its own writes.
-  - It takes the next canonical sequence when it persists a new outcome. A retry
-    of a command earlier in the batch replays that outcome and takes no sequence.
+After completing a retained copy gap, the command owner selects a current primary
+which covers both its partition prefix and metadata authority. Data and catalog
+decisions use a common physical primary so native serializable conflicts protect
+fresh authorization and resource lifetimes. This is full-copy execution, not
+independent partition primaries or physical query fan-out.
 
-  A later command does not run in the batch if it fails outside its own persisted
-  outcome. It then runs first in a later commit. The first command of a batch always runs, so it behaves as a commit of its
-  own.
-- The grain acknowledges each command only after every owner returned the same
-  sequence and result for it. It then advances the cached cut once for the batch.
-  If the copies disagree from some command on, that command and every later one in
-  the batch fail with `UnknownWriteOutcome`, and the owners' cuts are read again.
-  The rules for a failed batch:
-  - Before the copies are sent the batch to apply (owner selection, completing a
-    lagging copy, preparation), no command was applied: a transport failure or an
-    uncertain owner fails every command with `OwnershipLost`, so retrying the same
-    command is safe.
-  - Once the batch was sent, a transport failure, cancellation, or an apply that
-    some copy acknowledged makes every command the copies received uncertain.
-  - A failure that every copy raised before any effect belongs to the first command.
-  - Commands that no copy applied are queued again, ahead of newer commands.
-  - A caller that cancels before its command joins a batch sees cancellation. After
-    the command was sent, the caller receives `UnknownWriteOutcome`.
-- A commit that persisted several outcomes records their outcome keys in the system
-  row `last-batch`. `ReadLastCommittedCommandsAsync` returns those commands when the
-  row describes the last commit, and otherwise the last command. A copy that missed
-  part of the last batch is completed from these commands before the next batch. A
-  gap larger than the last batch still returns `RecoveryRequired`.
-- One implementation serves both paths. `ApplyStorageOperation` applies a batch of one
-  command, and the single-command `ApplyAsync`, `PrepareAsync`,
-  `ReadStoredCommandAsync` and `ReadLastCommittedCommandAsync` storage service
-  methods are removed. Shared-volume mode keeps one ordinary owner. Its commands
-  still commit one at a time inside that owner's invocation.
+Local primary execution borrows the original physical session through DI.
+Remote primary execution uses `ISiloDatabaseService.CommitBatchAsync`; copies use
+`ISiloDatabaseService.ApplyReplicaBatchAsync`. The physical session's original
+work ledger joins every publication before close. File handles never leave that
+owner. No ordinary activation is created solely to apply a physical batch.
 
-## Consequences
+The primary prepares commands once and publishes their effects in one native
+ZoneTree transaction. An `IAtomicActionStaging` action sees earlier actions'
+writes; resetting an action discards only its own changes. Each newly retained
+outcome advances that partition's canonical prefix. A retry replays its original
+outcome without another sequence. Preparation stops before a later command whose
+identity or preparation requires a new batch. A failure outside a later command's
+persisted outcome leaves it for the next batch; the first command still decides
+as it would alone. Business time never decreases within a partition batch.
 
-- With many concurrent writers, one physical commit on each copy acknowledges many commands.
-  The latency of a single write is unchanged: its batch holds only that command.
-- Every acknowledged command is in a process-persistent ZoneTree transaction on
-  every required copy before its caller sees success. Process interruption and
-  power-loss persistence require distinct qualification; a grouped commit does
-  not strengthen the selected durability contract.
-- Readers wait only for a batch's apply, as they waited for one command's apply.
-- A batch is one ordinary ZoneTree transaction. The `last-batch` row is a system
-  row, written only by commits that persist several outcomes.
-- Interleaved reads (`ReadCutAsync`, `GetReadOwnerAsync`, background reads) never
-  replace the owners a batch is using. A cut read that a batch overtook is not
-  cached.
+The same transaction retains `StorageReplicaBatch`: exact decided mutations,
+original outcome bytes, partition predecessor and final prefix, batch identity,
+and observed dependency prefixes. Its `Applied` array contains only typed
+sequence/success/error decisions. Copies never prepare or authorize the business
+command again. They validate incarnation, batch identity, exact predecessor and
+required dependency prefixes before atomically applying the original effects.
+A duplicate batch does not publish again. Native physical timestamps are not
+copied or used as canonical sequence counters.
 
-Related: [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-143](ADR-143-independent-silo-replica-topology.md), [ADR-145](ADR-145-no-request-throttling.md), StorageReplication REQ-REP-008.
+A copy missing a dependency defers before effects, waits outside its transaction
+for that earlier prefix to reach the required copies, then retries against a fresh
+native cut. Catalog decisions depend on earlier observed partition data; data
+decisions depend on catalog state and foreign resource partitions actually read.
+This prevents a catalog deletion or foreign-vertex operation from overtaking its
+source effects on a copy.
+
+Every required copy must confirm the same prefix and decisions before the command
+owner attaches its observed persisted-copy count. Only the primary returns full
+results; exact persisted outcome bytes remain on every copy. A missing selected
+result or disagreement yields `UnknownWriteOutcome`. Failure before primary
+dispatch leaves writes unstarted; failure after dispatch may leave an outcome
+unknown even when no response arrived. A stable command ID resolves retries.
+
+A failed copy invalidates the owner roster. The existing joined drain and a typed
+Orleans grain timer complete the last retained exact batch without another
+foreground write. Read barriers may proceed on an advanced complete owner, and
+other partition drains remain independent. Larger gaps, unavailable required
+copies and divergent predecessors refuse explicitly. This mechanism does not
+rebuild an empty replica or establish general lost-copy recovery.
+
+## Consequences and qualification
+
+All-copy acknowledgement retains the selected native persistence barrier from
+[ADR-003](ADR-003-durability-ack-barrier.md). Grouping adds no disk sync per command;
+explicit `IAtomicStore.SyncAsync` awaits native WAL APIs. Native snapshots, conflict
+handling, cache maintenance and merge scheduling remain ZoneTree responsibilities.
+
+Shared-volume mode keeps one ordinary physical owner and one open ZoneTree;
+independent request contexts borrow its joined session. It requires one persisted
+copy. Actual deployed filesystem exclusion and flush behavior remain separate
+qualification gates.
+
+Grouped publication, exact replay, wrong acknowledgements, causal copy order,
+held-copy isolation, cancellation, process recovery and real Aspire SDK/MCP flows
+require their own original evidence. No source change establishes throughput,
+endurance, power-loss durability or three independent write streams.
+
+Related: [ADR-003](ADR-003-durability-ack-barrier.md),
+[ADR-136](ADR-136-orleans-partition-ownership.md),
+[ADR-143](ADR-143-independent-silo-replica-topology.md),
+[ADR-145](ADR-145-no-request-throttling.md), StorageReplication REQ-REP-008.

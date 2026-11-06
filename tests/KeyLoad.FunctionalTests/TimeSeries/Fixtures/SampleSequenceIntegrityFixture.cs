@@ -29,8 +29,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series);
     internal void RetainEvidence() => preserve = true;
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+        => Store.Read(view => (StorageOperationApply.ReadCanonicalSequence(view, Source.Owner.Partition), Store.Position));
 
     internal void Reopen()
     {

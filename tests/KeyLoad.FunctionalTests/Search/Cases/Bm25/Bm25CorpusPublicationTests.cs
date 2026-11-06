@@ -44,7 +44,7 @@ internal sealed class Bm25CorpusPublicationTests
             await Assert.That(revoked.PolicyEpoch).IsEqualTo(2L);
             var before = CanonicalStoreCut.Read(flow.Database);
             var denied = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateVerifiedBm25CorpusPublication(
-                Bm25CorpusPublicationFlow.Root, phase, flow.Database.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
+                Bm25CorpusPublicationFlow.Root, phase, TestDatabase.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(Errors.Code(flow.Database.SubmitIssued(original).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
             var searchDenied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => flow.SearchAsync());
@@ -57,7 +57,7 @@ internal sealed class Bm25CorpusPublicationTests
             await Assert.That(restored.PolicyEpoch).IsEqualTo(3L);
             var repairedBefore = CanonicalStoreCut.Read(flow.Database);
             var old = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateVerifiedBm25CorpusPublication(
-                Bm25CorpusPublicationFlow.Root, phase, flow.Database.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
+                Bm25CorpusPublicationFlow.Root, phase, TestDatabase.CreateReadWork(Bm25CorpusPublicationFlow.Token)));
             await Assert.That(old.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(Errors.Code(flow.Database.SubmitIssued(original).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
             await repairedBefore.RequireAsync(CanonicalStoreCut.Read(flow.Database));

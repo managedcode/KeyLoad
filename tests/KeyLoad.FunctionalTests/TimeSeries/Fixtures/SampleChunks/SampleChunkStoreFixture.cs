@@ -52,8 +52,8 @@ internal sealed class SampleChunkStoreFixture : IDisposable
     {
         return store.Read(view =>
         {
-            var budget = NewBudget(database);
-            var before = CaptureCanonicalState(store, database, view);
+            var budget = new ReadExecutionBudget();
+            var before = CaptureCanonicalState(store, view);
             var source = ReadSamples(partition, view, budget);
             var executionOptions = UnitExecutionOptions.TimeSeriesExecution();
             var encoded = SampleChunkCodec.Encode(source.AsSpan(), budget, executionOptions);
@@ -65,17 +65,16 @@ internal sealed class SampleChunkStoreFixture : IDisposable
 
     internal static SampleChunkStoreCanonicalState CaptureCanonicalState(TestDatabase database)
     {
-        return CaptureCanonicalState(database.Store, database.Database);
+        return CaptureCanonicalState(database.Store);
     }
 
-    internal static SampleChunkStoreCanonicalState CaptureCanonicalState(ZoneTreeStore store, DatabaseEngine database)
-        => store.Read(view => CaptureCanonicalState(store, database, view));
+    internal static SampleChunkStoreCanonicalState CaptureCanonicalState(ZoneTreeStore store)
+        => store.Read(view => CaptureCanonicalState(store, view));
 
-    private static SampleChunkStoreCanonicalState CaptureCanonicalState(ZoneTreeStore store,
-        DatabaseEngine database, IKeyValueView view)
+    private static SampleChunkStoreCanonicalState CaptureCanonicalState(ZoneTreeStore store, IKeyValueView view)
     {
         var position = store.Position;
-        var page = NewBudget(database).Scan(view, [], MaximumCanonicalRecords);
+        var page = new ReadExecutionBudget().Scan(view, [], MaximumCanonicalRecords);
         if (page.HasMore)
         {
             throw new InvalidOperationException("The canonical test fixture exceeded its complete-state bound.");
@@ -88,7 +87,7 @@ internal sealed class SampleChunkStoreFixture : IDisposable
     {
         return database.Store.Read(view =>
         {
-            var budget = NewBudget(database);
+            var budget = new ReadExecutionBudget();
             var records = new List<KeyValueRecord>();
             AddPrefix(view, budget, records, SampleReadKeys.Prefix(database.Partition, Set, Series));
             AddPrefix(view, budget, records, KeySpace.Partition("sample-id", database.Partition, Set, Series));
@@ -122,12 +121,6 @@ internal sealed class SampleChunkStoreFixture : IDisposable
         }
     }
 
-    internal static ReadExecutionBudget NewBudget(TestDatabase database, CancellationToken cancellationToken = default)
-        => new(database.Database.EvaluationClock, cancellationToken);
-
-    private static ReadExecutionBudget NewBudget(DatabaseEngine database)
-        => new(database.EvaluationClock);
-
     private static SampleRecord[] ReadSamples(PartitionRef partition, IKeyValueView view, ReadExecutionBudget budget)
     {
         var records = new List<SampleRecord>();
@@ -150,14 +143,14 @@ internal sealed class SampleChunkStoreFixture : IDisposable
     {
         var from = Floor;
         var range = SampleRangeReader.Read(engine, engine.EvaluationClock, view, Root,
-            new(partition, Set, Series, from, EndExclusive, MaximumSeriesRecords), NewBudget(engine));
+            new(partition, Set, Series, from, EndExclusive, MaximumSeriesRecords), new ReadExecutionBudget());
         var latest = SampleLatestReader.Read(engine, view, Root,
-            new(partition, Set, Series, EndExclusive), NewBudget(engine));
+            new(partition, Set, Series, EndExclusive), new ReadExecutionBudget());
         var aggregate = SampleAggregateReader.Read(engine, view, Root,
-            new(partition, Set, Series, from, EndExclusive, MaximumSeriesRecords), NewBudget(engine));
+            new(partition, Set, Series, from, EndExclusive, MaximumSeriesRecords), new ReadExecutionBudget());
         var windows = SampleAggregateWindowReader.Read(engine, view, Root,
             new(partition, Set, Series, from, EndExclusive, WindowWidth, MaximumSeriesRecords, WindowLimit),
-            NewBudget(engine));
+            new ReadExecutionBudget());
         return new(range, latest.Sample, aggregate, windows.Windows.ToArray());
     }
 

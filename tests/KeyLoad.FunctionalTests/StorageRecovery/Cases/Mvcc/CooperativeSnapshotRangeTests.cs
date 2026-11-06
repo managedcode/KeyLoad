@@ -20,14 +20,15 @@ internal sealed class CooperativeSnapshotRangeTests
     {
         using var files = new CurrentStorageFixture();
         using var store = new ZoneTreeStore(files.SourceOptions, UnitExecutionOptions.StorageExecution());
-        var cut = store.Commit((transaction, position) =>
+        store.Commit((transaction, _) =>
         {
             for (var index = 0; index < Rows; index++)
             {
                 transaction.Put(RowKey(index), [Original]);
             }
-            return position;
+            return true;
         });
+        var cut = store.Position;
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         var context = new FirstYieldContext();
         var visited = new List<byte[]>();

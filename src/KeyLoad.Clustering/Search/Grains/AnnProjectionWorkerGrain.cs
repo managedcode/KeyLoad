@@ -8,7 +8,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Activation-local ANN hints; canonical records remain the durable work source.</summary>
 [StatelessWorker(MaximumLocalPollers)]
 internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
-    IServiceProvider services, TimeProvider clock,
+    IServiceProvider services,
     IOptions<BackgroundWorkerOptions> batching, ILogger<AnnProjectionWorkerGrain> diagnostics)
     : Grain, IAnnProjectionWorkerGrain
 {
@@ -59,7 +59,7 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         var token = binding.Token;
         try
         {
-            var budget = new ReadExecutionBudget(clock, token);
+            var budget = new ReadExecutionBudget(token);
             budget.AttachResourceLifetimeBinding(binding);
             var targetOwner = await storage.AnnDiscoveryTargetAsync(token);
             var page = await BackgroundStorageReadAccounting.ReadAsync<AnnProjectionDiscoveryPage>(budget, binding,

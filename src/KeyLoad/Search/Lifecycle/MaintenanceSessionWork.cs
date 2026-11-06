@@ -26,13 +26,13 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
         }
     }
 
-    internal MaintenanceSessionWork(TimeProvider clock, CancellationToken shutdown)
+    internal MaintenanceSessionWork(CancellationToken shutdown)
     {
         retention = new();
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
         try
         {
-            Budget = new(clock, lifetime.Token);
+            Budget = new(lifetime.Token);
             Budget.AttachResourceLifetimeBinding(this);
         }
         catch (Exception primary)

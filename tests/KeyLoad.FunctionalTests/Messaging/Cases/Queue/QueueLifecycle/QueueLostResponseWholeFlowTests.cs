@@ -31,7 +31,7 @@ internal sealed class QueueLostResponseWholeFlowTests
         fixture.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, leased, leasedPosition, identity);
+        leasedPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(reopened, leased, leasedPosition, identity);
         await RefuseChangedContentAsync(database, reopened, OperationKind.Receive, claim with
         {
             LeaseSeconds = 31
@@ -49,7 +49,7 @@ internal sealed class QueueLostResponseWholeFlowTests
         reopened.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(second);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, acked, ackedPosition, identity);
+        ackedPosition = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(second, acked, ackedPosition, identity);
         await RefuseChangedContentAsync(restored, second, OperationKind.Delivery, ack with
         {
             Action = DeliveryAction.Renew
@@ -78,12 +78,12 @@ internal sealed class QueueLostResponseWholeFlowTests
         var identity = OrleansSerialization.Serialize(store.Identity);
         var first = QueueWholeFlowStorage.Apply(database, kind, changed, originalId, time);
         await QueueLeaseExpiryEqualityAssertions.RefusalAsync(first, ErrorCode.Conflict);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
         var repeated = QueueWholeFlowStorage.Apply(database, kind, changed, originalId, time);
         await QueueLeaseExpiryEqualityAssertions.RefusalAsync(repeated, ErrorCode.Conflict);
         await Assert.That(OrleansSerialization.Serialize(repeated)).IsEquivalentTo(
             OrleansSerialization.Serialize(first), CollectionOrdering.Matching);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(store, bytes, position, identity);
     }
 
     private static async Task CompleteHealthyColdAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -99,13 +99,13 @@ internal sealed class QueueLostResponseWholeFlowTests
         store.Dispose();
         using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(reopened);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, bytes, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(reopened, bytes, position, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
             OperationKind.Delivery, originalAck, originalAck.CommandId, time), originalReceipt);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
             OperationKind.Delivery, ack, ack.CommandId, time), receipt);
         await TerminalMessagesAsync(restored, lane);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(reopened, bytes, position, identity);
+        await QueueLeaseExpiryEqualityAssertions.SameImageAsync(reopened, bytes, position, identity);
         var empty = new ReceiveRequest(Guid.NewGuid(), lane);
         await Assert.That(QueueWholeFlowStorage.Apply(restored, OperationKind.Receive, empty, empty.RequestId,
             time).Get<ReceiveResult>().Deliveries).IsEmpty();

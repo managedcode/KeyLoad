@@ -27,6 +27,7 @@ internal static class PackedAnnStressColdRestore
         var identity = database.Store.Identity;
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
+        position = await NativeStoreAssertions.ReopenedAsync(reopened, position);
         await Assert.That(OrleansSerialization.Serialize(reopened.Identity)
             .SequenceEqual(OrleansSerialization.Serialize(identity))).IsTrue();
         await PackedAnnStressOracle.UnchangedAsync(reopened, canonical, position);

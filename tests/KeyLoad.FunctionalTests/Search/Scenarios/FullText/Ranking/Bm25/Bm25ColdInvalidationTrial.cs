@@ -82,7 +82,7 @@ internal static class Bm25ColdInvalidationTrial
         await Assert.That(Tail(flow)).IsEqualTo(tail);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen();
-        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        await before.RequireReopenedAsync(owner);
         await Bm25ColdInvalidationAssertions.DeniedAsync(flow, original);
         var repaired = flow.Configure(flow.Reader with
         {

@@ -27,7 +27,7 @@ internal static class QueueDeadLetterSelectedSetup
             ClusterAdministrator = true
         })).Get<PrincipalRecord>();
         var lane = new QueueLaneRef(fixture.Partition, QueueDeadLetterSelectedProtocol.Queue);
-        var time = QueueWholeFlowStorage.Clock(fixture.Store);
+        var time = QueueWholeFlowStorage.Clock(fixture.Store, fixture.Partition);
         var history = new List<QueueDeadLetterSelectedSaved>();
         await QueueDeadLetterSelectedRetainedInbox.SeedAsync(fixture.Database, lane, time, history);
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition,

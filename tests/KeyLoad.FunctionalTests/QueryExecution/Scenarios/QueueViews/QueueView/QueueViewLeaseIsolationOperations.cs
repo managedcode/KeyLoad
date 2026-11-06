@@ -15,7 +15,9 @@ internal static class QueueViewLeaseIsolationOperations
     {
         state.Token.ThrowIfCancellationRequested();
         var owner = state.Owner;
-        var index = checked(owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
+        var global = kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
+        var index = checked(NativeStoreAssertions.Applied(owner.Store, global ? null : state.Partition)
+            + QueueViewLeaseIsolationProtocol.One);
         var operation = owner.Database.CreateCommand(kind, id, QueueViewLeaseIsolationProtocol.Root,
             owner.Database.EvaluationClock.GetUtcNow(), request);
         operation = owner.Database.OwnCommand(operation);
@@ -24,7 +26,6 @@ internal static class QueueViewLeaseIsolationOperations
         var entry = owner.Entry(operation);
         await Assert.That(entry.CanonicalSequence).IsEqualTo(index);
         await QueueViewLeaseIsolationResults.SameAsync(result, Result<object>.Succeed(predicted));
-        var global = kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
         var key = global ? KeySpace.GlobalOutcome(QueueViewLeaseIsolationProtocol.Root, id)
             : KeySpace.PartitionOutcome(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);
         var locatorKey = KeySpace.OutcomeLocator(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);

@@ -32,8 +32,9 @@ internal static class SampleSequenceIntegrityRecovery
         fixture.PutCounter(counter);
         await SampleSequenceIntegrityAssertions.CounterAsync(fixture, counter);
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store))
-            .IsEqualTo(StorageRecovery.NativeStorePositionOracle.AtPosition(healthyImage, cut.StorePosition + 1));
-        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo((cut.AppliedPosition, cut.StorePosition + 1));
+            .IsEqualTo(healthyImage);
+        await NativeStoreAssertions.AdvancedAsync(fixture.Store, cut.StorePosition);
+        await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(cut.AppliedPosition);
         await Assert.That(OutcomeStoreOracle.ReadStored(fixture.Store, issued)).IsNull();
         await FinishAsync(fixture, command, issued, token);
     }
@@ -75,7 +76,8 @@ internal static class SampleSequenceIntegrityRecovery
         await SampleSequenceIntegrityAssertions.EqualAsync(expected, result.Get<CommitReceipt>());
         await SampleSequenceIntegrityAssertions.EqualAsync(expected, recovered.Result.Get<CommitReceipt>());
         await Assert.That(result.Get<CommitReceipt>().Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
-        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo((expectedSequence, cut.StorePosition + 1));
+        await NativeStoreAssertions.AdvancedAsync(fixture.Store, cut.StorePosition);
+        await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(expectedSequence);
         await SampleSequenceIntegrityAssertions.ReplayAsync(fixture, original, result, outcomeBytes, token);
     }
 }

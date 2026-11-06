@@ -98,7 +98,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
-        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
+        position = await QueueLeaseExpiryEqualityAssertions.ReopenedImageAsync(cold, image, position, identity);
         await SubscriptionContinuationAssertions.TerminalAsync(db, cold, group, original, time);
         foreach (var entry in retained)
         {
