@@ -7,17 +7,14 @@ Key-value currently uses the same document path without secondary indexes.
 MongoDB and Redis are the existing comparison drivers; no benchmark contract or
 dataset change is part of this review.
 
-Status: the first repair batch passed local qualification. Its Linux run failed the
-canonical test inventory because nine added admission cases were absent; release
-and comparisons did not run. The partition coordinator redesign and its local
-qualification are complete at the scopes recorded below. Exact-source delivery
-requires the separate Linux Build and Tests, Release and Benchmarks
-artifacts. The first redesign run and its correction checkpoint are recorded below.
-Findings distinguish source observations,
-runtime evidence, completed repairs and remaining qualification. This document
-does not claim a whole-repository audit or product readiness.
+The coordinator redesign passed Linux Build and Tests and shipped in `5c5063be0`.
+The replica buffer correction passed the same Linux gate in `6dd245b6a`.
+The native full-text point lookup passed local qualification; its exact-source
+Linux and released comparisons are separate. Findings below distinguish source
+observations, measured behavior and remaining qualification. The review covers
+the shared database operation paths, not product readiness or a whole-repository audit.
 
-## Active implementation and validation plan
+## Review scope and validation method
 
 The expanded scope includes update, SQL/AST queries, full-text/vector/graph search
 and their common admission, cancellation, physical publication and replica paths.
@@ -107,9 +104,9 @@ the hook did not call `SetObserved` or alter runtime behavior.
 
 The normal CI command does not turn these upstream notifications into additional
 test identities. No test-runner gate was removed or exception marked observed.
-The existing-store fault-observer prohibition also remains unchanged. Complete
-functional, process recovery, Aspire SDK/MCP, coverage, Linux delivery and
-released comparison qualification remain open.
+The existing-store fault-observer prohibition also remains unchanged. Later
+Linux qualification and released comparisons are recorded below. Numeric
+coverage remains a separate gate.
 
 The current compiled roster contains 3,094 cases: 2,661 functional contributors
 and 433 required controls, with no skipped or excluded cases. The redundant
@@ -570,5 +567,44 @@ took 10.83 and 38.73 seconds in that instrumented run. In the comparable
 bulk-only capture window, the prior two Orleans memory copier sites were no
 longer among the leading allocation sites. Native allocations remain visible;
 the captures completed different work within their five-second windows and do
-not establish an isolated throughput or peak-memory improvement. Exact-source
-Linux, Release and released-image comparisons are separate gates.
+not establish an isolated throughput or peak-memory improvement.
+
+[Build and Tests 42336172768](https://github.com/managedcode/KeyLoad/actions/runs/42336172768)
+passed all 33 jobs for `6dd245b6a094ae3d586c3505c0116a7cea10c6f3`. Its
+original reports contain 3,095 functional, 583 analyzer, 365 real cluster and
+154 actual process-recovery passes without failures or skips.
+Its [Release](https://github.com/managedcode/KeyLoad/actions/runs/42339402864)
+published the server image with digest
+`sha256:0f2e682bf1310bde202e4228100aa3450ebe70da4372db73c08cfb25bc47ebd4`.
+[Benchmarks 42339586942](https://github.com/managedcode/KeyLoad/actions/runs/42339586942)
+is the associated released comparison run.
+
+## Full-text candidate lookup
+
+The full-text index generates candidates before the canonical read loads their
+documents at the authorized snapshot. On 200,000 documents and 64 real term
+queries, 2,845 of 4,317 managed allocation events attributed to the query root
+were below exact candidate capture. Repeated merged-cursor seeks spent work
+locating the next key across segments even though capture needed a known key.
+Native B-tree and disk segment seek routines were prominent. This profile does
+not establish the cost of all search or of ranking.
+
+Transactional document candidates now use the original retained ZoneTree read
+transaction's native point lookup. Range and mixed physical captures still use
+their cursor. The capture holds one owned key for each exact record and its
+membership check. It retains cancellation and byte accounting, the same
+snapshot and fresh authorization, closed hit/miss scope, exact ranking and
+response bodies, and joined release of the read owner.
+
+The same uninstrumented work on the same host allocated 922,701,848 bytes
+before and 652,819,760 after (29.25% less cumulative managed allocation).
+Elapsed time was 2.33 and 2.20 seconds. The independent top-ten and full-body
+checks agreed for all 64 queries at canonical cut 2002 in both runs. These are
+fixed local work measurements, not released throughput or retained heap size.
+
+The strict Debug solution build passed all 20 projects with zero warnings or
+errors, followed by full format verification, repository governance, shard
+assignment and six compiled discovery selections. Search passed 392/392,
+StorageRecovery 187/187 and actual process recovery 154/154 without skips.
+Existing snapshot cases now also exercise an original hit and miss after
+subsequent writes and exact byte-budget refusal on the native point path.

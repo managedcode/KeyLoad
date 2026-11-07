@@ -62,8 +62,8 @@ internal static class CapturedReadScopeScenario
         });
         try
         {
-            builder.CaptureExact(ReadCutFixture.Key(Point));
-            builder.CaptureExact(ReadCutFixture.Key(Missing));
+            builder.CaptureExact(ReadCutFixture.Key(Point), transactional: true);
+            builder.CaptureExact(ReadCutFixture.Key(Missing), transactional: true);
             builder.CapturePrefix(ReadCutFixture.Key(Group));
             return builder.Transfer();
         }

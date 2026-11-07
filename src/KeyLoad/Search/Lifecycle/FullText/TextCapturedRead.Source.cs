@@ -46,7 +46,7 @@ internal sealed partial class TextCapturedRead
             foreach (var candidate in certified.Candidates)
             {
                 budget.Check();
-                builder.CaptureExact(DocumentStorageKeys.RecordKey(prefix, candidate.Reference.Id));
+                builder.CaptureExact(DocumentStorageKeys.RecordKey(prefix, candidate.Reference.Id), Resource.Transactional);
             }
         }
         SearchLookupClosure.Capture(database, builder, Principal, request.Partition, request.Collection,

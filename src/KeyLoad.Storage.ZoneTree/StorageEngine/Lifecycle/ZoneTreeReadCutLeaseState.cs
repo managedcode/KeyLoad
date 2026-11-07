@@ -1,5 +1,3 @@
-using ZoneTree.Transactional;
-
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutLeaseState
@@ -47,7 +45,7 @@ internal sealed class ZoneTreeReadCutLeaseState
 
     internal void FinishCapture() => captureFinished.TrySetResult();
 
-    internal ITransactionIterator<Memory<byte>, Memory<byte>> BeginTraversal()
+    internal ZoneTreeSnapshotCursor BeginTraversal()
     {
         lock (sync)
         {
@@ -63,7 +61,7 @@ internal sealed class ZoneTreeReadCutLeaseState
             traversing = true;
             traversalThread = Environment.CurrentManagedThreadId;
             traversalFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            return snapshot.Iterator;
+            return snapshot;
         }
     }
 

@@ -40,7 +40,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     {
         ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: BCL null validation accepts the prefix byte[] reference through its object parameter. */;
         ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: BCL null validation accepts the visitor ZoneTreeReadCutVisitor reference through its object parameter. */;
-        var source = state.BeginTraversal();
+        var source = state.BeginTraversal().Iterator;
         try
         {
             work.Check(CancellationToken);
@@ -59,7 +59,8 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         }
     }
 
-    internal bool ReadExact(byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead)
+    internal bool ReadExact(byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead,
+        bool transactional = false)
     {
         ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
         ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
@@ -69,22 +70,9 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         {
             work.ChargeExaminedKey(key.Length, CancellationToken);
             admitBeforeRead(key.Length, 0);
-            source.Seek(key);
-            work.BeforeAdvance(CancellationToken);
-            var found = source.Next();
-            work.Check(CancellationToken);
-            if (!found)
-            {
-                return false;
-            }
-            if (!source.CurrentKey.Span.SequenceEqual(key))
-            {
-                work.ChargeExaminedKey(source.CurrentKey.Length, CancellationToken);
-                admitBeforeRead(source.CurrentKey.Length, 0);
-                return false;
-            }
-            ReadExactValue(source, reader, admitBeforeRead);
-            return true;
+            return transactional
+                ? ReadSnapshotPoint(source.Transaction, key, reader, admitBeforeRead)
+                : ReadCursorPoint(source.Iterator, key, reader, admitBeforeRead);
         }
         catch (Exception failure)
         {
@@ -97,12 +85,45 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         }
     }
 
-    private void ReadExactValue(ITransactionIterator<Memory<byte>, Memory<byte>> source,
-        StorageValueReader reader, Action<long, int> admitBeforeRead)
+    private bool ReadSnapshotPoint(IReadTransaction<Memory<byte>, Memory<byte>> source,
+        byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead)
     {
-        var raw = source.CurrentValue;
-        work.ChargeRecord(source.CurrentKey.Length, raw.Length, CancellationToken);
-        admitBeforeRead((long)source.CurrentKey.Length + raw.Length, 1);
+        work.BeforeAdvance(CancellationToken);
+        var found = source.TryGet(key, out var raw);
+        work.Check(CancellationToken);
+        if (found)
+        {
+            ReadExactValue(key.Length, raw, reader, admitBeforeRead);
+        }
+        return found;
+    }
+
+    private bool ReadCursorPoint(ITransactionIterator<Memory<byte>, Memory<byte>> source,
+        byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead)
+    {
+        source.Seek(key);
+        work.BeforeAdvance(CancellationToken);
+        var found = source.Next();
+        work.Check(CancellationToken);
+        if (!found)
+        {
+            return false;
+        }
+        if (!source.CurrentKey.Span.SequenceEqual(key))
+        {
+            work.ChargeExaminedKey(source.CurrentKey.Length, CancellationToken);
+            admitBeforeRead(source.CurrentKey.Length, 0);
+            return false;
+        }
+        ReadExactValue(source.CurrentKey.Length, source.CurrentValue, reader, admitBeforeRead);
+        return true;
+    }
+
+    private void ReadExactValue(int keyLength, ReadOnlyMemory<byte> raw, StorageValueReader reader,
+        Action<long, int> admitBeforeRead)
+    {
+        work.ChargeRecord(keyLength, raw.Length, CancellationToken);
+        admitBeforeRead((long)keyLength + raw.Length, 1);
         reader(raw.Span);
         work.Check(CancellationToken);
     }

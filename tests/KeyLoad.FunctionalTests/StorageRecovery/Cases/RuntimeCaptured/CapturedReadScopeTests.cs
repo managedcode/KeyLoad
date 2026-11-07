@@ -60,29 +60,32 @@ internal sealed class CapturedReadScopeTests
         var key = ReadCutFixture.Key(Point);
         var value = ReadCutFixture.Value(OldPoint);
         var exactBytes = key.Length * 2L + value.Length;
-        using (var rejected = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, exactBytes - 1)))
+        foreach (var transactional in new[] { false, true })
         {
-            var delivered = 0;
-            var admittedRecords = 0;
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => rejected.ReadExact(key,
-                _ => delivered++, (_, count) => admittedRecords += count));
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            await Assert.That(delivered).IsEqualTo(0);
-            await Assert.That(admittedRecords).IsEqualTo(0);
-            await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: false);
-        }
-        using (var accepted = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, exactBytes)))
-        {
-            await RequireCutAsync(accepted.Cut, identity, position);
-            byte[]? captured = null;
-            var admittedRecords = 0;
-            await Assert.That(accepted.ReadExact(key, current => captured = current.ToArray(),
-                (_, count) => admittedRecords += count)).IsTrue();
-            await Assert.That(captured!.SequenceEqual(value)).IsTrue();
-            await Assert.That(admittedRecords).IsEqualTo(1);
-            var settled = accepted.ObserveSettledWork();
-            await Assert.That(settled.ExaminedBytes).IsEqualTo(exactBytes);
-            await Assert.That(settled.Records).IsEqualTo(1);
+            using (var rejected = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, exactBytes - 1)))
+            {
+                var delivered = 0;
+                var admittedRecords = 0;
+                var failure = Assert.ThrowsExactly<KeyLoadException>(() => rejected.ReadExact(key,
+                    _ => delivered++, (_, count) => admittedRecords += count, transactional));
+                await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+                await Assert.That(delivered).IsEqualTo(0);
+                await Assert.That(admittedRecords).IsEqualTo(0);
+                await RequireCurrentAsync(fixture.Store, identity, position, changed: false, healthy: false);
+            }
+            using (var accepted = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, exactBytes)))
+            {
+                await RequireCutAsync(accepted.Cut, identity, position);
+                byte[]? captured = null;
+                var admittedRecords = 0;
+                await Assert.That(accepted.ReadExact(key, current => captured = current.ToArray(),
+                    (_, count) => admittedRecords += count, transactional)).IsTrue();
+                await Assert.That(captured!.SequenceEqual(value)).IsTrue();
+                await Assert.That(admittedRecords).IsEqualTo(1);
+                var settled = accepted.ObserveSettledWork();
+                await Assert.That(settled.ExaminedBytes).IsEqualTo(exactBytes);
+                await Assert.That(settled.Records).IsEqualTo(1);
+            }
         }
         fixture.Reopen();
         position = await NativeStoreAssertions.ReopenedAsync(fixture.Store, position);

@@ -40,6 +40,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     }
 
     public void CaptureExact(byte[] key)
+        => CaptureExact(key, transactional: false);
+
+    internal void CaptureExact(byte[] key, bool transactional)
     {
         ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
         if (key.Length == 0)
@@ -57,14 +60,14 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         original.ReadExact(key, value =>
         {
             ReserveRecord();
-            admit(checked((long)ownedKey.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), 0);
+            admit(checked((long)value.Length + ArrayHeaderPointerSlots * IntPtr.Size), 0);
             var location = ZoneTreeCapturedReadLookup.Find(records, ownedKey, records.Count);
             if (location >= 0)
             {
                 throw Errors.Fail(ErrorCode.Corruption, DuplicatePoint);
             }
-            records.Insert(~location, new(ownedKey.ToArray(), value.ToArray()));
-        }, admit);
+            records.Insert(~location, new(ownedKey, value.ToArray()));
+        }, admit, transactional);
         // Execution absence is an explicitly observed key, not permission to query any other key.
         exactKeys.Insert(~index, ownedKey);
     }

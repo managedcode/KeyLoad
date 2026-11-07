@@ -52,6 +52,7 @@ internal sealed class ZoneTreeSnapshotCursor : IDisposable
     }
 
     internal ITransactionIterator<Memory<byte>, Memory<byte>> Iterator { get; }
+    internal IReadTransaction<Memory<byte>, Memory<byte>> Transaction => snapshot.Transaction;
 
     internal static TransactionIteratorOptions CreateTransactionalOptions() => new() { ContributeToTheBlockCache = true };
 
