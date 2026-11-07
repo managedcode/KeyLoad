@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>Owns one commit's staged entries and the reset point of its current action.</summary>
@@ -5,6 +7,8 @@ namespace KeyLoad.Storage.ZoneTree;
 /// staged earlier stay visible, while reset covers only the keys the current action staged itself.</remarks>
 internal sealed class ZoneTreeTransactionStaging
 {
+    private const string InvalidReplicaEffect = "A retained replica effect has an invalid byte buffer.";
+
     private readonly SortedDictionary<byte[], ZoneTreeStagedEntry?> actionOriginals = new(BinaryKeyComparer.Instance);
 
     internal SortedSet<ZoneTreeStagedEntry> Entries { get; } = new(ZoneTreeStagedEntryComparer.Instance);
@@ -17,19 +21,40 @@ internal sealed class ZoneTreeTransactionStaging
 
     internal void BeginAction() => actionOriginals.Clear();
 
-    internal void Stage(byte[] key, byte[]? value)
+    internal void Stage(byte[] key, byte[]? value) => Stage(key, value, owned: false);
+
+    internal void StageReplicaEffect(StorageReplicaEffect effect)
+    {
+        var (key, value) = effect.BorrowOwnedBuffers();
+        Stage(key ?? throw Errors.Fail(ErrorCode.Corruption, InvalidReplicaEffect), value, owned: true);
+    }
+
+    internal ImmutableArray<StorageReplicaEffect> CaptureWrites()
+    {
+        var effects = ImmutableArray.CreateBuilder<StorageReplicaEffect>(Entries.Count);
+        // Stage owns its input bytes and replaces entries without editing their buffers.
+        foreach (var entry in Entries)
+        {
+            effects.Add(StorageReplicaEffect.FromOwnedBuffers(entry.Key, entry.Value));
+        }
+        return effects.MoveToImmutable();
+    }
+
+    private void Stage(byte[] key, byte[]? value, bool owned)
     {
         var replacing = Entries.TryGetValue(new(key, null), out var previous);
-        var ownedKey = replacing ? previous!.Key : key.ToArray();
+        var ownedKey = replacing ? previous!.Key : Own(key, owned);
         actionOriginals.TryAdd(ownedKey, previous);
         if (replacing)
         {
             Entries.Remove(previous!);
         }
 
-        Entries.Add(new(ownedKey, value?.ToArray()));
+        Entries.Add(new(ownedKey, value is null ? null : Own(value, owned)));
         Version++;
     }
+
+    private static byte[] Own(byte[] bytes, bool owned) => owned ? bytes : bytes.ToArray();
 
     /// <summary>Restores every key the current action staged to its entry before the action.</summary>
     internal void ResetAction()

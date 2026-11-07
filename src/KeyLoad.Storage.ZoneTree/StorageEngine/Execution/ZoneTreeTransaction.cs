@@ -18,7 +18,16 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime)
 
     public void BeginAction() => staging.BeginAction();
 
-    public StorageMutation[] CaptureWrites() => PrepareChanges();
+    public ImmutableArray<StorageReplicaEffect> CaptureWrites() => staging.CaptureWrites();
+
+    public void StageReplicaEffects(ImmutableArray<StorageReplicaEffect> effects, CancellationToken cancellationToken)
+    {
+        foreach (var effect in effects)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            staging.StageReplicaEffect(effect);
+        }
+    }
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {

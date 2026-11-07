@@ -16,7 +16,7 @@ public static class StorageReplicaExecution
         var staging = transaction as IAtomicActionStaging
             ?? throw new InvalidOperationException(StorageOperationBatchApply.ActionStagingRequired);
         var batch = new StorageReplicaBatch(engine.Store.Identity.Incarnation, batchId, partition,
-            previous, result.Position, [.. staging.CaptureWrites()], [.. result.Applied.Select(StorageCopyBatchAcknowledgements.Decision)])
+            previous, result.Position, staging.CaptureWrites(), [.. result.Applied.Select(StorageCopyBatchAcknowledgements.Decision)])
         {
             Dependencies = StorageReplicaDependencies.Capture(transaction, partition, readPartitions)
         };
@@ -60,18 +60,9 @@ public static class StorageReplicaExecution
                 throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidBatch);
             }
             StorageReplicaDependencies.Require(transaction, batch);
-            foreach (var change in batch.Changes)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (change.Value is { } value)
-                {
-                    transaction.Put(change.Key.ToArray(), value.ToArray());
-                }
-                else
-                {
-                    transaction.Delete(change.Key.ToArray());
-                }
-            }
+            var staging = transaction as IAtomicActionStaging
+                ?? throw new InvalidOperationException(StorageOperationBatchApply.ActionStagingRequired);
+            staging.StageReplicaEffects(batch.Changes, cancellationToken);
             if (StorageOperationApply.ReadCanonicalSequence(transaction, batch.Partition) != batch.Position)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidBatch);

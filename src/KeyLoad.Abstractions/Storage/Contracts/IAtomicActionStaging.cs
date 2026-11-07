@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace KeyLoad.Storage;
 
 /// <summary>Lets several independent actions share one process-persistent native atomic ZoneTree commit.</summary>
@@ -10,5 +12,8 @@ public interface IAtomicActionStaging
 
     /// <summary>Captures the provider-owned staged writes for persisted replication. Later staging never mutates
     /// these buffers; no borrowed read-snapshot bytes are retained.</summary>
-    StorageMutation[] CaptureWrites();
+    ImmutableArray<StorageReplicaEffect> CaptureWrites();
+
+    /// <summary>Stages an immutable replica publication without taking copies of its owned buffers.</summary>
+    void StageReplicaEffects(ImmutableArray<StorageReplicaEffect> effects, CancellationToken cancellationToken);
 }

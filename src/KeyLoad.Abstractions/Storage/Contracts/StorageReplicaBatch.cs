@@ -11,7 +11,7 @@ public sealed record StorageReplicaBatch(
     [property: Orleans.Id(2)] PartitionRef? Partition,
     [property: Orleans.Id(3)] long PreviousPosition,
     [property: Orleans.Id(4)] long Position,
-    [property: Orleans.Id(5)] ImmutableArray<StorageMutation> Changes,
+    [property: Orleans.Id(5)] ImmutableArray<StorageReplicaEffect> Changes,
     [property: Orleans.Id(6)] ImmutableArray<StorageCopyCommandAcknowledgement> Applied)
 {
     internal const string SerializerAlias = "keyload.storage-replica-batch";

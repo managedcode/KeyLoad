@@ -26,8 +26,11 @@ internal sealed class ActionStagingTests
             {
                 var staging = (IAtomicActionStaging)transaction;
                 var firstInput = FirstKey.ToArray();
-                transaction.Put(firstInput, FirstValue);
+                var firstValueInput = FirstValue.ToArray();
+                transaction.Put(firstInput, firstValueInput);
                 Array.Clear(firstInput);
+                Array.Clear(firstValueInput);
+                var captured = staging.CaptureWrites();
                 staging.BeginAction();
                 transaction.Put(DiscardedKey, SecondValue);
                 var replacementInput = FirstKey.ToArray();
@@ -43,9 +46,12 @@ internal sealed class ActionStagingTests
                     return (First: prepared.ReadOwnedValue(FirstKey), Second: prepared.ReadOwnedValue(SecondKey),
                         Child: prepared.ReadOwnedValue(ChildKey));
                 });
-                return (AfterReset: afterReset, Child: child);
+                return (AfterReset: afterReset, Child: child, FirstEffect: captured.Single());
             });
 
+            var firstEffect = observed.FirstEffect.BorrowOwnedBuffers();
+            await Assert.That(firstEffect.Key).IsEquivalentTo(FirstKey, CollectionOrdering.Matching);
+            await Assert.That(firstEffect.Value).IsEquivalentTo(FirstValue, CollectionOrdering.Matching);
             await Assert.That(observed.AfterReset.First).IsEquivalentTo(FirstValue, CollectionOrdering.Matching);
             await Assert.That(observed.AfterReset.Discarded).IsNull();
             await Assert.That(observed.Child.First).IsEquivalentTo(FirstValue, CollectionOrdering.Matching);

@@ -47031,9 +47031,9 @@
       "methodName": "AcRep008ResetDiscardsOnlyTheCurrentActionAndEveryActionCommitsInOneTransaction",
       "instanceName": "AcRep008ResetDiscardsOnlyTheCurrentActionAndEveryActionCommitsInOneTransaction",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ActionStaging/ActionStagingTests.cs",
-      "sourceSha256": "1ba487a9c4f10675995d71e3cb18015851bae8b58d188cf19afb2939e57ee45b",
+      "sourceSha256": "2957f7bd285d17ee5afa77cb9d0c3fb054af5593f6801a9ca49c3d28504939ef",
       "lineNumber": 19,
-      "endLineNumber": 61,
+      "endLineNumber": 67,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [

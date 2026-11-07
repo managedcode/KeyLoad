@@ -186,7 +186,7 @@ build-21 run (2,959 passes, 17 failures). They do not qualify this source.
 | Request placement used a complete database vector for commands and many bounded single-partition reads. | Known canonical commands admit on the current write primary. Single-partition reads select their scoped owner plus current metadata. Graph traversal, incoming edges and multi-partition operations retain the database vector because they can read foreign rows. | Source review complete; current runtime qualification pending. |
 | Query/search loaded the principal before a lower API loaded it again at the actual data cut. | Bound query/search operations use the lower API's current persisted policy check; the public identity guard and authorization diagnostics remain. Metadata-only capabilities still reload policy. | Source change; current authorization and whole-operation tests pending. |
 | Crash injection guessed the next physical timestamp. | Arm after syncing the original seed, then stop at the selected actual publication stage and mutation index. Recovery commit-count oracles use the original persisted partition prefix. | Current actual-process campaign pending. |
-| Native tuning forced frequent small mutable segments and larger decompression blocks. | Use the native mutable-segment capacity and the supported 1 MiB LZ4 compression block. Native maintainers, cache, WAL barriers and async APIs retain ownership. | The 250,000-document SDK diagnostic passed; memory tradeoffs and released Linux measurements remain open. |
+| Native maintenance and large compressed blocks add work around document operations. | Use the supported 1 MiB LZ4 block and keep the earlier bounded mutable segment. Native maintainers, cache, WAL barriers and async APIs retain ownership. | The larger segment trial is withdrawn after release resource investigation. Its isolated effect on peak memory is unverified. |
 | Copy batches duplicated full command results already present in the exact stored outcome changes. | `Applied` carries only typed sequence/success/error decisions. The selected primary returns full results; copies retain the exact original outcome bytes and return compact acknowledgements directly. | The real queue-delivery serialization, byte-identical copy/replay and healthy acknowledgement control passed in the 17-case replication run. Matched runtime measurements remain pending. |
 | Per-batch ordinary activations added placement and activation lifecycle work without owning a separate invariant. | Local primary execution borrows storage through DI. Remote primary execution and copies use the typed Grain Service. Extra apply-grain contracts, placement helpers and activation IDs are removed. | Orleans 10.4.2 `SystemTarget.ReceiveMessage` schedules each request on its existing work-item group and tracks awaited requests separately ([source](https://github.com/dotnet/orleans/blob/v10.4.2/src/Orleans.Runtime/Core/SystemTarget.cs#L351)). Local/remote execution and held-copy isolation passed in the 17-case run. Broader lifecycle qualification remains open. |
 | Every read-budget check called `GetTimestamp()` and discarded the value, including scan/search inner loops. | The budget no longer takes or forwards a clock. Cancellation, bounded reads, policy/lifetime checks and real business clocks retain their owners. Exclusive clock-driven test helpers are removed with the obsolete API. | The strict combined build and 26 actual-work cancellation, fairness, reservation and shutdown controls passed. A matched runtime profile is still required before a speed claim. |
@@ -519,3 +519,56 @@ alone does not establish the isolated effect of this patch.
 Detailed TUnit output is retained with live progress and ANSI enabled. Diagnostic
 excerpts omit repeated redraws. Tests keep their original operation, failure,
 healthy continuation, real storage and joined-cleanup requirements.
+
+## Replica buffer ownership follow-up
+
+[Build and Tests 42322637780](https://github.com/managedcode/KeyLoad/actions/runs/42322637780)
+passed all 33 jobs on `5c5063be08813fe0f8b1041174c3e3799d62ea58`: 3,095 functional,
+365 real cluster, 583 analyzer and 154 process-recovery cases, with no failures
+or skips. Its [Release](https://github.com/managedcode/KeyLoad/actions/runs/42326232963)
+succeeded. The exactly-once job does not measure numeric coverage.
+
+The [released comparisons](https://github.com/managedcode/KeyLoad/actions/runs/42326479843)
+showed faster one-node document, key-value and SQL operations, and a faster
+three-node SQL update. Full-text results differed by topology and exact vector
+queries measured lower throughput. The three-node document and key-value jobs
+were interrupted before producing first-attempt results. The original document
+runner lost contact with GitHub; its retry received a runner shutdown signal
+during Load. The key-value retry also received a shutdown signal during Load.
+Neither cell produced a result in either attempt, and the logs do not establish
+the underlying runner resource condition.
+
+On the same constrained local Docker VM, both the released redesign and its
+baseline lost a copy to an observed OOM kill during the unchanged three-copy
+key-value load. These diagnostics establish a shared-host memory limit for those
+attempts, not the isolated cause of a Linux runner loss. A separate actual
+three-copy SDK bulk allocation profile captured a substantial byte-buffer cost
+in Orleans deep copying. Its bulk and read phases completed; the mixed phase
+reached the original deadline. No public throughput or retained-heap claim is
+derived from that profile.
+
+The current correction captures exact effects as immutable values backed by the
+staging owner's byte buffers. The generated serializer carries compact byte
+arrays; Orleans may share the immutable values during its copy step. Replica
+staging retains those same owned buffers. Ordinary caller buffers still get an
+owned copy, and later staging replaces entries without modifying prior bytes.
+Keys, values, tombstones, dependency checks, native publication and the original
+command outcomes keep their semantics. The native mutable-segment bound is
+restored while retaining the 1 MiB compression block. The action-staging control
+also verifies exact captured bytes after caller buffers are cleared and the key
+is subsequently staged again. The compiled batch copier retains `Changes`
+directly, and both byte fields use the generated `ByteArrayCodec` calls.
+
+The corrected Debug solution passed all 20 projects with zero warnings/errors,
+full format verification, governance and exactly-once assignment. Native
+StorageReplication passed 17/17, StorageRecovery 187/187 and actual process
+recovery 154/154. Six compiled discovery selections matched 3,095 cases and
+the 533/520/552/491/566-case subsets. The identical local three-copy SDK
+diagnostic completed all 100,000 document creates, point reads, 10,000 predicate
+queries, mixed operations and exact final readback. Its bulk and mixed phases
+took 10.83 and 38.73 seconds in that instrumented run. In the comparable
+bulk-only capture window, the prior two Orleans memory copier sites were no
+longer among the leading allocation sites. Native allocations remain visible;
+the captures completed different work within their five-second windows and do
+not establish an isolated throughput or peak-memory improvement. Exact-source
+Linux, Release and released-image comparisons are separate gates.
