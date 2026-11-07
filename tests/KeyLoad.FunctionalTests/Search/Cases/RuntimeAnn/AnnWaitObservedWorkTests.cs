@@ -16,23 +16,16 @@ internal sealed class AnnWaitObservedWorkTests
             var cut = database.Store.Position;
             var before = database.Store.GetReadDiagnostics();
             using var caller = new CancellationTokenSource();
-            var triggered = false;
-            using var observed = new ReadObservedStore(database.Store, afterRange: () =>
-            {
-                if (!triggered && database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes)
-                {
-                    triggered = true;
-                    caller.Cancel();
-                }
-            });
+            using var observed = new ReadObservedStore(database.Store);
             var engine = new SearchEngine(database.CreateConfiguredDatabase(observed),
                 UnitExecutionOptions.QueryExecution(new() { EnableApproximateSearch = true }), null, runtime.Owner);
+            observed.CancelAfterReadProgress(caller, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
             WaitForAnnIndexResult? partial = null;
             var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => partial =
                 await engine.WaitForAnnIndexAsync(AnnWaitWholeFlow.Root, request, caller.Token))
                 ?? throw new InvalidOperationException();
             await Assert.That(error.CancellationToken).IsEqualTo(caller.Token);
-            await Assert.That(triggered).IsTrue();
+            await Assert.That(observed.CancelledAfterProgress).IsTrue();
             await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
             await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

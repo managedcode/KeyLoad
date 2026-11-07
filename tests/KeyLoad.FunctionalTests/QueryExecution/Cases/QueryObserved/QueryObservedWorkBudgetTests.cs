@@ -37,22 +37,15 @@ internal sealed class QueryObservedWorkBudgetTests
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
-        var triggered = false;
-        using var observed = new ReadObservedStore(database.Store, afterRange: () =>
-        {
-            if (!triggered && database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes)
-            {
-                triggered = true;
-                cancellation.Cancel();
-            }
-        });
+        using var observed = new ReadObservedStore(database.Store);
         var engine = new QueryEngine(database.CreateConfiguredDatabase(observed), UnitExecutionOptions.QueryExecution());
+        observed.CancelAfterReadProgress(cancellation, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
         QueryPage Execute() => typed ? engine.ExecuteAst(Principal, ast, cancellationToken: cancellation.Token)
             : engine.Execute(Principal, request, cancellationToken: cancellation.Token);
         QueryPage? partial = null;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => partial = Execute());
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(triggered).IsTrue();
+        await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);

@@ -8,7 +8,7 @@ internal static class TextLaterStageCancellationAssertions
 {
     internal static async Task VerifyAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
         TextIndexMaintenanceRequest request, TextMaintenanceCapabilityResult begin,
-        CancellationToken token)
+        ReadObservedStore observed, CancellationToken token)
     {
         var page = database.Database.ReadProjectionBatch(TextMaintenanceTestValues.Principal,
             new(request.Consumer, ThroughSequence: begin.ReplayUpperSequence));
@@ -17,9 +17,7 @@ internal static class TextLaterStageCancellationAssertions
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
         using var stage = CancellationTokenSource.CreateLinkedTokenSource(token);
-        await using var observed = new ObservedWorkCancellation(database.Store, stage,
-            static progress => progress.RangeExaminedBytes);
-        await observed.Ready;
+        observed.CancelAfterReadProgress(stage, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
         TextMaintenanceCapabilityResult? partial = null;
         var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
         {

@@ -7,8 +7,34 @@ internal sealed class ReadObservedStore(IAtomicStore original, Action? afterRead
 {
     private Action? observation = afterRead;
     private Action? rangeObservation = afterRange;
+    private long observedProgress;
+    private int cancelledAfterProgress;
+    internal long ObservedProgress => Interlocked.Read(ref observedProgress);
+    internal bool CancelledAfterProgress => Volatile.Read(ref cancelledAfterProgress) != 0;
     public StoreIdentity Identity => original.Identity;
     public long Position => original.Position;
+
+    /// <summary>Arms cancellation at an actual native read boundary after the original counter advances.</summary>
+    internal void CancelAfterReadProgress(CancellationTokenSource caller, Func<long> measure,
+        Action? onProgress = null)
+    {
+        var baseline = measure();
+        Interlocked.Exchange(ref observedProgress, baseline);
+        Interlocked.Exchange(ref cancelledAfterProgress, 0);
+        void Progress()
+        {
+            var current = measure();
+            if (current <= baseline || Interlocked.CompareExchange(ref cancelledAfterProgress, 1, 0) != 0)
+            {
+                return;
+            }
+            Interlocked.Exchange(ref observedProgress, current);
+            onProgress?.Invoke();
+            caller.Cancel();
+        }
+        observation = Progress;
+        rangeObservation = Progress;
+    }
 
     public T Read<T>(Func<IKeyValueView, T> read)
         => original.Read(view => read(new ReadObservedView(view, Observe, ObserveRange)));

@@ -35,16 +35,15 @@ internal sealed class SqlInnerJoinCancellationTests
         using var database = new TestDatabase();
         Configure(database);
         Seed(database);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true);
         var position = database.Store.Position;
         var before = global::KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var identity = Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity));
         var baseline = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
-            static snapshot => snapshot.RangeExaminedBytes);
-        await observed.Ready;
+        using var observed = new ReadObservedStore(database.Store);
+        var engine = new QueryEngine(database.CreateConfiguredDatabase(observed), UnitExecutionOptions.QueryExecution());
+        observed.CancelAfterReadProgress(cancellation, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             engine.Execute("root", request, cancellationToken: cancellation.Token));
 

@@ -74,22 +74,16 @@ internal sealed class AnalyticalAdmissionTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, FirstDocument, DocumentJson),
             new PutDocument(Collection, SecondDocument, DocumentJson));
-        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
+        using var observed = new ReadObservedStore(db.Store);
+        var owner = db.CreateConfiguredDatabase(observed);
+        var search = new SearchEngine(owner, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);
         using var cancellation = new CancellationTokenSource();
         var before = db.Store.GetReadDiagnostics();
         var position = db.Store.Position;
         var admitted = 0;
-        await using var observed = new ObservedWorkCancellation(() =>
-        {
-            var bytes = db.Store.GetReadDiagnostics().RangeExaminedBytes;
-            if (bytes > before.RangeExaminedBytes)
-            {
-                Volatile.Write(ref admitted, db.Database.QueryReadsInFlight);
-            }
-            return bytes;
-        }, cancellation);
-        await observed.Ready;
+        observed.CancelAfterReadProgress(cancellation, () => db.Store.GetReadDiagnostics().RangeExaminedBytes,
+            () => Volatile.Write(ref admitted, owner.QueryReadsInFlight));
         RankedDocument[]? partial = null;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
             partial = search.Search(Principal, request, cancellation.Token));
@@ -98,7 +92,7 @@ internal sealed class AnalyticalAdmissionTests
         await Assert.That(Volatile.Read(ref admitted)).IsEqualTo(1);
         await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(partial).IsNull();
-        await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
+        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(0);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         var healthy = await search.SearchAsync(Principal, request);
         await Assert.That(string.Join(',', healthy.Select(row => row.Document.Reference.Id)))
@@ -106,7 +100,7 @@ internal sealed class AnalyticalAdmissionTests
         await Assert.That(healthy.All(row => row.Document.Json == DocumentJson && row.Document.Revision == 1
             && !row.Document.Redacted && row.Document.Reference == db.ExpectedReference(
                 new(db.Partition, Collection, row.Document.Reference.Id)))).IsTrue();
-        await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
+        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(0);
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }
 

@@ -15,11 +15,11 @@ internal sealed class ReadObservedView(IKeyValueView original, Action? afterRead
     }
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
-        => original.ReadValue(key, bytes =>
+        => original.ReadValue(key, reader, bytes =>
         {
+            observer?.Invoke(bytes);
             afterRead?.Invoke();
-            reader(bytes);
-        }, observer);
+        });
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)
     {

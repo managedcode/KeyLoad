@@ -49,9 +49,9 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(error.Message).IsEqualTo(FieldDenied);
         using var canceled = new CancellationTokenSource();
         var runtimeBeforeCore = db.Store.GetReadDiagnostics();
-        await using var observed = new ObservedWorkCancellation(db.Store, canceled,
-            static progress => progress.RangeExaminedBytes);
-        await observed.Ready;
+        using var observed = new ReadObservedStore(db.Store);
+        engine = new SearchEngine(db.CreateConfiguredDatabase(observed), UnitExecutionOptions.QueryExecution());
+        observed.CancelAfterReadProgress(canceled, () => db.Store.GetReadDiagnostics().RangeExaminedBytes);
         GraphSearchResult? partial = null;
         OperationCanceledException cancellation;
         cancellation = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>

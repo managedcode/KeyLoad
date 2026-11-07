@@ -20,15 +20,14 @@ internal sealed class TextWaitObservedWorkTests
         database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
         var receipt = await TextWaitSeed.CommitAsync(fixture, TestContext.Current!.Execution.CancellationToken);
         using var projection = TextBilingualAudit.Open(database);
-        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var request = new WaitForIndexRequest(database.Partition, TextBilingualAudit.Collection, TextField, receipt.Token);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var cut = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
-            static progress => progress.RangeExaminedBytes);
-        await observed.Ready;
+        using var observed = new ReadObservedStore(database.Store);
+        var search = new SearchEngine(database.CreateConfiguredDatabase(observed), UnitExecutionOptions.QueryExecution(), projection);
+        observed.CancelAfterReadProgress(cancellation, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
         WaitForIndexResult? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
             {

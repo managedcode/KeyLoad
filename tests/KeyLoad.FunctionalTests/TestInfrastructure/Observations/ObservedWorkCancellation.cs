@@ -1,5 +1,3 @@
-using KeyLoad.Storage.ZoneTree;
-
 namespace KeyLoad.FunctionalTests;
 
 /// <summary>Cancels the original caller only after real owned work reports the required progress.</summary>
@@ -14,12 +12,6 @@ internal sealed class ObservedWorkCancellation : IAsyncDisposable
     private readonly long minimumBytes;
     private readonly long baseline;
     private long observed;
-
-    internal ObservedWorkCancellation(ZoneTreeStore store, CancellationTokenSource caller,
-        Func<ZoneTreeReadSnapshot, long> measure, long minimumBytes = 1)
-        : this(() => measure(store.GetReadDiagnostics()), caller, minimumBytes)
-    {
-    }
 
     internal ObservedWorkCancellation(Func<long> measure, CancellationTokenSource caller, long minimumBytes = 1)
     {

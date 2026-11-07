@@ -17,16 +17,45 @@ internal static class TextIncrementalMetadata
         {
             throw TextErrors.Ownership();
         }
-        TextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions, resources);
+        try
+        {
+            TextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions, resources);
+            if (resources is null)
+            {
+                File.Move(pending, current);
+            }
+            else
+            {
+                resources.MutatePhysical(() => File.Move(pending, current), budget);
+            }
+            budget.Check();
+        }
+        catch (Exception failure) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            var failures = new List<Exception> { failure };
+            ServerFailureObserver.Observe(() => DeletePrepared(pending, resources), failures);
+            ServerFailureObserver.Observe(() => DeletePrepared(current, resources), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    /// <summary>Removes only files created by this unpublished preparation, preserving original and cleanup failures.</summary>
+    private static void DeletePrepared(string path, TextResourceOwnership? resources)
+    {
+        if (!File.Exists(path))
+        {
+            return;
+        }
+        TextFileIO.VerifyRegularFile(path);
         if (resources is null)
         {
-            File.Move(pending, current);
+            File.Delete(path);
         }
         else
         {
-            resources.MutatePhysical(() => File.Move(pending, current), budget);
+            resources.DeleteOwnedFile(path, () => File.Delete(path));
         }
-        budget.Check();
     }
 
     internal static TextIncrementalIntent ReadIntent(string generationPath, long maximumBytes,

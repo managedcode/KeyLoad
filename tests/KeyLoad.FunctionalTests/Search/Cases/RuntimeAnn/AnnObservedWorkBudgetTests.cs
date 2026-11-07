@@ -14,13 +14,14 @@ internal sealed class AnnObservedWorkBudgetTests
         using var database = AnnSeedTestSupport.Create(Count, new DatabaseLimits());
         var request = AnnMaintenanceTestData.Pin(database);
         var failures = new List<Exception>();
+        using var observed = new ReadObservedStore(database.Store);
         try
         {
-            await using var runtime = new AnnMaintenanceTestRuntime(database);
+            await using var runtime = new AnnMaintenanceTestRuntime(database.CreateConfiguredDatabase(observed), database.Directory);
             var actual = runtime;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                _ = await VerifyFailureAndHealthyAsync(database, actual, request);
+                _ = await VerifyFailureAndHealthyAsync(database, actual, request, observed);
             }, failures);
         }
         catch (Exception cleanup) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
@@ -28,7 +29,7 @@ internal sealed class AnnObservedWorkBudgetTests
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task<AnnMaintenanceCapabilityResult> VerifyFailureAndHealthyAsync(TestDatabase database, AnnMaintenanceTestRuntime actual,
-        AnnMaintenanceRequest request)
+        AnnMaintenanceRequest request, ReadObservedStore observed)
     {
         var began = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, actual, request, AnnMaintenanceCapabilityKind.Begin);
         var built = await AnnMaintenancePhaseAssertions.FinishAsync(database, actual, request, began.Source!.ThroughSequence);
@@ -36,9 +37,7 @@ internal sealed class AnnObservedWorkBudgetTests
         var before = AnnMaintenanceTestData.Snapshot(database);
         var position = database.Store.Position;
         var work = database.Store.GetReadDiagnostics();
-        await using var observed = new ObservedWorkCancellation(database.Store, original,
-            static progress => progress.RangeExaminedBytes);
-        await observed.Ready;
+        observed.CancelAfterReadProgress(original, () => database.Store.GetReadDiagnostics().RangeExaminedBytes);
         AnnMaintenanceCapabilityResult? partial = null;
         await AssertFailureAsync(async () => partial = await actual.PhaseAsync(database, request,
             AnnMaintenanceCapabilityKind.Verify, token: original.Token), original.Token);

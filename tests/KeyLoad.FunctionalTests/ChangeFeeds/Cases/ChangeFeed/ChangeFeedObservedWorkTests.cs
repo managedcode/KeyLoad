@@ -24,19 +24,19 @@ internal sealed class ChangeFeedObservedWorkTests
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
-            static progress => progress.PointExaminedBytes);
-        await observed.Ready;
+        using var observed = new ReadObservedStore(database.Store);
+        var owner = database.CreateConfiguredDatabase(observed);
+        observed.CancelAfterReadProgress(cancellation, () => database.Store.GetReadDiagnostics().PointExaminedBytes);
         ChangeFeedPage? partial = null;
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            partial = database.Database.ReadChangeFeed(Principal, request, cancellation.Token));
+            partial = owner.ReadChangeFeed(Principal, request, cancellation.Token));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(observed.CancelledAfterProgress).IsTrue();
         await Assert.That(database.Store.GetReadDiagnostics().PointExaminedBytes).IsGreaterThan(before.PointExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        var healthy = database.Database.ReadChangeFeed(Principal, request, TestContext.Current!.Execution.CancellationToken);
+        var healthy = owner.ReadChangeFeed(Principal, request, TestContext.Current!.Execution.CancellationToken);
         await ChangeFeedLiteralOracle.RequireAsync(database, healthy, receipt, committedAt, position);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);

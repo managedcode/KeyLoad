@@ -426,6 +426,50 @@ not change. Sixteen source hashes and ranges were refreshed from the resolved
 methods. Subsequent Linux, Release and comparison results belong to their own
 original workflow artifacts, not to these local checks.
 
+## Complete native-read and prepared-intent correction
+
+[Build and Tests 42317145158](https://github.com/managedcode/KeyLoad/actions/runs/42317145158)
+ran against `3575638589e8a5d492f4e2c58c4c9f20abff4ec2`: 31 jobs passed and two
+functional jobs failed on three cases. Every previously failing cluster lane
+passed, including the complete atomic/deadline, SDK/MCP/SQL, composite authority
+and administration lanes. The unexpected post-kill generic response was not
+observed in this run; its original cause remains unverified.
+
+Change-feed and owned ANN verification exposed two remaining uses of the same
+polling-thread race. All native-read cancellation controls now arm the existing
+real-store observer synchronously, including SQL joins, hybrid explain, text
+publication, resource admission and later maintenance reads. Point observation
+includes native misses and preserves the original reader and budget observer.
+The polling helper's native-store constructor is removed. Its only remaining
+callers observe external ANN replay work units or actual frame-writer bytes.
+
+The third failure was a runtime defect. Prepared full-text intent publication
+could rename the flushed file, then observe caller cancellation before assigning
+the intent to the session. Its next preparation found the retained file and
+reported ownership refusal. `PersistIntent` now removes only its own unpublished
+pending/current files on nonfatal failure. Existing-file refusal stays outside
+that cleanup scope; original and cleanup failures remain visible. Intent effects
+already accepted by later apply/checkpoint stages retain their existing replay
+contract. Both explicit and online preparation use this same helper.
+
+The new actual-filesystem control prepares a genuine index intent, joins its
+runtime, and cancels through the existing owned-root verifier only after the
+renamed file exists. It verifies removal of the unpublished intent, preservation
+of an unrelated owned file, and a byte-exact healthy intent publication. No
+timing delay, substitute store or new product observation hook is used.
+
+Before push, the complete Debug build 43 passed all 20 projects with zero
+warnings/errors; full format verification, governance and exactly-once shard
+assignment passed. The 20 selected controls passed. Complete namespace execution
+passed Search 392/392, ChangeFeeds 56/56, QueryExecution 390/390 and
+ResourceExecution 196/196: 1,034 cases, zero failures or skips. All 20 selected
+full-text process-recovery cases passed, preserving abrupt-fault replay and cold
+healthy continuation. Six fresh discovery selections verified 3,095 cases
+(2,662 contributors and 433 required controls), with canonical subsets
+533/520/552/491/566. The new intent-publication control is included in the current
+inventory. Exact-source Linux, coverage, Release and comparison results remain
+separate original workflow evidence.
+
 ## Original Linux baseline
 
 [Benchmarks run 42128099998](https://github.com/managedcode/KeyLoad/actions/runs/42128099998)
@@ -458,6 +502,8 @@ alone does not establish the isolated effect of this patch.
 | First small batch `e49b5126d955aae2a805c8bda8705ef5c7545f5a` | Pushed to main. Its earlier local focused checks passed. |
 | First-batch Linux Build and Tests `42192949029` | Failed the canonical inventory: nine added admission cases were absent. Release and comparisons were skipped. |
 | Redesign Linux Build and Tests `42309640297` | 28 jobs passed, five failed. Original failures and the correction checkpoint are described above; Release and comparisons were skipped. |
+| First correction Linux Build and Tests `42317145158` | 31 jobs passed; two functional jobs failed on three cases. All previously failing cluster lanes passed. The complete native-read and prepared-intent correction is described above. |
+| Complete correction build 43 | All 20 Debug projects and full format verification passed. All 1,034 cases in the four affected namespaces, 20 full-text process-recovery cases, 20 selected controls and six canonical discovery selections passed without skips. |
 | Correction checkpoint | Full Debug build 41: 20 projects, zero warnings/errors; full format/verify and governance passed. All 31 selected controls, seven atomic/deadline cases, four native-cut cases and six canonical discovery selections passed. The complete SDK/MCP/SQL lane passed 81/81 on build 36. No skips. |
 | Latest partition/query/search/recovery source | Complete at the local implementation and verification scopes listed here; physical partition fan-out and deployed filesystem qualification remain separate. |
 | Combined Debug solution build 35 | All 20 projects passed with zero warnings/errors. Restore, full format/verify, governance and exactly-once shard assignment passed. |
