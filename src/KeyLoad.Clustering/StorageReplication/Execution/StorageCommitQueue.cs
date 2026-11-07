@@ -45,6 +45,9 @@ internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
     {
         while (pending.Count > 0)
         {
+            // A local publication can complete inline. Give queued Orleans calls a turn to join the batch.
+            await Task.Yield();
+
             var batch = new List<IStorageCommitRequest>(pending.Count);
             while (pending.TryDequeue(out var request))
             {

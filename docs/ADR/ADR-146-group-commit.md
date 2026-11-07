@@ -15,9 +15,10 @@ able to publish while another partition waits for a copy.
 `DatabaseCommitGrain` owns metadata commands and, in shared-volume mode, the
 physical session acquisition. These ordinary grains are reentrant so submissions
 and read barriers can interleave while one joined drain waits for publication.
-Each queue has one drain; a partition's next batch follows its preceding batch.
-A batch is the commands already queued when that drain takes them. Commands which
-arrive during publication enter the next batch.
+Each queue has one drain, and a partition's next batch follows its preceding
+batch. Before taking a batch, the drain yields one turn on the activation
+scheduler. Queued calls can join even when local storage publishes synchronously.
+Commands that arrive during publication enter the next batch.
 
 After completing a retained copy gap, the command owner selects a current primary
 which covers both its partition prefix and metadata authority. Data and catalog

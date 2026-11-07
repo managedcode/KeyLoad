@@ -608,3 +608,50 @@ assignment and six compiled discovery selections. Search passed 392/392,
 StorageRecovery 187/187 and actual process recovery 154/154 without skips.
 Existing snapshot cases now also exercise an original hit and miss after
 subsequent writes and exact byte-budget refusal on the native point path.
+
+## Local commit queue scheduling
+
+A five-second trace on the actual one-node SDK workload on `9838d2c6c`
+showed native ZoneTree publication under `StorageCommitQueue.Submit` in
+151 opened publication frames. The primary's local work can complete
+synchronously. When it does, the queue can publish before Orleans can
+schedule another ready request on the same activation.
+
+The drain yields one turn on that activation before taking its batch.
+Ready submissions can join the existing queue before the next native
+publication. The drain retains submission order and the original command
+outcomes, including cancellation and replay. A real single-silo test
+submits two replacements in the same activation turn, reads the persisted
+cut between submissions, and verifies exact receipts, stored documents
+and replay. The existing Core grouping cases verify one native publication
+for a prepared batch.
+
+The matched local SDK diagnostic used 50,000 documents, 16 concurrent
+operations and the same 50/50 read and replacement phase. Both uninstrumented
+runs completed all 50,000 operations and verified the complete final store.
+
+| Local SDK mixed phase | Before | After |
+| --- | ---: | ---: |
+| Elapsed time | 16.617 s | 11.245 s |
+| Throughput | 3,009 ops/s | 4,446 ops/s |
+
+The separately instrumented runs completed at 2,635 and 3,890 ops/s.
+Both captures stayed inside the mixed phase. The new trace still contains
+native publication frames and has zero beneath the inline submit frame.
+The profiler records stack frames. The Core grouping cases count native
+publications.
+
+A direct `EmbeddedCoordinator` run with the same documents, update and
+read sequence, process-persistent receipts and 16 concurrent operations
+completed at 1,152 ops/s and verified all results. Its writes use independent
+native transactions. The difference from the SDK includes publication
+grouping and contention as well as the transport and grain path. These
+local diagnostics measure the mixed workload. Released indexed document
+replacement comparisons use the unchanged official benchmark.
+
+The strict solution build passed with zero warnings or errors. The adjusted
+test observer also passed its strict build. All 23 other focused cases
+passed on the same runtime source, and the corrected single-silo case passed
+on its repeat. The compiled inventory and all five selectors matched the
+3,096 observed cases. The local artifacts include the original TUnit
+reports, phase timings, native process identities and before/after traces.
