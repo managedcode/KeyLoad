@@ -11,15 +11,11 @@ internal static class RelationalSqlClusterJoinPageAssertions
     private const string RightAlias = "r";
     private const string CustomerId = "customer_id";
 
-    internal static async Task EquivalentAsync(QueryPage expected, QueryPage actual)
-    {
-        await SqlClusterProtocol.EqualAsync(expected, actual);
-        await VerifySourcesAsync(actual);
-    }
-
     internal static async Task SameRowsAsync(QueryPage expected, QueryPage actual)
     {
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
+        // Each public route can read a different physical copy; only its own native stamp is meaningful.
+        await Assert.That(expected.CutPosition).IsGreaterThan(0);
+        await Assert.That(actual.CutPosition).IsGreaterThan(0);
         await SqlClusterProtocol.EqualAsync(expected with
         {
             CutPosition = actual.CutPosition

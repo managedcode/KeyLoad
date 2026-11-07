@@ -1,3 +1,5 @@
+using KeyLoad.Query;
+
 namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class AnnPublicObservedWorkTests
@@ -12,20 +14,27 @@ internal sealed class AnnPublicObservedWorkTests
         {
             using var cancellation = new CancellationTokenSource();
             var request = AnnPublicWholeFlow.Request(database, pin);
-            var engine = AnnPublicWholeFlow.Engine(database, runtime);
             var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
             var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var before = database.Store.GetReadDiagnostics().RangeExaminedBytes;
-            await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
-                static progress => progress.RangeExaminedBytes);
-            await observed.Ready;
+            var triggered = false;
+            using var observed = new ReadObservedStore(database.Store, afterRange: () =>
+            {
+                if (!triggered && database.Store.GetReadDiagnostics().RangeExaminedBytes > before)
+                {
+                    triggered = true;
+                    cancellation.Cancel();
+                }
+            });
+            var engine = new SearchEngine(database.CreateConfiguredDatabase(observed),
+                UnitExecutionOptions.QueryExecution(new() { EnableApproximateSearch = true }), null, runtime.Owner);
             AnnSearchPage? partial = null;
             var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
                 partial = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, cancellation.Token))
                 ?? throw new InvalidOperationException("The real execution public read did not cancel.");
             await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-            await Assert.That(observed.CancelledAfterProgress).IsTrue();
+            await Assert.That(triggered).IsTrue();
             await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before);
             await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

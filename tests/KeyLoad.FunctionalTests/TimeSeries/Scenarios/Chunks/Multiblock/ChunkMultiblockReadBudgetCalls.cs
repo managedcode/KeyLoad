@@ -15,7 +15,7 @@ internal static class ChunkMultiblockReadBudgetCalls
             var manifest = SampleChunkManifestReader.Read(original, fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window,
                 options.Value.MaximumChunkWindowRecords, options);
-            var observed = afterPointRead is null ? original : new PointObservedView(original, afterPointRead);
+            var observed = afterPointRead is null ? original : new ReadObservedView(original, afterPointRead);
             return SampleChunkGenerationReader.Read(budget.CreateView(observed), fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window, manifest,
                 options, SampleChunkWork.Observe(budget));

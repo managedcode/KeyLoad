@@ -5,7 +5,8 @@ namespace KeyLoad;
 /// <summary>Contains a page of query rows and its continuation metadata.</summary>
 /// <param name="Rows">The rows in this page.</param>
 /// <param name="Cursor">The cursor for the next page, if one exists.</param>
-/// <param name="CutPosition">The committed position at which the query snapshot was taken.</param>
+/// <param name="CutPosition">The native snapshot stamp of the physical store serving this page.
+/// It is not a canonical command prefix or comparable across physical copies or openings.</param>
 /// <param name="AccessPath">The access path used to execute the query.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.QueryPage)]

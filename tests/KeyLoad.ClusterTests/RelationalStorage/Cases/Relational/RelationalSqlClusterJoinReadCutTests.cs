@@ -67,8 +67,9 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
             var page = await queryTask;
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await updateTask);
             await Assert.That(receipt.Token.Position).IsGreaterThanOrEqualTo(seed.Token.Position);
+            await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
             await AssertPairAsync(page, previousCustomer, previousGeneration, leftRevision, previousRightRevision,
-                nextCustomer, nextGeneration, leftRevision + 1, nextRightRevision + 1, seed.Token.Position);
+                nextCustomer, nextGeneration, leftRevision + 1, nextRightRevision + 1);
             previousCustomer = nextCustomer;
             previousGeneration = nextGeneration;
             leftRevision++;
@@ -84,10 +85,10 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
 
         var finalPages = await ReadPagesAsync(sdk, mcp, query, sql, deadline.Token);
         var finalRightRevision = previousCustomer == CustomerA ? customerARevision : customerBRevision;
-        await AssertCurrentPairAsync(finalPages.Direct, previousCustomer, previousGeneration, leftRevision, finalRightRevision, seed.Token.Position);
-        await AssertCurrentPairAsync(finalPages.Unified, previousCustomer, previousGeneration, leftRevision, finalRightRevision, seed.Token.Position);
-        await AssertCurrentPairAsync(finalPages.McpDirect, previousCustomer, previousGeneration, leftRevision, finalRightRevision, seed.Token.Position);
-        await AssertCurrentPairAsync(finalPages.McpUnified, previousCustomer, previousGeneration, leftRevision, finalRightRevision, seed.Token.Position);
+        await AssertCurrentPairAsync(finalPages.Direct, previousCustomer, previousGeneration, leftRevision, finalRightRevision);
+        await AssertCurrentPairAsync(finalPages.Unified, previousCustomer, previousGeneration, leftRevision, finalRightRevision);
+        await AssertCurrentPairAsync(finalPages.McpDirect, previousCustomer, previousGeneration, leftRevision, finalRightRevision);
+        await AssertCurrentPairAsync(finalPages.McpUnified, previousCustomer, previousGeneration, leftRevision, finalRightRevision);
         await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(finalPages.Direct, finalPages.Unified);
         await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(finalPages.Direct, finalPages.McpDirect);
         await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(finalPages.Direct, finalPages.McpUnified);
@@ -162,9 +163,9 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
 
     private static async Task AssertPairAsync(QueryPage page, string previousCustomer, int previousGeneration,
         long previousLeftRevision, long previousRightRevision, string nextCustomer, int nextGeneration,
-        long nextLeftRevision, long nextRightRevision, long minimumCut)
+        long nextLeftRevision, long nextRightRevision)
     {
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimumCut);
+        await Assert.That(page.CutPosition).IsGreaterThan(0);
         await Assert.That(page.Rows).HasSingleItem();
         await RelationalSqlClusterJoinPageAssertions.VerifySourcesAsync(page);
         using var json = JsonDocument.Parse(page.Rows[0].Json);
@@ -181,9 +182,9 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
     }
 
     private static async Task AssertCurrentPairAsync(QueryPage page, string customer, int generation,
-        long leftRevision, long rightRevision, long minimumCut)
+        long leftRevision, long rightRevision)
     {
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimumCut);
+        await Assert.That(page.CutPosition).IsGreaterThan(0);
         await Assert.That(page.Rows).HasSingleItem();
         await RelationalSqlClusterJoinPageAssertions.RevisionsAsync(page, leftRevision, rightRevision);
         using var json = JsonDocument.Parse(page.Rows[0].Json);

@@ -44,6 +44,9 @@ internal static class RelationalSqlClusterJoinRejectionFlow
         var committed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.Command(
             new PutDocument(RelationalSqlClusterTokens.Table, OrderId, LeftJson),
             new PutDocument(Right, CustomerId, RightJson)), cancellationToken));
+        await Assert.That(committed.PersistedCopies).IsEqualTo(3);
+        await Assert.That(committed.Mutations.Length).IsEqualTo(2);
+        await Assert.That(committed.Mutations.All(mutation => mutation.Revision == 1)).IsTrue();
         return (scenario, committed.Token.Position, ResourceCreationLifetime.Create(rightCommandId, rightRequest));
     }
 

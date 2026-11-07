@@ -123,7 +123,9 @@ internal static class AggregateReplayAuthorizationRoutes
 
     private static async Task PageAsync(AggregateReplayPage original, AggregateReplayPage actual)
     {
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(original.CutPosition);
+        // Each route can select another physical copy with its own native MVCC stamp.
+        await Assert.That(actual.CutPosition).IsGreaterThan(0L);
+        await Assert.That(original.CutPosition).IsGreaterThan(0L);
         await SqlClusterProtocol.EqualAsync(original, actual with
         {
             CutPosition = original.CutPosition

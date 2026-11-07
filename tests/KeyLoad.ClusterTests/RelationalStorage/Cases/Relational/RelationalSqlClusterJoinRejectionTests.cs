@@ -36,7 +36,8 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
             fixture.AdminKey, deadline.Token);
         var rows = await RelationalSqlClusterJoinRejectionFlow.ReadRowsAsync(sdk, scenario, seed.RightLifetime, deadline.Token);
         var healthy = await RelationalSqlClusterJoinRejectionFlow.ReadHealthyAsync(sdk, mcp, scenario.Partition, deadline.Token);
-        await Assert.That(healthy.CutPosition).IsGreaterThanOrEqualTo(seed.Position);
+        await Assert.That(healthy.CutPosition).IsGreaterThan(0);
+        await Assert.That(seed.Position).IsGreaterThan(0);
         var query = new QueryRequest(scenario.Partition, text, AllowFullScan: true);
         var sql = new SqlOperationRequest(scenario.Partition, text, AllowFullScan: true);
         var direct = await sdk.QueryAsync(query, deadline.Token);

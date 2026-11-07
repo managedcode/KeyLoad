@@ -38,18 +38,18 @@ internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture f
 
         var sdkDirectFailure = await sdk.QueryAsync(query, cancellation.Token);
         await AssertCancelledAsync(sdkDirectFailure.IsSuccess, sdkDirectFailure.Problem?.ErrorCode);
-        await AssertJoinedPageAsync(await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(query, deadline.Token)), seed.Token.Position);
+        await AssertJoinedPageAsync(await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(query, deadline.Token)), seed);
         var sdkSqlFailure = await sdk.ExecuteSqlAsync(sql, cancellation.Token);
         await AssertCancelledAsync(sdkSqlFailure.IsSuccess, sdkSqlFailure.Problem?.ErrorCode);
-        await AssertJoinedPageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, sql, deadline.Token), seed.Token.Position);
+        await AssertJoinedPageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, sql, deadline.Token), seed);
 
         await Assert.ThrowsAsync<OperationCanceledException>(() => mcp.CallAsync(McpCallerTools.QueryExecute,
             query, cancellation.Token));
         await AssertJoinedPageAsync((await McpCallerAssertions.SuccessAsync<QueryPage>(
-            await mcp.CallAsync(McpCallerTools.QueryExecute, query, deadline.Token))).Value, seed.Token.Position);
+            await mcp.CallAsync(McpCallerTools.QueryExecute, query, deadline.Token))).Value, seed);
         await Assert.ThrowsAsync<OperationCanceledException>(() => mcp.CallAsync(SqlOperationProtocol.ToolName,
             sql, cancellation.Token));
-        await AssertJoinedPageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(mcp, sql, deadline.Token), seed.Token.Position);
+        await AssertJoinedPageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(mcp, sql, deadline.Token), seed);
     }
 
     private static async Task ConfigureRightAsync(KeyLoadClient sdk, RelationalSqlClusterScenario scenario,
@@ -66,12 +66,15 @@ internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture f
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RightId);
     }
 
-    private static async Task AssertJoinedPageAsync(QueryPage page, long minimumCut)
+    private static async Task AssertJoinedPageAsync(QueryPage page, CommitReceipt seed)
     {
         await Assert.That(page.Rows).HasSingleItem();
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimumCut);
+        await Assert.That(page.CutPosition).IsGreaterThan(0);
+        await Assert.That(seed.PersistedCopies).IsEqualTo(3);
+        await Assert.That(seed.Mutations.Length).IsEqualTo(2);
         await Assert.That(page.Rows[0].EntityId).IsEqualTo(OrderId);
-        await RelationalSqlClusterJoinPageAssertions.VerifySourcesAsync(page);
+        await RelationalSqlClusterJoinPageAssertions.RevisionsAsync(page,
+            seed.Mutations[0].Revision, seed.Mutations[1].Revision);
     }
 
     private static async Task AssertCancelledAsync(bool isSuccess, string? errorCode)

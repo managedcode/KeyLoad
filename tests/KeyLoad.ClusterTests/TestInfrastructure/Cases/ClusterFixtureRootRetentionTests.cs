@@ -61,7 +61,12 @@ internal sealed class ClusterFixtureRootRetentionTests
                 Incarnation = expected.Incarnation
             }, IntegrationExecutionOptions.StorageExecution()))
             {
-                await ServerFailureObserver.ObserveAsync(() => VerifyAsync(root, reopened, expected), failures);
+                await ServerFailureObserver.ObserveAsync(async () =>
+                {
+                    var reopenedCut = reopened.Position;
+                    await Assert.That(reopenedCut).IsGreaterThanOrEqualTo(expected.Cut);
+                    await VerifyAsync(root, reopened, expected with { Cut = reopenedCut });
+                }, failures);
             }
             released = true;
             if (failures.Count == NoFailures)

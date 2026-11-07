@@ -38,7 +38,7 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
         await Assert.That(row!.Revision).IsEqualTo(RelationalSqlClusterTokens.PatchedRevision);
         using var json = JsonDocument.Parse(row.Json);
         await Assert.That(json.RootElement.GetProperty(RelationalSqlClusterTokens.Count).GetInt32()).IsEqualTo(RelationalSqlClusterTokens.PatchedCount);
-        await VerifySelectAsync(sdk, mcp, scenario, patched.Token.Position, deadline.Token);
+        await VerifySelectAsync(sdk, mcp, scenario, patched, deadline.Token);
     }
 
     [Test]
@@ -63,7 +63,7 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
     }
 
     private static async Task VerifySelectAsync(KeyLoadClient sdk, McpOfficialClient mcp, RelationalSqlClusterScenario scenario,
-        long committedPosition, CancellationToken cancellationToken)
+        CommitReceipt committed, CancellationToken cancellationToken)
     {
         var request = new SqlOperationRequest(scenario.Partition, SqlClusterProtocol.TableSelect);
         var sql = await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, request, cancellationToken);
@@ -78,8 +78,10 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
         await SqlClusterProtocol.EqualAsync(sql.Rows, official.Rows);
         await Assert.That(execution.AccessPath).IsEqualTo(sql.AccessPath);
         await Assert.That(official.AccessPath).IsEqualTo(sql.AccessPath);
-        await Assert.That(sql.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
-        await Assert.That(execution.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
-        await Assert.That(official.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
+        await Assert.That(committed.PersistedCopies).IsEqualTo(3);
+        await Assert.That(sql.Rows[0].Revision).IsEqualTo(committed.Mutations.Single().Revision);
+        await Assert.That(sql.CutPosition).IsGreaterThan(0);
+        await Assert.That(execution.CutPosition).IsGreaterThan(0);
+        await Assert.That(official.CutPosition).IsGreaterThan(0);
     }
 }

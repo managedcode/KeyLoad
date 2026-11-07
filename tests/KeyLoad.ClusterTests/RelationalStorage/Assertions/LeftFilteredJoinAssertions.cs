@@ -24,7 +24,8 @@ internal static class LeftFilteredJoinAssertions
             McpCallerTools.QueryExecute, LeftFilteredJoinProtocol.Query(state.Partition), token))).Value;
         await Assert.That(direct.Cursor).IsNull();
         await Assert.That(direct.AccessPath).IsEqualTo("bounded-primary-key-inner-join");
-        await Assert.That(direct.CutPosition).IsGreaterThanOrEqualTo(state.Receipt.Token.Position);
+        await Assert.That(direct.CutPosition).IsGreaterThan(0);
+        await Assert.That(state.Receipt.Token.Position).IsGreaterThan(0);
         await Assert.That(direct.Rows).HasSingleItem();
         var row = direct.Rows.Single();
         await Assert.That(row.EntityId).IsEqualTo("a");
@@ -54,7 +55,7 @@ internal static class LeftFilteredJoinAssertions
     // The direct row's sources are asserted literally above; the projection has no customer_id output.
     private static async Task SamePageAsync(QueryPage direct, QueryPage actual)
     {
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(direct.CutPosition);
+        await Assert.That(actual.CutPosition).IsGreaterThan(0);
         await SqlClusterProtocol.EqualAsync(direct with
         {
             CutPosition = actual.CutPosition

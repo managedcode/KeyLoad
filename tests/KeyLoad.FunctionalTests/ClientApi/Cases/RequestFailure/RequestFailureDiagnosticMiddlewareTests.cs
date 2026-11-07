@@ -1,8 +1,10 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using KeyLoad.FunctionalTests.Authorization;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.FunctionalTests.ClientApi;
 
@@ -177,10 +179,18 @@ internal sealed class RequestFailureDiagnosticMiddlewareTests
     private static async Task<(int Status, byte[] Body, string Output)> InvokeFailureAsync(HttpContext context, Exception error)
     {
         using var capture = new RequestFailureDiagnosticEventSourceCapture();
-        using var factory = CreateLoggerFactory();
+        using var exporter = new AuthorizationLogExporter(Options.Create(new AuthorizationTelemetryCaptureOptions()));
+        using var factory = RequestFailureDiagnosticLoggerFactory.Create(exporter);
         var middleware = new ServerErrorMiddleware(_ => throw error,
             factory.CreateLogger<ServerErrorMiddleware>());
         await middleware.InvokeAsync(context);
+        var log = exporter.Bank.Snapshot().Single();
+        await Assert.That(log.Body).StartsWith("Database request failed at ");
+        await Assert.That(capture.Text).Contains(log.Body!);
+        await Assert.That(log.Formatted).IsEqualTo(log.Body);
+        await Assert.That(log.Exception).IsNull();
+        await Assert.That(log.Attributes).IsEmpty();
+        await AssertPrivateValuesAbsentAsync(log.Body!);
         return (context.Response.StatusCode, ((MemoryStream)context.Response.Body).ToArray(), capture.Text);
     }
 

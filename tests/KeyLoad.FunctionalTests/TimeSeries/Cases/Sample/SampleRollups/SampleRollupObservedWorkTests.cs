@@ -14,7 +14,7 @@ internal sealed class SampleRollupObservedWorkTests
         var before = db.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
         var triggered = false;
-        using var observed = new PointObservedStore(db.Store, () =>
+        using var observed = new ReadObservedStore(db.Store, () =>
         {
             if (!triggered && db.Store.GetReadDiagnostics().BorrowedPointLookups >=
                 before.BorrowedPointLookups + PointThreshold)

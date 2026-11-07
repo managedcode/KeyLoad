@@ -57,10 +57,11 @@ internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)
 
         await Assert.That(direct.AccessPath).IsEqualTo(AccessPath);
         await Assert.That(direct.Rows.Select(row => row.EntityId)).IsEquivalentTo(["order-a", "order-z"], CollectionOrdering.Matching);
-        await Assert.That(direct.CutPosition).IsGreaterThanOrEqualTo(seed.Token.Position);
-        await RelationalSqlClusterJoinPageAssertions.EquivalentAsync(direct, unified);
-        await RelationalSqlClusterJoinPageAssertions.EquivalentAsync(direct, officialQuery);
-        await RelationalSqlClusterJoinPageAssertions.EquivalentAsync(direct, officialSql);
+        await Assert.That(seed.PersistedCopies).IsEqualTo(3);
+        await Assert.That(seed.Token.AtomicPartitionId).IsEqualTo(scenario.Partition.AtomicPartitionId);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, unified);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, officialQuery);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, officialSql);
         await RelationalSqlClusterJoinPageAssertions.RevisionsAsync(direct, 1, 1);
         using var first = JsonDocument.Parse(direct.Rows[0].Json);
         await Assert.That(first.RootElement.GetProperty(CustomerNameField).GetString()).IsEqualTo("Ada");

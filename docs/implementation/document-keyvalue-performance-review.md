@@ -1,4 +1,4 @@
-# Document and key-value execution review
+# Database operation execution review
 
 Review started 2026-11-06 against `fde02c1a5`. Scope: document insert, replacement,
 deletion, point reads and indexed ranges, including the SDK, HTTP admission,
@@ -11,8 +11,9 @@ Status: the first repair batch passed local qualification. Its Linux run failed 
 canonical test inventory because nine added admission cases were absent; release
 and comparisons did not run. The partition coordinator redesign and its local
 qualification are complete at the scopes recorded below. Exact-source delivery
-is established by the separate Linux Build and Tests, Release and Benchmarks
-artifacts. Findings distinguish source observations,
+requires the separate Linux Build and Tests, Release and Benchmarks
+artifacts. The first redesign run and its correction checkpoint are recorded below.
+Findings distinguish source observations,
 runtime evidence, completed repairs and remaining qualification. This document
 does not claim a whole-repository audit or product readiness.
 
@@ -61,7 +62,7 @@ The official installed tracing command is
 `bin/Debug/net10.0` output. Use the same case, phase and collector settings before
 and after. Keep uninstrumented timing runs separate to assess collector overhead.
 
-The latest completed full Debug solution build (`build-current-contracts-35`)
+The full Debug solution build (`build-current-contracts-35`)
 passed all 20 projects with zero warnings or errors. The earlier 26 actual-work
 cancellation, fairness, reservation and shutdown controls passed, and the final
 123-case ANN family repeat passed, including retained later-child cancellation
@@ -384,6 +385,47 @@ Actual native allocation cost, memory tradeoffs and matched before/after phase
 measurements remain open. A sampled wall-clock stack
 is not a CPU-share measurement and a source deletion is not a speed result.
 
+## Linux qualification follow-up
+
+[Build and Tests 42309640297](https://github.com/managedcode/KeyLoad/actions/runs/42309640297)
+ran against source `77d97ee26c30e30218b3b12439ff58638aa12deb`: 28 jobs passed and five
+failed. Release and Benchmarks were skipped. Its original failures are retained;
+the current correction checkpoint does not treat a local repeat as Linux delivery.
+
+The SQL join, aggregate replay and local root-reopen controls still compared
+native timestamps across physical copies or cold openings. The corrected controls
+retain complete page bytes after normalizing only the native cut, exact rows,
+source revisions, mutation receipts, three-copy acknowledgements and unchanged
+store images. A cold opening must retain its complete original image and identity;
+its reserved native timestamp may advance. Cross-copy pages have positive native
+cuts and exactly matching data, rather than numerically comparable timestamps.
+
+Four short SQL/ANN cancellation cases could finish before their counter-watching
+thread ran. They now observe the real store synchronously, forwarding the original
+read bytes, visitors and budget charges. Cancellation occurs only after native
+read progress. The original cancellation token, absence of partial results,
+unchanged storage and healthy continuation remain required. No product delay or
+synthetic read result was added.
+
+The deadline lane also observed one unexpected generic `RecoveryRequired` response
+after killing a silo. Its cause was unavailable because OTLP replaced even the
+closed dispatch phase and error category with `Runtime event`. The privacy
+processor now preserves only those defined enums for the owning failure event;
+exception text, arbitrary attributes and caller data remain removed. The original
+scenario passed unchanged both alone and in its complete seven-case lane. This
+does not establish the cause of the original Linux failure. Readiness still fails
+on unexpected `RecoveryRequired` instead of hiding it with another request.
+
+The correction checkpoint passed the full Debug solution build 41 (20 projects,
+zero warnings/errors), full format verification, governance, all 31 selected
+cancellation/privacy controls, all seven original atomic/deadline lane cases,
+and all four aggregate-replay/root-retention cases. The complete SDK/MCP/SQL lane
+passed 81/81 on build 36. Six fresh discovery runs validated all 3,094 build-41
+cases and the 533/520/551/491/566-case selectors; identities and exclusions did
+not change. Sixteen source hashes and ranges were refreshed from the resolved
+methods. Subsequent Linux, Release and comparison results belong to their own
+original workflow artifacts, not to these local checks.
+
 ## Original Linux baseline
 
 [Benchmarks run 42128099998](https://github.com/managedcode/KeyLoad/actions/runs/42128099998)
@@ -415,6 +457,8 @@ alone does not establish the isolated effect of this patch.
 | --- | --- |
 | First small batch `e49b5126d955aae2a805c8bda8705ef5c7545f5a` | Pushed to main. Its earlier local focused checks passed. |
 | First-batch Linux Build and Tests `42192949029` | Failed the canonical inventory: nine added admission cases were absent. Release and comparisons were skipped. |
+| Redesign Linux Build and Tests `42309640297` | 28 jobs passed, five failed. Original failures and the correction checkpoint are described above; Release and comparisons were skipped. |
+| Correction checkpoint | Full Debug build 41: 20 projects, zero warnings/errors; full format/verify and governance passed. All 31 selected controls, seven atomic/deadline cases, four native-cut cases and six canonical discovery selections passed. The complete SDK/MCP/SQL lane passed 81/81 on build 36. No skips. |
 | Latest partition/query/search/recovery source | Complete at the local implementation and verification scopes listed here; physical partition fan-out and deployed filesystem qualification remain separate. |
 | Combined Debug solution build 35 | All 20 projects passed with zero warnings/errors. Restore, full format/verify, governance and exactly-once shard assignment passed. |
 | Focused replication/document checks | 17/17 replication and 68/68 document checks passed at their stated earlier builds. |
@@ -424,7 +468,7 @@ alone does not establish the isolated effect of this patch.
 | Current real SDK diagnostics | Both original one-copy 250,000-document and three-copy 100,000-document cases passed. Separate profiling cases passed; local timings are diagnostic evidence only. |
 | Current Aspire SDK/MCP/SQL | Both complete every-model cases passed on one and three nodes. Both public-query cases passed in each of isolated three-copy and shared-volume one-copy modes. The three-copy restart/missing-copy fault case passed. |
 | Compiled inventory and governance | Six original discovery runs validated all 3,094 build-35 cases and the five current selectors. Governance and exactly-once shard assignment pass. Coverage remains a separate Linux gate. |
-| Exact-source delivery and comparisons | Established by the original Linux Build and Tests, Release and Benchmarks artifacts for the checkpoint SHA, separately from these local checks. No released figure is inferred from local captures. |
+| Exact-source delivery and comparisons | Require the original Linux Build and Tests, Release and Benchmarks artifacts for the checkpoint SHA, separately from these local checks. Local captures supply no released figure. |
 
 Detailed TUnit output is retained with live progress and ANSI enabled. Diagnostic
 excerpts omit repeated redraws. Tests keep their original operation, failure,

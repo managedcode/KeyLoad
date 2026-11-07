@@ -28,25 +28,31 @@ internal sealed class QueryObservedWorkBudgetTests
                 PrimaryJson),
             new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.SecondaryId,
                 SecondaryJson));
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sql = indexed ? IndexSql : ScanSql;
         var request = new QueryRequest(database.Partition, sql, AllowFullScan: !indexed);
         var query = new SqlParser(sql,
             UnitExecutionOptions.QueryExecution()).Parse();
         var ast = QueryAdapterTestSupport.RoundTrip(new(database.Partition, query, AllowFullScan: !indexed));
         using var cancellation = new CancellationTokenSource();
-        QueryPage Execute() => typed ? engine.ExecuteAst(Principal, ast, cancellationToken: cancellation.Token)
-            : engine.Execute(Principal, request, cancellationToken: cancellation.Token);
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var before = database.Store.GetReadDiagnostics();
-        await using var observed = new ObservedWorkCancellation(database.Store, cancellation,
-            static progress => progress.RangeExaminedBytes);
-        await observed.Ready;
+        var triggered = false;
+        using var observed = new ReadObservedStore(database.Store, afterRange: () =>
+        {
+            if (!triggered && database.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes)
+            {
+                triggered = true;
+                cancellation.Cancel();
+            }
+        });
+        var engine = new QueryEngine(database.CreateConfiguredDatabase(observed), UnitExecutionOptions.QueryExecution());
+        QueryPage Execute() => typed ? engine.ExecuteAst(Principal, ast, cancellationToken: cancellation.Token)
+            : engine.Execute(Principal, request, cancellationToken: cancellation.Token);
         QueryPage? partial = null;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => partial = Execute());
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(observed.CancelledAfterProgress).IsTrue();
+        await Assert.That(triggered).IsTrue();
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(position);
